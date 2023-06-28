@@ -1,3 +1,4 @@
 <resources>
   <string name="app_name">TrackPacer</string>
+  <string name="app_pacing">Run pacing in progress…</string>
 </resources>

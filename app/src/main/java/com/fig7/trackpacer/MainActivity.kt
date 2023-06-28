@@ -1,45 +1,24 @@
 package com.fig7.trackpacer
 
-import android.media.MediaPlayer
-import androidx.appcompat.app.AppCompatActivity
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.Spinner
-
-val clipList = arrayOf(
-    R.raw.fifty, R.raw.onehundred, R.raw.onehundredandfifty, R.raw.twohundred,
-    R.raw.twohundredandfifty, R.raw.threehundred, R.raw.threehundredandfifty, R.raw.fourhundred)
-
-const val goClip = R.raw.threetwoone
-const val finishClip = R.raw.finish
-const val goClipOffset = 2000L
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
-
-    private val waypointCalculator = WaypointCalculator()
-    private lateinit var mpStart: MediaPlayer
-    private lateinit var mpFinish: MediaPlayer
-    private lateinit var mpWaypoint: Array<MediaPlayer>
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val runnable = Runnable {
-        handleWaypoint()
-    }
-
-    private fun handleWaypoint() {
-        if (waypointCalculator.waypointsRemaining()) {
-            val i = waypointCalculator.waypointNum() % 8
-            mpWaypoint[i].start()
-
-            val nextTime = waypointCalculator.nextWaypointIn()
-            handler.postDelayed(runnable, nextTime.toLong())
-        } else {
-            mpFinish.start()
+    private lateinit var distanceAndTimeArray: Array<String>
+    private val requestPermissionLauncher = registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
+        if (isGranted) {
+            val intent = Intent(this, WaypointService::class.java)
+            applicationContext.startForegroundService(intent)
         }
     }
 
@@ -47,40 +26,46 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mpStart  = MediaPlayer.create(this, goClip)
-        mpFinish = MediaPlayer.create(this, finishClip)
-        mpWaypoint = Array(8) { i -> MediaPlayer.create(this, clipList[i]) }
+        distanceAndTimeArray = resources.getStringArray(R.array.distance_array)
+        val distanceArray: Array<String> = Array(distanceAndTimeArray.size) { distanceAndTimeArray[it].split("+")[0] }
 
         val spinner1 = findViewById<Spinner>(R.id.spinner_distance)
-        ArrayAdapter.createFromResource(this,
-            R.array.distance_array,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner1.adapter = adapter
-        }
+        val spinner1Adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, distanceArray)
+        spinner1Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner1.adapter = spinner1Adapter
+        spinner1.onItemSelectedListener = this
 
         val spinner2 = findViewById<Spinner>(R.id.spinner_time)
-        ArrayAdapter.createFromResource(this,
-            R.array.time_array,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner2.adapter = adapter
-        }
+        val timeArray: Array<String> = distanceAndTimeArray[0].split("+")[1].split(",").toTypedArray()
+        val spinner2Adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, timeArray)
+        spinner2Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner2.adapter = spinner2Adapter
 
         val button = findViewById<ImageButton>(R.id.button_go)
         button.setOnClickListener {
-            mpStart.setOnCompletionListener {
-                val nextTime = waypointCalculator.beginRun()
-                handler.postDelayed(runnable, nextTime.toLong() - goClipOffset)
+            when {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
+                    val intent = Intent(this, WaypointService::class.java)
+                    intent.putExtra("distance", spinner1.selectedItem.toString())
+                    intent.putExtra("time", spinner2.selectedItem.toString())
+                    applicationContext.startForegroundService(intent)
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    // showInContextUI(...)
+                }
+                else -> {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
-
-            mpStart.start()
         }
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+        val timeArray: Array<String> = distanceAndTimeArray[pos].split("+")[1].split(",").toTypedArray()
+        val spinner2 = findViewById<Spinner>(R.id.spinner_time)
+        val spinner2Adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, timeArray)
+        spinner2Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner2.adapter = spinner2Adapter
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {

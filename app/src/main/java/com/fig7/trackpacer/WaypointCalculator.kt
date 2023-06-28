@@ -1,11 +1,11 @@
 package com.fig7.trackpacer
 
-const val totalTime = 420000.0
 const val totalDistance = 1609.34
 
 class WaypointCalculator {
     private var waypointList: Array<Double> = Array(32) { i-> ((59.34 + 50.0*i) / totalDistance) }
-    private var currentWaypoint = 0
+    private var currentWaypoint = -1
+    private var totalTime = -1.0
 
     private fun waypointTime(): Double {
         return waypointList[currentWaypoint] * totalTime
@@ -13,6 +13,11 @@ class WaypointCalculator {
 
     private fun nextWaypointTime(): Double {
         return waypointList[currentWaypoint+1] * totalTime
+    }
+
+    fun initRun(runTime: Double) {
+        currentWaypoint = -1
+        totalTime = runTime
     }
 
     fun beginRun(): Double {
