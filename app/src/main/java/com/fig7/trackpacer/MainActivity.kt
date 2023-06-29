@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             when {
                 ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
                     val intent = Intent(this, WaypointService::class.java)
-                    intent.putExtra("distance", spinner1.selectedItem.toString())
+                    intent.putExtra("dist", spinner1.selectedItem.toString())
                     intent.putExtra("time", spinner2.selectedItem.toString())
                     applicationContext.startForegroundService(intent)
                 }
