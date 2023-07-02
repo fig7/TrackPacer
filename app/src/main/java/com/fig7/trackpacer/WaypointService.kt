@@ -1,11 +1,14 @@
 package com.fig7.trackpacer
 
 import android.app.*
+import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
 import android.media.MediaPlayer
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
+import android.os.*
 
 val clipList = arrayOf(
     R.raw.fifty, R.raw.onehundred, R.raw.onehundredandfifty, R.raw.twohundred,
@@ -29,7 +32,12 @@ const val finishClip = R.raw.finish
 const val goClipOffset = 1000L
 
 class WaypointService : Service() {
+    private val wsBinder = LocalBinder()
+    private var startTime = -1L
+
     private lateinit var mNM: NotificationManager
+    private lateinit var audioManager: AudioManager
+    private lateinit var focusRequest: AudioFocusRequest
 
     private val handler = Handler(Looper.getMainLooper())
     private val runnable = Runnable {
@@ -41,7 +49,47 @@ class WaypointService : Service() {
     private lateinit var mpWaypoint: Array<MediaPlayer>
 
     private val waypointCalculator = WaypointCalculator()
-    private var clipIndexList: Array<Int> = emptyArray()
+    private lateinit var clipIndexList: Array<Int>
+
+    inner class LocalBinder : Binder() {
+        fun getService(): WaypointService = this@WaypointService
+    }
+
+    fun beginPacing(runDistStr: String, runTimeStr: String): Boolean {
+        val pendingIntent: PendingIntent =
+            Intent(this, MainActivity::class.java).let { notificationIntent ->
+                PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+            }
+
+        val notification: Notification = Notification.Builder(this, "TrackPacer_NC")
+            .setContentTitle(getText(R.string.app_name))
+            .setContentText(getText(R.string.app_pacing))
+            .setSmallIcon(R.drawable.play_small)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        startForeground(1, notification)
+
+        val runTimeSplit = runTimeStr.split(":")
+        val runTime    = runTimeSplit[0].trim().toInt()*60.0 + runTimeSplit[1].toInt()
+
+        clipIndexList = clipMap[runDistStr]!!
+        waypointCalculator.initRun(runDistStr, runTime*1000.0)
+
+        val res = audioManager.requestAudioFocus(focusRequest)
+        if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            mpStart.start()
+            return true
+        } else {
+            stopSelf()
+            return false
+        }
+    }
+
+    fun elapsedTime() : Long {
+        if (startTime == -1L) return 0L
+        return SystemClock.elapsedRealtime() - startTime
+    }
 
     override fun onCreate() {
         mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -53,37 +101,28 @@ class WaypointService : Service() {
         mpStart  = MediaPlayer.create(this, goClip)
         mpFinish = MediaPlayer.create(this, finishClip)
         mpWaypoint = Array(clipList.size) { i -> MediaPlayer.create(this, clipList[i]) }
-    }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        val pendingIntent: PendingIntent =
-            Intent(this, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
-            }
-
-        val notification: Notification = Notification.Builder(this, "TrackPacer_NC")
-            .setContentTitle(getText(R.string.app_name))
-            .setContentText(getText(R.string.app_pacing))
-            .setSmallIcon(R.drawable.play)
-            .setContentIntent(pendingIntent)
-            .build()
-
-        startForeground(1, notification)
-
-        val runDist    = intent.getStringExtra("dist")!!
-        val runTimeStr = intent.getStringExtra("time")!!.split(":")
-        val runTime    = runTimeStr[0].trim().toInt()*60.0 + runTimeStr[1].toInt()
-
-        clipIndexList = clipMap[runDist]!!
-        waypointCalculator.initRun(runDist, runTime*1000.0)
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+            setAudioAttributes(AudioAttributes.Builder().run {
+                setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+                setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                setFocusGain(AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                build()
+            })
+            build()
+        }
 
         mpStart.setOnCompletionListener {
+            audioManager.abandonAudioFocusRequest(focusRequest)
+            startTime = SystemClock.elapsedRealtime() - goClipOffset
+
             val nextTime = waypointCalculator.beginRun()
             handler.postDelayed(runnable, nextTime.toLong() - goClipOffset)
         }
 
-        mpStart.start()
-        return START_NOT_STICKY
+        for(mp in mpWaypoint) mp.setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
+        mpFinish.setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
     }
 
     override fun onDestroy() {
@@ -93,23 +132,36 @@ class WaypointService : Service() {
         mpFinish.release()
         for (mp in mpWaypoint) mp.release()
 
+        audioManager.abandonAudioFocusRequest(focusRequest)
         mNM.cancel(1)
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    override fun onBind(intent: Intent?): IBinder {
+        return wsBinder
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        super.onUnbind(intent)
+
+        stopSelf()
+        return false
     }
 
     private fun handleWaypoint() {
         if (waypointCalculator.waypointsRemaining()) {
             val i = clipIndexList[waypointCalculator.waypointNum()]
-            mpWaypoint[i].start()
+            val res = audioManager.requestAudioFocus(focusRequest)
+            if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                mpWaypoint[i].start()
+            }
 
-            val nextTime = waypointCalculator.nextWaypointIn()
-            handler.postDelayed(runnable, nextTime.toLong())
+            val nextTime = waypointCalculator.nextWaypoint()
+            handler.postDelayed(runnable, nextTime.toLong()-elapsedTime())
         } else {
-            mpFinish.setOnCompletionListener { stopSelf() }
-            mpFinish.start()
+            val res = audioManager.requestAudioFocus(focusRequest)
+            if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                mpFinish.start()
+            }
         }
     }
 }

@@ -18,6 +18,8 @@
     <service
       android:name=".WaypointService"
       android:foregroundServiceType="mediaPlayback"
+
+      android:exported="false"
       android:stopWithTask="true"/>
 
     <activity
@@ -27,9 +29,8 @@
       tools:ignore="LockedOrientationActivity">
 
       <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-
-        <category android:name="android.intent.category.LAUNCHER" />
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
   </application>

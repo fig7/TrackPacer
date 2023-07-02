@@ -27,10 +27,6 @@ class WaypointCalculator {
         return (waypointList[currentWaypoint] * totalTime) / totalDistance
     }
 
-    private fun nextWaypointTime(): Double {
-        return (waypointList[currentWaypoint+1] * totalTime) / totalDistance
-    }
-
     fun initRun(runDist: String, runTime: Double) {
         totalDistance = distanceMap[runDist]!!
         totalTime = runTime
@@ -44,18 +40,16 @@ class WaypointCalculator {
         return waypointTime()
     }
 
-    fun nextWaypointIn() : Double {
-        val timeToNext = nextWaypointTime() - waypointTime()
-
-        currentWaypoint += 1
-        return timeToNext
-    }
-
     fun waypointNum(): Int {
         return currentWaypoint
     }
 
     fun waypointsRemaining(): Boolean {
         return (currentWaypoint < (waypointList.size - 1))
+    }
+
+    fun nextWaypoint(): Double {
+        currentWaypoint += 1
+        return waypointTime()
     }
 }
