@@ -18,7 +18,7 @@
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="40dp" />
+      android:layout_height="30dp" />
 
     <TextView
       android:id="@+id/text_time"
@@ -31,30 +31,57 @@
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="80dp" />
+      android:layout_height="40dp" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="start"
+      android:textColor="@color/black"
+      android:textSize="18sp"
+      android:text="@string/label_distance"/>
 
     <Spinner
       android:id="@+id/spinner_distance"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      style="@style/spinner_style"/>
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="80dp" />
+      android:layout_height="60dp" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="start"
+      android:textColor="@color/black"
+      android:textSize="18sp"
+      android:text="@string/label_time"/>
 
     <Spinner
       android:id="@+id/spinner_time"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      style="@style/spinner_style"/>
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="120dp" />
+      android:layout_height="60dp" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="start"
+      android:textColor="@color/black"
+      android:textSize="18sp"
+      android:text="@string/label_profile"/>
 
     <Spinner
       android:id="@+id/spinner_profile"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      style="@style/spinner_style"/>
   </LinearLayout>
 
   <LinearLayout

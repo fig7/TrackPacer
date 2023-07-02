@@ -66,15 +66,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         val distanceArray: Array<String> = Array(distanceAndTimeArray.size) { distanceAndTimeArray[it].split("+")[0] }
 
         val spinner1 = findViewById<Spinner>(R.id.spinner_distance)
-        val spinner1Adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, distanceArray)
-        spinner1Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinner1Adapter = ArrayAdapter(this, R.layout.spinner_item, distanceArray)
+        spinner1Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinner1.adapter = spinner1Adapter
         spinner1.onItemSelectedListener = this
 
         val spinner2 = findViewById<Spinner>(R.id.spinner_time)
         val timeArray: Array<String> = distanceAndTimeArray[0].split("+")[1].split(",").toTypedArray()
-        val spinner2Adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, timeArray)
-        spinner2Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinner2Adapter = ArrayAdapter(this, R.layout.spinner_item, timeArray)
+        spinner2Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinner2.adapter = spinner2Adapter
 
         timerView = findViewById(R.id.text_time)
@@ -98,8 +98,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
         val timeArray: Array<String> = distanceAndTimeArray[pos].split("+")[1].split(",").toTypedArray()
         val spinner2 = findViewById<Spinner>(R.id.spinner_time)
-        val spinner2Adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, timeArray)
-        spinner2Adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinner2Adapter = ArrayAdapter(this, R.layout.spinner_item, timeArray)
+        spinner2Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinner2.adapter = spinner2Adapter
     }
 
