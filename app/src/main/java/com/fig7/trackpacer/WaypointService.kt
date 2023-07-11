@@ -13,7 +13,8 @@ import android.os.*
 val clipList = arrayOf(
     R.raw.fifty, R.raw.onehundred, R.raw.onehundredandfifty, R.raw.twohundred,
     R.raw.twohundredandfifty, R.raw.threehundred, R.raw.threehundredandfifty, R.raw.fourhundred,
-    R.raw.lap2, R.raw.lap3, R.raw.lap4, R.raw.lap5, R.raw.lap6, R.raw.lap7, R.raw.lap8, R.raw.lap9, R.raw.lap10, R.raw.lap11, R.raw.lap12, R.raw.lap13)
+    R.raw.lap2,  R.raw.lap3,  R.raw.lap4,  R.raw.lap5,  R.raw.lap6,  R.raw.lap7,  R.raw.lap8,  R.raw.lap9,  R.raw.lap10, R.raw.lap11, R.raw.lap12, R.raw.lap13,
+    R.raw.lap14, R.raw.lap15, R.raw.lap16, R.raw.lap17, R.raw.lap18, R.raw.lap19, R.raw.lap20, R.raw.lap21, R.raw.lap22, R.raw.lap23, R.raw.lap24, R.raw.lap25)
 
 val clipMap = mapOf(
     "400m"   to arrayOf(0, 1, 2, 3, 4, 5 ,6, 7),
@@ -25,11 +26,20 @@ val clipMap = mapOf(
     "5000m"  to arrayOf(0, 1, 2, 3, 4, 5 ,6,  8, 0, 1, 2, 3, 4, 5, 6,  9, 0, 1, 2, 3, 4, 5, 6, 10, 0, 1, 2, 3, 4, 5, 6, 11,
                         0, 1, 2, 3, 4, 5, 6, 12, 0, 1, 2, 3, 4, 5, 6, 13, 0, 1, 2, 3, 4, 5, 6, 14, 0, 1, 2, 3, 4, 5, 6, 15,
                         0, 1, 2, 3, 4, 5, 6, 16, 0, 1, 2, 3, 4, 5, 6, 17, 0, 1, 2, 3, 4, 5, 6, 18, 0, 1, 2, 3, 4, 5, 6, 19, 0, 1, 2, 3),
+    "10000m" to arrayOf(0, 1, 2, 3, 4, 5 ,6,  8, 0, 1, 2, 3, 4, 5, 6,  9, 0, 1, 2, 3, 4, 5, 6, 10, 0, 1, 2, 3, 4, 5, 6, 11,
+                        0, 1, 2, 3, 4, 5, 6, 12, 0, 1, 2, 3, 4, 5, 6, 13, 0, 1, 2, 3, 4, 5, 6, 14, 0, 1, 2, 3, 4, 5, 6, 15,
+                        0, 1, 2, 3, 4, 5, 6, 16, 0, 1, 2, 3, 4, 5, 6, 17, 0, 1, 2, 3, 4, 5, 6, 18, 0, 1, 2, 3, 4, 5, 6, 19,
+                        0, 1, 2, 3, 4, 5, 6, 20, 0, 1, 2, 3, 4, 5, 6, 21, 0, 1, 2, 3, 4, 5, 6, 22, 0, 1, 2, 3, 4, 5, 6, 23,
+                        0, 1, 2, 3, 4, 5, 6, 24, 0, 1, 2, 3, 4, 5, 6, 25, 0, 1, 2, 3, 4, 5, 6, 26, 0, 1, 2, 3, 4, 5, 6, 27,
+                        0, 1, 2, 3, 4, 5, 6, 28, 0, 1, 2, 3, 4, 5, 6, 29, 0, 1, 2, 3, 4, 5, 6, 30, 0, 1, 2, 3, 4, 5, 6, 31, 0, 1, 2, 3, 4, 5, 6, 7),
+
     "1 mile" to arrayOf(0, 1, 2, 3, 4, 5 ,6,  8, 0, 1, 2, 3, 4, 5, 6,  9, 0, 1, 2, 3, 4, 5, 6, 10, 0, 1, 2, 3, 4, 5, 6, 7))
 
-const val goClip = R.raw.threetwoone
-const val finishClip = R.raw.finish
-const val goClipOffset = 1000L
+private const val goClip = R.raw.threetwoone
+private const val finishClip = R.raw.finish
+
+private const val goStartOffset = 5000L
+private const val goClipOffset  = 2000L
 
 class WaypointService : Service() {
     private val wsBinder = LocalBinder()
@@ -40,8 +50,12 @@ class WaypointService : Service() {
     private lateinit var focusRequest: AudioFocusRequest
 
     private val handler = Handler(Looper.getMainLooper())
-    private val runnable = Runnable {
+    private val waypointRunnable = Runnable {
         handleWaypoint()
+    }
+
+    private val startRunnable = Runnable {
+        mpStart.start()
     }
 
     private lateinit var mpStart: MediaPlayer
@@ -56,6 +70,34 @@ class WaypointService : Service() {
     }
 
     fun beginPacing(runDistStr: String, runTimeStr: String): Boolean {
+        val runTimeSplit = runTimeStr.split(":")
+        val runTime      = runTimeSplit[0].trim().toInt()*60.0 + runTimeSplit[1].toInt()
+
+        clipIndexList = clipMap[runDistStr]!!
+        waypointCalculator.initRun(runDistStr, runTime*1000.0)
+
+        val res = audioManager.requestAudioFocus(focusRequest)
+        return if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            startTime = SystemClock.elapsedRealtime() + goStartOffset
+            handler.postDelayed(startRunnable, goClipOffset)
+            true
+        } else {
+            stopSelf()
+            false
+        }
+    }
+
+    fun elapsedTime() : Long {
+        return SystemClock.elapsedRealtime() - startTime
+    }
+
+    override fun onCreate() {
+        mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = NotificationChannel("TrackPacer_NC", "TrackPacer", NotificationManager.IMPORTANCE_LOW)
+        channel.description = "TrackPacer notifications"
+        mNM.createNotificationChannel(channel)
+
         val pendingIntent: PendingIntent =
             Intent(this, MainActivity::class.java).let { notificationIntent ->
                 PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
@@ -69,34 +111,6 @@ class WaypointService : Service() {
             .build()
 
         startForeground(1, notification)
-
-        val runTimeSplit = runTimeStr.split(":")
-        val runTime    = runTimeSplit[0].trim().toInt()*60.0 + runTimeSplit[1].toInt()
-
-        clipIndexList = clipMap[runDistStr]!!
-        waypointCalculator.initRun(runDistStr, runTime*1000.0)
-
-        val res = audioManager.requestAudioFocus(focusRequest)
-        if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            mpStart.start()
-            return true
-        } else {
-            stopSelf()
-            return false
-        }
-    }
-
-    fun elapsedTime() : Long {
-        if (startTime == -1L) return 0L
-        return SystemClock.elapsedRealtime() - startTime
-    }
-
-    override fun onCreate() {
-        mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-        val channel = NotificationChannel("TrackPacer_NC", "TrackPacer", NotificationManager.IMPORTANCE_LOW)
-        channel.description = "TrackPacer notifications"
-        mNM.createNotificationChannel(channel)
 
         mpStart  = MediaPlayer.create(this, goClip)
         mpFinish = MediaPlayer.create(this, finishClip)
@@ -115,10 +129,9 @@ class WaypointService : Service() {
 
         mpStart.setOnCompletionListener {
             audioManager.abandonAudioFocusRequest(focusRequest)
-            startTime = SystemClock.elapsedRealtime() - goClipOffset
 
             val nextTime = waypointCalculator.beginRun()
-            handler.postDelayed(runnable, nextTime.toLong() - goClipOffset)
+            handler.postDelayed(waypointRunnable, nextTime.toLong())
         }
 
         for(mp in mpWaypoint) mp.setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
@@ -126,7 +139,8 @@ class WaypointService : Service() {
     }
 
     override fun onDestroy() {
-        handler.removeCallbacks(runnable)
+        handler.removeCallbacks(startRunnable)
+        handler.removeCallbacks(waypointRunnable)
 
         mpStart.release()
         mpFinish.release()
@@ -156,7 +170,7 @@ class WaypointService : Service() {
             }
 
             val nextTime = waypointCalculator.nextWaypoint()
-            handler.postDelayed(runnable, nextTime.toLong()-elapsedTime())
+            handler.postDelayed(waypointRunnable, nextTime.toLong()-elapsedTime())
         } else {
             val res = audioManager.requestAudioFocus(focusRequest)
             if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {

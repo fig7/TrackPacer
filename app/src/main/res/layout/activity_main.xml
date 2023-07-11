@@ -7,9 +7,9 @@
   tools:context=".MainActivity">
 
   <LinearLayout
-    android:layout_width="wrap_content"
+    android:id="@+id/time_view"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-
     android:orientation="vertical"
 
     app:layout_constraintEnd_toEndOf="parent"
@@ -28,6 +28,17 @@
       android:textColor="@color/black"
       android:textSize="50sp"
       android:gravity="center"/>
+  </LinearLayout>
+
+  <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+
+    android:orientation="vertical"
+
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/time_view">
 
     <Space
       android:layout_width="match_parent"
@@ -43,7 +54,7 @@
 
     <Spinner
       android:id="@+id/spinner_distance"
-      android:layout_width="match_parent"
+      android:layout_width="275dp"
       android:layout_height="wrap_content"
       style="@style/spinner_style"/>
 
