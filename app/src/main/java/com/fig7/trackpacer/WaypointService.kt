@@ -9,6 +9,7 @@ import android.media.AudioManager
 import android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
 import android.media.MediaPlayer
 import android.os.*
+import android.os.PowerManager.WakeLock
 
 val clipList = arrayOf(
     R.raw.fifty, R.raw.onehundred, R.raw.onehundredandfifty, R.raw.twohundred,
@@ -48,6 +49,7 @@ class WaypointService : Service() {
     private lateinit var mNM: NotificationManager
     private lateinit var audioManager: AudioManager
     private lateinit var focusRequest: AudioFocusRequest
+    private lateinit var wakeLock: WakeLock
 
     private val handler = Handler(Looper.getMainLooper())
     private val waypointRunnable = Runnable {
@@ -92,8 +94,11 @@ class WaypointService : Service() {
     }
 
     override fun onCreate() {
-        mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TrackPacer::WaypointServiceWakeLock")
+        wakeLock.acquire()
 
+        mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val channel = NotificationChannel("TrackPacer_NC", "TrackPacer", NotificationManager.IMPORTANCE_LOW)
         channel.description = "TrackPacer notifications"
         mNM.createNotificationChannel(channel)
@@ -114,6 +119,8 @@ class WaypointService : Service() {
 
         mpStart  = MediaPlayer.create(this, goClip)
         mpFinish = MediaPlayer.create(this, finishClip)
+        mpFinish.setOnCompletionListener { wakeLock.release() }
+
         mpWaypoint = Array(clipList.size) { i -> MediaPlayer.create(this, clipList[i]) }
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -148,6 +155,8 @@ class WaypointService : Service() {
 
         audioManager.abandonAudioFocusRequest(focusRequest)
         mNM.cancel(1)
+
+        wakeLock.release()
     }
 
     override fun onBind(intent: Intent?): IBinder {
