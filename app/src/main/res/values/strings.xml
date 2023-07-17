@@ -5,4 +5,6 @@
   <string name="label_distance">Distance:</string>
   <string name="label_time">Time:</string>
   <string name="label_profile">Profile:</string>
+  <string name="nextup">Next up: %1$s</string>
+  <string name="timeto">Time to target: %1$s</string>
 </resources>

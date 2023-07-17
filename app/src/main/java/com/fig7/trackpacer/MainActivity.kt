@@ -33,7 +33,7 @@ import androidx.core.content.ContextCompat
 // Resume pacing
 // Auto pause on phone call, or other audio request?
 // Error handling on start / convert to jetpack / code review / ship!
-// Add history + set own times (edit times)
+// Add history + set own times (edit times, and edit distances). With runpacer: could do set a point on a map and set the time (use GPS, eek!).
 
 private const val cancelledClip = R.raw.cancelled
 private const val pauseClip     = R.raw.paused
@@ -56,6 +56,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private lateinit var timerView: TextView
 
+    private lateinit var nextUpLabel: TextView
+    private lateinit var nextUpProgress : ProgressBar
+
     private val requestPermissionLauncher = registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
         if (isGranted) {
             beginPacing()
@@ -73,6 +76,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 stopButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.stop))
                 stopButton.isEnabled = true
                 stopButton.isClickable = true
+
+                nextUpLabel.text = getString(R.string.nextup, "")
+                nextUpProgress.progress = 0
 
                 handler.postDelayed(runnable, 100)
             }
@@ -108,6 +114,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         timerView = findViewById(R.id.text_time)
         timerView.text = getString(R.string.base_time, "", "00", "00", "00", "000")
+
+        nextUpLabel = findViewById(R.id.nextup_label)
+        nextUpLabel.text = getString(R.string.nextup, "")
+
+        nextUpProgress = findViewById(R.id.nextup_progress)
+        nextUpProgress.progress = 0
 
         goButton = findViewById(R.id.button_go)
         goButton.setOnClickListener {
@@ -172,6 +184,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             goButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.pause))
             goButton.isClickable = true
             goButton.isEnabled = true
+        } else {
+            nextUpProgress.progress = (100.0*waypointService.waypointProgress(elapsedTime)).toInt()
         }
 
         val hrs = elapsedTime / 3600000L
@@ -190,6 +204,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         val msStr = String.format("%03d", ms)
 
         timerView.text = getString(R.string.base_time, sgnStr, hrsStr, minsStr, secsStr, msStr)
+        nextUpLabel.text = getString(R.string.nextup, waypointService.waypointName())
         handler.postDelayed(runnable, 100)
     }
 

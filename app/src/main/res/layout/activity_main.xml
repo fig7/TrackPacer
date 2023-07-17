@@ -18,7 +18,7 @@
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="30dp" />
+      android:layout_height="20dp" />
 
     <TextView
       android:id="@+id/text_time"
@@ -42,7 +42,7 @@
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="40dp" />
+      android:layout_height="20dp"/>
 
     <TextView
       android:layout_width="match_parent"
@@ -60,7 +60,7 @@
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="60dp" />
+      android:layout_height="20dp" />
 
     <TextView
       android:layout_width="match_parent"
@@ -72,13 +72,13 @@
 
     <Spinner
       android:id="@+id/spinner_time"
-      android:layout_width="match_parent"
+      android:layout_width="275dp"
       android:layout_height="wrap_content"
       style="@style/spinner_style"/>
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="60dp" />
+      android:layout_height="20dp" />
 
     <TextView
       android:layout_width="match_parent"
@@ -90,9 +90,57 @@
 
     <Spinner
       android:id="@+id/spinner_profile"
-      android:layout_width="match_parent"
+      android:layout_width="275dp"
       android:layout_height="wrap_content"
       style="@style/spinner_style"/>
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="20dp" />
+
+    <TextView
+      android:id="@+id/nextup_label"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="start"
+      android:textColor="@color/black"
+      android:textSize="18sp"/>
+
+    <ProgressBar
+      android:id="@+id/nextup_progress"
+      android:layout_width="285dp"
+      android:layout_height="30dp"
+
+      android:paddingTop="5dp"
+      android:paddingStart="10dp"
+      tools:ignore="RtlSymmetry"
+
+      style="@android:style/Widget.ProgressBar.Horizontal"/>
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="20dp"/>
+
+    <TextView
+      android:id="@+id/timeto_label"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="start"
+      android:textColor="@color/black"
+      android:textSize="18sp"
+      android:text="@string/timeto"/>
+
+    <ProgressBar
+      android:id="@+id/timeto_progress"
+      android:layout_width="285dp"
+      android:layout_height="30dp"
+
+      android:paddingTop="5dp"
+      android:paddingStart="10dp"
+      tools:ignore="RtlSymmetry"
+
+      style="@android:style/Widget.ProgressBar.Horizontal"
+      android:progress="0"/>
   </LinearLayout>
 
   <LinearLayout
