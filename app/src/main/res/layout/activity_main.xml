@@ -127,8 +127,7 @@
       android:layout_height="wrap_content"
       android:gravity="start"
       android:textColor="@color/black"
-      android:textSize="18sp"
-      android:text="@string/timeto"/>
+      android:textSize="18sp"/>
 
     <ProgressBar
       android:id="@+id/timeto_progress"

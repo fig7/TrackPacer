@@ -58,4 +58,8 @@ class WaypointCalculator {
         currentWaypoint += 1
         return waypointTime()
     }
+
+    fun runTime(): Long {
+        return totalTime.toLong()
+    }
 }

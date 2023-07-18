@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import kotlin.math.min
 
 // States
 // 1. Initial:   NotPacing                          Stop: Disabled Play:  Enabled
@@ -29,7 +30,6 @@ import androidx.core.content.ContextCompat
 // 5b. Resume -> PacingPaused -> Pacing             Stop: Disabled Play:  Disabled       Pacing resumed   -> Stop: Enabled  Pause: Enabled
 
 
-// Progress indicators (Next up: Total:)
 // Resume pacing
 // Auto pause on phone call, or other audio request?
 // Error handling on start / convert to jetpack / code review / ship!
@@ -59,6 +59,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var nextUpLabel: TextView
     private lateinit var nextUpProgress : ProgressBar
 
+    private lateinit var timeToLabel: TextView
+    private lateinit var timeToProgress : ProgressBar
+
+    private fun runTimeFromSpinner(): Double {
+        val runTimeStr = spinner2.selectedItem.toString()
+        val runTimeSplit = runTimeStr.split(":")
+        return 1000.0*(runTimeSplit[0].trim().toLong()*60.0 + runTimeSplit[1].toLong())
+    }
+
     private val requestPermissionLauncher = registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
         if (isGranted) {
             beginPacing()
@@ -70,7 +79,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val binder = service as WaypointService.LocalBinder
             waypointService = binder.getService()
 
-            if (waypointService.beginPacing(spinner1.selectedItem.toString(), spinner2.selectedItem.toString())) {
+            if (waypointService.beginPacing(spinner1.selectedItem.toString(), runTimeFromSpinner())) {
                 pacingStatus = PacingStatus.PacingStart
 
                 stopButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.stop))
@@ -79,6 +88,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
                 nextUpLabel.text = getString(R.string.nextup, "")
                 nextUpProgress.progress = 0
+
+                timeToLabel.text = getString(R.string.timeto, "")
+                timeToProgress.progress = 0
 
                 handler.postDelayed(runnable, 100)
             }
@@ -113,13 +125,19 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         spinner2.adapter = spinner2Adapter
 
         timerView = findViewById(R.id.text_time)
-        timerView.text = getString(R.string.base_time, "", "00", "00", "00", "000")
+        timerView.text = getString(R.string.base_time_all, "00", "00", "00", "000")
 
         nextUpLabel = findViewById(R.id.nextup_label)
         nextUpLabel.text = getString(R.string.nextup, "")
 
         nextUpProgress = findViewById(R.id.nextup_progress)
         nextUpProgress.progress = 0
+
+        timeToLabel = findViewById(R.id.timeto_label)
+        timeToLabel.text = getString(R.string.timeto, "")
+
+        timeToProgress = findViewById(R.id.timeto_progress)
+        timeToProgress.progress = 0
 
         goButton = findViewById(R.id.button_go)
         goButton.setOnClickListener {
@@ -141,6 +159,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
             goButton.isEnabled = true
             goButton.isClickable = true
+
+            spinner1.isEnabled = true
+            spinner1.isClickable = true
+
+            spinner2.isEnabled = true
+            spinner2.isClickable = true
         }
 
         mpPacingComplete = MediaPlayer.create(this, completeClip)
@@ -148,6 +172,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
             goButton.isEnabled = true
             goButton.isClickable = true
+
+            spinner1.isEnabled = true
+            spinner1.isClickable = true
+
+            spinner2.isEnabled = true
+            spinner2.isClickable = true
         }
 
         mpPacingPaused = MediaPlayer.create(this, pauseClip)
@@ -172,46 +202,102 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     override fun onNothingSelected(parent: AdapterView<*>) {
     }
 
+    private fun timeToString(timeInMS: Long): String {
+        var timeLeft = timeInMS
+
+        val hrs = timeLeft / 3600000L
+        timeLeft -= hrs * 3600000L
+
+        val mins = timeLeft / 60000L
+        timeLeft -= mins * 60000L
+
+        val secs = timeLeft / 1000L
+        timeLeft -= secs * 1000L
+
+        return if (hrs > 0) {
+            val hrsStr  = String.format("%d", hrs)
+            val minsStr = String.format("%02d", mins)
+            val secsStr = String.format("%02d", secs)
+            getString(R.string.base_time_hms, hrsStr, minsStr, secsStr)
+        } else if (mins > 0) {
+            val minsStr = String.format("%d", mins)
+            val secsStr = String.format("%02d", secs)
+            getString(R.string.base_time_ms, minsStr, secsStr)
+        } else {
+            val secsStr = String.format("%d", secs)
+            val msStr = String.format("%03d", timeLeft)
+            getString(R.string.base_time_s, secsStr, msStr)
+        }
+    }
+
+    private fun timeToFullString(timeInMS: Long): String {
+        var timeLeft = timeInMS
+
+        val hrs = timeLeft / 3600000L
+        val hrsStr = String.format("%02d", hrs)
+        timeLeft -= hrs * 3600000L
+
+        val mins = timeLeft / 60000L
+        val minsStr = String.format("%02d", mins)
+        timeLeft -= mins * 60000L
+
+        val secs = timeLeft / 1000L
+        val secsStr = String.format("%02d", secs)
+        timeLeft -= secs * 1000L
+
+        val msStr = String.format("%03d", timeLeft)
+        return getString(R.string.base_time_all, hrsStr, minsStr, secsStr, msStr)
+    }
+
     private fun handleTimeUpdate() {
+        var elapsedSgn = ""
         var elapsedTime = waypointService.elapsedTime()
-        var sgnStr = ""
+
         if (elapsedTime < 0) {
-            sgnStr = "-"
+            elapsedSgn = "-"
             elapsedTime = -elapsedTime
         } else if (pacingStatus == PacingStatus.PacingStart) {
             pacingStatus = PacingStatus.Pacing
+            waypointService.beginRun()
 
             goButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.pause))
             goButton.isClickable = true
             goButton.isEnabled = true
         } else {
+            nextUpLabel.text = getString(R.string.nextup, waypointService.waypointName())
             nextUpProgress.progress = (100.0*waypointService.waypointProgress(elapsedTime)).toInt()
+
+            var remainingSgn = ""
+            var remainingTime = waypointService.timeRemaining(elapsedTime)
+            timeToProgress.progress = min(100, (100.0 - 100.0*(remainingTime / runTimeFromSpinner())).toInt())
+
+            if (remainingTime < 0) {
+                remainingSgn = "-"
+                remainingTime = -remainingTime
+            }
+
+            val remainingStr = timeToString(remainingTime)
+            timeToLabel.text = getString(R.string.timeto, getString(R.string.signed_time, remainingSgn, remainingStr))
         }
 
-        val hrs = elapsedTime / 3600000L
-        val hrsStr = String.format("%02d", hrs)
-        elapsedTime -= hrs * 3600000L
+        val elapsedStr = timeToFullString(elapsedTime)
+        timerView.text = getString(R.string.signed_time, elapsedSgn, elapsedStr)
 
-        val mins = elapsedTime / 60000L
-        val minsStr = String.format("%02d", mins)
-        elapsedTime -= mins * 60000L
-
-        val secs = elapsedTime / 1000L
-        val secsStr = String.format("%02d", secs)
-        elapsedTime -= secs * 1000L
-
-        val ms = elapsedTime
-        val msStr = String.format("%03d", ms)
-
-        timerView.text = getString(R.string.base_time, sgnStr, hrsStr, minsStr, secsStr, msStr)
-        nextUpLabel.text = getString(R.string.nextup, waypointService.waypointName())
         handler.postDelayed(runnable, 100)
     }
 
     private fun beginPacing() {
+        pacingStatus = PacingStatus.ServiceStart
+
         goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play2))
         goButton.isEnabled = false
         goButton.isClickable = false
+
+        spinner1.isEnabled = false
+        spinner1.isClickable = false
+
+        spinner2.isEnabled = false
+        spinner2.isClickable = false
 
         when {
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {

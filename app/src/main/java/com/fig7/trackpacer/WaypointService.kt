@@ -82,12 +82,9 @@ class WaypointService : Service() {
         fun getService(): WaypointService = this@WaypointService
     }
 
-    fun beginPacing(runDistStr: String, runTimeStr: String): Boolean {
-        val runTimeSplit = runTimeStr.split(":")
-        val runTime      = runTimeSplit[0].trim().toInt()*60.0 + runTimeSplit[1].toInt()
-
-        clipIndexList = clipMap[runDistStr]!!
-        waypointCalculator.initRun(runDistStr, runTime*1000.0)
+    fun beginPacing(runDist: String, runTime: Double): Boolean {
+        clipIndexList = clipMap[runDist]!!
+        waypointCalculator.initRun(runDist, runTime)
 
         val res = audioManager.requestAudioFocus(focusRequest)
         return if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
@@ -102,24 +99,25 @@ class WaypointService : Service() {
         }
     }
 
+    fun beginRun() {
+        val nextTime = waypointCalculator.beginRun()
+        handler.postDelayed(waypointRunnable, nextTime.toLong())
+    }
+
     fun elapsedTime(): Long {
         return SystemClock.elapsedRealtime() - startRealtime
     }
 
+    fun timeRemaining(elapsedTime: Long): Long {
+        return waypointCalculator.runTime() - elapsedTime
+    }
+
     fun waypointName(): String {
         val waypointNum = waypointCalculator.waypointNum()
-        if (waypointNum < 0) {
-            return ""
-        }
-
         return clipNames[clipIndexList[waypointNum]]
     }
 
     fun waypointProgress(elapsedTime: Long): Double {
-        if (waypointCalculator.waypointNum() == -1) {
-            return 0.0
-        }
-
         val waypointTime = waypointCalculator.waypointTime()
         return min(1.0, (elapsedTime - prevTime) / (waypointTime - prevTime))
     }
@@ -163,12 +161,7 @@ class WaypointService : Service() {
             build()
         }
 
-        mpStart.setOnCompletionListener {
-            audioManager.abandonAudioFocusRequest(focusRequest)
-
-            val nextTime = waypointCalculator.beginRun()
-            handler.postDelayed(waypointRunnable, nextTime.toLong())
-        }
+        mpStart.setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
 
         for( i in 0..<fL ) mpWaypoint[i].setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
         mpWaypoint[fL].setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest); wakeLock.release() }

@@ -1,7 +1,11 @@
 <resources>
   <string name="app_name">TrackPacer</string>
   <string name="app_pacing">Run pacing in progress…</string>
-  <string name="base_time">%1$s%2$s:%3$s:%4$s.%5$s</string>
+  <string name="base_time_all">%1$s:%2$s:%3$s.%4$s</string>
+  <string name="base_time_hms">%1$s:%2$s:%3$s</string>
+  <string name="base_time_ms">%1$s:%2$s</string>
+  <string name="base_time_s">%1$s.%2$s</string>
+  <string name="signed_time">%1$s%2$s</string>
   <string name="label_distance">Distance:</string>
   <string name="label_time">Time:</string>
   <string name="label_profile">Profile:</string>
