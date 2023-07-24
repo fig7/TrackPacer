@@ -49,6 +49,7 @@ val clipMap = mapOf(
     "1 mile" to arrayOf(0, 1, 2, 3, 4, 5 ,6,  7, 0, 1, 2, 3, 4, 5, 6,  8, 0, 1, 2, 3, 4, 5, 6,  9, 0, 1, 2, 3, 4, 5, 6, fL))
 
 private const val goClip = R.raw.threetwoone
+private const val resumeClip = R.raw.resumed
 private const val goStartOffset = 5000L
 private const val goClipOffset  = 2000L
 
@@ -73,6 +74,7 @@ class WaypointService : Service() {
     }
 
     private lateinit var mpStart: MediaPlayer
+    private lateinit var mpResume: MediaPlayer
     private lateinit var mpWaypoint: Array<MediaPlayer>
 
     private val waypointCalculator = WaypointCalculator()
@@ -99,9 +101,25 @@ class WaypointService : Service() {
         }
     }
 
-    fun beginRun() {
-        val nextTime = waypointCalculator.beginRun()
-        handler.postDelayed(waypointRunnable, nextTime.toLong())
+    fun resumePacing(runDist: String, runTime: Double, resumeTime: Long): Boolean {
+        clipIndexList = clipMap[runDist]!!
+        prevTime = waypointCalculator.initResume(runDist, runTime, resumeTime.toDouble())
+
+        val res = audioManager.requestAudioFocus(focusRequest)
+        return if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            startRealtime = SystemClock.elapsedRealtime() - resumeTime
+            mpResume.start()
+            true
+        } else {
+            stopSelf()
+            false
+        }
+    }
+
+    fun beginRun(elapsedTime: Long) {
+        val nextTime   = waypointCalculator.waypointTime()
+        val updateTime = (nextTime - elapsedTime.toDouble()).toLong()
+        if (updateTime >= 0L)  handler.postDelayed(waypointRunnable, updateTime)
     }
 
     fun elapsedTime(): Long {
@@ -147,7 +165,8 @@ class WaypointService : Service() {
 
         startForeground(1, notification)
 
-        mpStart  = MediaPlayer.create(this, goClip)
+        mpStart   = MediaPlayer.create(this, goClip)
+        mpResume  = MediaPlayer.create(this, resumeClip)
         mpWaypoint = Array(clipList.size) { i -> MediaPlayer.create(this, clipList[i]) }
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -172,6 +191,7 @@ class WaypointService : Service() {
         handler.removeCallbacks(waypointRunnable)
 
         mpStart.release()
+        mpResume.release()
         for (mp in mpWaypoint) mp.release()
 
         audioManager.abandonAudioFocusRequest(focusRequest)
@@ -197,6 +217,7 @@ class WaypointService : Service() {
         val i = clipIndexList[waypointCalculator.waypointNum()]
         val res = audioManager.requestAudioFocus(focusRequest)
         if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            mpResume.release()
             mpWaypoint[i].start()
         }
 
