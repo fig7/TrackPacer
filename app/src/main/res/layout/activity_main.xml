@@ -18,7 +18,7 @@
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="20dp"/>
+      android:layout_height="15dp"/>
 
     <TextView
       android:id="@+id/text_time"
@@ -31,7 +31,7 @@
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="20dp"/>
+      android:layout_height="15dp"/>
   </LinearLayout>
 
   <LinearLayout
@@ -124,9 +124,9 @@
     <ProgressBar
       android:id="@+id/nextup_progress"
       android:layout_width="285dp"
-      android:layout_height="30dp"
+      android:layout_height="wrap_content"
 
-      android:paddingTop="5dp"
+      android:paddingTop="3dp"
       android:paddingStart="10dp"
       tools:ignore="RtlSymmetry"
 
@@ -147,9 +147,9 @@
     <ProgressBar
       android:id="@+id/timeto_progress"
       android:layout_width="285dp"
-      android:layout_height="30dp"
+      android:layout_height="wrap_content"
 
-      android:paddingTop="5dp"
+      android:paddingTop="3dp"
       android:paddingStart="10dp"
       tools:ignore="RtlSymmetry"
 
@@ -167,7 +167,7 @@
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="20dp"/>
+      android:layout_height="15dp"/>
 
     <LinearLayout
       android:layout_width="match_parent"
@@ -177,20 +177,16 @@
       <ImageButton
         android:id="@+id/button_stop"
         android:layout_width="180dp"
-        android:layout_height="61dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/stop2"
+        android:layout_height="60dp"
 
-        android:enabled="false"
-        android:clickable="false" />
+        android:scaleType="centerInside"/>
 
       <ImageButton
         android:id="@+id/button_go"
         android:layout_width="180dp"
-        android:layout_height="61dp"
+        android:layout_height="60dp"
 
-        android:scaleType="centerInside"
-        android:src="@drawable/play" />
+        android:scaleType="centerInside"/>
     </LinearLayout>
   </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,7 +7,7 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+import android.media.AudioManager.*
 import android.media.MediaPlayer
 import android.os.*
 import android.os.PowerManager.WakeLock
@@ -53,7 +53,7 @@ private const val resumeClip = R.raw.resumed
 private const val goStartOffset = 5000L
 private const val goClipOffset  = 2000L
 
-class WaypointService : Service() {
+class WaypointService : Service(), OnAudioFocusChangeListener {
     private val wsBinder = LocalBinder()
 
     private var startRealtime = -1L
@@ -89,7 +89,7 @@ class WaypointService : Service() {
         waypointCalculator.initRun(runDist, runTime)
 
         val res = audioManager.requestAudioFocus(focusRequest)
-        return if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+        return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
             prevTime = 0.0
             startRealtime = SystemClock.elapsedRealtime() + goStartOffset
 
@@ -106,7 +106,7 @@ class WaypointService : Service() {
         prevTime = waypointCalculator.initResume(runDist, runTime, resumeTime.toDouble())
 
         val res = audioManager.requestAudioFocus(focusRequest)
-        return if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+        return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
             startRealtime = SystemClock.elapsedRealtime() - resumeTime
             mpResume.start()
             true
@@ -170,13 +170,14 @@ class WaypointService : Service() {
         mpWaypoint = Array(clipList.size) { i -> MediaPlayer.create(this, clipList[i]) }
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+        focusRequest = AudioFocusRequest.Builder(AUDIOFOCUS_GAIN).run {
             setAudioAttributes(AudioAttributes.Builder().run {
                 setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
                 setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 setFocusGain(AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
                 build()
             })
+            setOnAudioFocusChangeListener(this@WaypointService, handler)
             build()
         }
 
@@ -213,11 +214,22 @@ class WaypointService : Service() {
         return false
     }
 
+    override fun onAudioFocusChange(focusChange: Int) {
+        if ((focusChange == AUDIOFOCUS_LOSS) || (focusChange == AUDIOFOCUS_LOSS_TRANSIENT) || (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK)) {
+            if (mpStart.isPlaying)  { mpStart.stop(); mpStart.prepare() }
+            if (mpResume.isPlaying) { mpResume.stop(); mpResume.prepare() }
+            for (mp in mpWaypoint) { if (mp.isPlaying) { mp.stop(); mp.prepare() } }
+
+            audioManager.abandonAudioFocusRequest(focusRequest)
+            handler.removeCallbacks(startRunnable)
+        }
+    }
+
     private fun handleWaypoint() {
         val i = clipIndexList[waypointCalculator.waypointNum()]
         val res = audioManager.requestAudioFocus(focusRequest)
-        if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            mpResume.release()
+        if (res == AUDIOFOCUS_REQUEST_GRANTED) {
+            mpResume.stop()
             mpWaypoint[i].start()
         }
 

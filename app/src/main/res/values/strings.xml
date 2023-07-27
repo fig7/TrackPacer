@@ -11,4 +11,8 @@
   <string name="label_profile">Profile:</string>
   <string name="nextup">Next up: %1$s</string>
   <string name="timeto">Time to target: %1$s</string>
+
+  <string name="ok">OK</string>
+  <string name="cancel">Cancel</string>
+  <string name="request_permission">Request permission</string>
 </resources>
