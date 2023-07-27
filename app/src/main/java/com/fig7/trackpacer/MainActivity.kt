@@ -99,7 +99,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         // TODO: Show an icon on the UI for the state of automatic pausing (NB. refresh UI in onResume())
         // And also for current state (play, pause, stopped) + start delay
         // Oh, and add a settings page / tab
-        pacingStatus = if (pacingStatus == PacingStatus.CheckPermissionStart) PacingStatus.ServiceStart else PacingStatus.ServiceResume
         startService()
     }
 
@@ -418,6 +417,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun startService() {
+        pacingStatus = if (pacingStatus == PacingStatus.CheckPermissionStart) PacingStatus.ServiceStart else PacingStatus.ServiceResume
+
         val intent = Intent(this, WaypointService::class.java)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
@@ -506,7 +507,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private fun checkPhonePermission() {
         when {
             (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) -> {
-                pacingStatus = if (pacingStatus == PacingStatus.CheckPermissionStart) PacingStatus.ServiceStart else PacingStatus.ServiceResume
                 startService()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.READ_PHONE_STATE) -> {

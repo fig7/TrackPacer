@@ -13,6 +13,6 @@
   <string name="timeto">Time to target: %1$s</string>
 
   <string name="ok">OK</string>
-  <string name="cancel">Cancel</string>
-  <string name="request_permission">Request permission</string>
+  <string name="request_cancel">Cancel</string>
+  <string name="request_continue">Continue</string>
 </resources>

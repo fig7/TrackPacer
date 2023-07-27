@@ -38,8 +38,8 @@ class RequestDialog: DialogFragment() {
         val builder = AlertDialog.Builder(activity)
         builder.setTitle(dialogTitle)
         builder.setMessage(dialogMessage)
-        builder.setPositiveButton(R.string.request_permission) { _, _ -> setResult(true)}
-        builder.setNegativeButton(R.string.cancel) { _, _ -> setResult(false) }
+        builder.setPositiveButton(R.string.request_continue) { _, _ -> setResult(true)}
+        builder.setNegativeButton(R.string.request_cancel) { _, _ -> setResult(false) }
         return builder.create()
     }
 }
