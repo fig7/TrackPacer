@@ -79,11 +79,24 @@
       android:textSize="18sp"
       android:text="@string/label_time"/>
 
-    <Spinner
-      android:id="@+id/spinner_time"
-      android:layout_width="275dp"
+    <LinearLayout
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      style="@style/spinner_style"/>
+      android:orientation="horizontal">
+
+      <Spinner
+        android:id="@+id/spinner_time"
+        android:layout_width="204dp"
+        android:layout_height="wrap_content"
+        style="@style/spinner_style"/>
+
+      <ImageButton
+        android:id="@+id/button_time"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+
+        style="@style/edit_style"/>
+    </LinearLayout>
   </LinearLayout>
 
   <LinearLayout
@@ -100,11 +113,23 @@
       android:textSize="18sp"
       android:text="@string/label_profile"/>
 
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal">
+
     <Spinner
       android:id="@+id/spinner_profile"
-      android:layout_width="275dp"
+      android:layout_width="204dp"
       android:layout_height="wrap_content"
       style="@style/spinner_style"/>
+
+    <ImageButton
+      android:layout_width="50dp"
+      android:layout_height="wrap_content"
+
+      style="@style/disabled_edit_style"/>
+    </LinearLayout>
   </LinearLayout>
 
   <LinearLayout

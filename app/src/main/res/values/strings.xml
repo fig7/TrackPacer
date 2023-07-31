@@ -15,4 +15,12 @@
   <string name="ok">OK</string>
   <string name="request_cancel">Cancel</string>
   <string name="request_continue">Continue</string>
+
+  <string name="edit_time_all">%1$s:%2$s.%3$s</string>
+  <string name="edit_time_title">Edit %1$s</string>
+  <string name="time_sep">:</string>
+  <string name="hths_sep">.</string>
+  <string name="delete_time">Delete</string>
+  <string name="add_time">Add %1$s</string>
+  <string name="set_time">Set to %1$s</string>
 </resources>

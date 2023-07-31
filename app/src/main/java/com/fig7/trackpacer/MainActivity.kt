@@ -31,6 +31,7 @@ import kotlin.math.min
 // 5b. Resume -> PacingPaused -> Pacing             Stop: Disabled Play:  Disabled       Pacing resumed   -> Stop: Enabled  Pause: Enabled
 
 
+// button handlers, implement variable times, icons, button text!
 // Error handling on start / convert to jetpack / code review / ship!
 // Clip recording / replacement / Tabs
 // Add history + set own times (edit times, and edit distances). With Runpacer: could do set a point on a map and set the time (use GPS, eek!).
@@ -40,8 +41,8 @@ private const val pauseClip     = R.raw.paused
 private const val completeClip  = R.raw.complete
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+    private lateinit var dataManager: DataManager
     private lateinit var waypointService: WaypointService
-    private lateinit var distanceAndTimeArray: Array<String>
 
     private var pacingStatus = PacingStatus.NotPacing
     private var pausedTime: Long = -1
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var mpPacingPaused: MediaPlayer
     private lateinit var mpPacingComplete: MediaPlayer
 
+    private lateinit var editButton: ImageButton
     private lateinit var goButton: ImageButton
     private lateinit var stopButton: ImageButton
 
@@ -68,9 +70,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private var broadcastReceiver = ActivityReceiver()
 
     private fun runTimeFromSpinner(): Double {
-        val runTimeStr = spinner2.selectedItem.toString()
-        val runTimeSplit = runTimeStr.split(":")
-        return 1000.0*(runTimeSplit[0].trim().toLong()*60.0 + runTimeSplit[1].toLong())
+        val runTime = spinner2.selectedItem.toString()
+        val runTimeSplit = runTime.split(":")
+        return 1000.0*(runTimeSplit[0].trim().toLong()*60.0 + runTimeSplit[1].toDouble())
     }
 
     private fun enableSpinners(enabled: Boolean) {
@@ -82,6 +84,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         spinner3.isEnabled   = enabled
         spinner3.isClickable = enabled
+    }
+
+    private fun updateTimeSpinner(runDistance: String) {
+        val spinner2Adapter = ArrayAdapter(this, R.layout.spinner_item, dataManager.timeMap[runDistance]!!)
+        spinner2Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        spinner2.adapter = spinner2Adapter
     }
 
     private val requestNotificationsLauncher = registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
@@ -150,21 +158,21 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             pausedTime = getLong("PAUSED_TIME")
         }
 
-        distanceAndTimeArray = resources.getStringArray(R.array.distance_array)
-        val distanceArray: Array<String> = Array(distanceAndTimeArray.size) { distanceAndTimeArray[it].split("+")[0] }
+        dataManager = DataManager(filesDir,  resources.getStringArray(R.array.distance_array))
+        if (!dataManager.dataOk) {
+            // Abort with error
+        }
 
         spinner1 = findViewById(R.id.spinner_distance)
-        val spinner1Adapter = ArrayAdapter(this, R.layout.spinner_item, distanceArray)
+        val spinner1Adapter = ArrayAdapter(this, R.layout.spinner_item, dataManager.distanceArray)
         spinner1Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinner1.adapter = spinner1Adapter
 
-        var spinner1Pos = 0
-        savedInstanceState?.run { spinner1Pos = getInt("SPINNER1_VAL"); spinner1.setSelection(spinner1Pos)  }
+        savedInstanceState?.run { val spinner1Pos = getInt("SPINNER1_VAL"); spinner1.setSelection(spinner1Pos)  }
         spinner1.onItemSelectedListener = this
 
         spinner2 = findViewById(R.id.spinner_time)
-        val timeArray: Array<String> = distanceAndTimeArray[spinner1Pos].split("+")[1].split(",").toTypedArray()
-        val spinner2Adapter = ArrayAdapter(this, R.layout.spinner_item, timeArray)
+        val spinner2Adapter = ArrayAdapter(this, R.layout.spinner_item, dataManager.timeMap[spinner1.selectedItem.toString()]!!)
         spinner2Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinner2.adapter = spinner2Adapter
         savedInstanceState?.run { spinner2.setSelection(getInt("SPINNER2_VAL")) }
@@ -189,6 +197,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         timeToProgress = findViewById(R.id.timeto_progress)
         timeToProgress.progress = savedInstanceState?.getInt("TIMETO_PROGRESS") ?: 0
+
+        editButton = findViewById(R.id.button_time)
+        editButton.setOnClickListener {
+            val dialog = EditTimeDialog.newDialog(spinner2.selectedItem.toString(), dataManager.timeMap[spinner1.selectedItem.toString()]!!, "EDIT_TIME_DIALOG")
+            dialog.show(supportFragmentManager, "EDIT_TIME_DIALOG")
+        }
 
         goButton = findViewById(R.id.button_go)
         goButton.setOnClickListener {
@@ -270,6 +284,25 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             if (resultVal) requestPhoneLauncher.launch(Manifest.permission.READ_PHONE_STATE) else stopPacing(true)
         }
 
+        supportFragmentManager.setFragmentResultListener("EDIT_TIME_DIALOG", this) { _: String, bundle: Bundle ->
+            val runDistance = spinner1.selectedItem.toString()
+            when (EditResult.values()[bundle.getInt("EditResult")]) {
+                EditResult.Delete -> {
+                    dataManager.deleteTime(runDistance, bundle.getString("EditTime"))
+                    updateTimeSpinner(runDistance)
+                }
+                EditResult.Add -> {
+                    dataManager.addTime(runDistance, bundle.getString("EditTime"))
+                    updateTimeSpinner(runDistance)
+                }
+                EditResult.Set -> {
+                    dataManager.replaceTime(runDistance, bundle.getString("OrigTime"), bundle.getString("EditTime"))
+                    updateTimeSpinner(runDistance)
+                }
+                else -> { }
+            }
+        }
+
         registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"))
     }
 
@@ -301,10 +334,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-        val timeArray: Array<String> = distanceAndTimeArray[pos].split("+")[1].split(",").toTypedArray()
-        val spinner2Adapter = ArrayAdapter(this, R.layout.spinner_item, timeArray)
-        spinner2Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        spinner2.adapter = spinner2Adapter
+        val runDistance = spinner1.selectedItem.toString()
+        updateTimeSpinner(runDistance)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
