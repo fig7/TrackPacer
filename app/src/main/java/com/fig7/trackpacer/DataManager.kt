@@ -10,22 +10,36 @@ class DataManager(filesDir: File, defaultDistances: Array<String>) {
     var timeMap = mutableMapOf<String, Array<String>>()
 
     private fun writeData() {
-        for (distance in distanceArray) {
-            val distanceDir = File(dataDir, distance)
+        for ((i, distance) in distanceArray.withIndex()) {
+            val prefix = String.format("Distance_%03d_", i)
+            val distanceDir = File(dataDir, prefix + distance)
             if (!distanceDir.exists()) {
                 dataOk = distanceDir.mkdir()
                 if (!dataOk) { return }
             }
 
             val timesFile = File(distanceDir, "times.dat")
-            val timeString = timeMap[distance]!!.joinToString(separator = ",")
-            timesFile.writeText(timeString)
+            val timeStr = timeMap[distance]!!.joinToString(separator = ",")
+            timesFile.writeText(timeStr)
         }
-
     }
 
     private fun readData() {
+        val distanceList = dataDir.list()
+        if (distanceList == null) { dataOk = false; return }
 
+        distanceList.sort()
+        distanceArray = Array(distanceList.size) { "" }
+
+        for ((i, distance) in distanceList.withIndex()) {
+            val runDistance  = distance.substring(13)
+            distanceArray[i] = runDistance
+
+            val distanceDir = File(dataDir, distance)
+            val timesFile = File(distanceDir, "times.dat")
+            val timesStr  = timesFile.readText()
+            timeMap[runDistance] = timesStr.split(",").toTypedArray()
+        }
     }
 
     private fun initData(distances: Array<String>) {
@@ -56,17 +70,20 @@ class DataManager(filesDir: File, defaultDistances: Array<String>) {
         return time1Dbl > time2Dbl
     }
 
-    fun deleteTime(runDistance: String, runTime: String?) {
-        if (runTime == null) { return }
-        if (!timeMap.containsKey(runDistance)) { return }
+    fun deleteTime(runDistance: String, runTime: String?): Int {
+        if (runTime == null) { return -1 }
+        if (!timeMap.containsKey(runDistance)) { return -1 }
 
         val timeArray = timeMap[runDistance]!!
-        if (!timeArray.contains(runTime)) return
+        if (!timeArray.contains(runTime)) return -1
 
         var i = 0
+        var newIndex = -1
         val newTimeArray = Array(timeArray.size-1) { "" }
         for (time in timeArray) {
             if (time == runTime) {
+                newIndex = i-1
+                if (newIndex < 0) newIndex = 0
                 continue
             }
 
@@ -74,11 +91,14 @@ class DataManager(filesDir: File, defaultDistances: Array<String>) {
         }
 
         timeMap[runDistance] = newTimeArray
+        writeData()
+
+        return newIndex
     }
 
-    fun addTime(runDistance: String, runTime: String?) {
-        if (runTime == null) { return }
-        if (!timeMap.containsKey(runDistance)) { return }
+    fun addTime(runDistance: String, runTime: String?): Int {
+        if (runTime == null) { return -1 }
+        if (!timeMap.containsKey(runDistance)) { return -1 }
 
         var i = 0
         var j = 0
@@ -94,6 +114,7 @@ class DataManager(filesDir: File, defaultDistances: Array<String>) {
             newTimeArray[j++] = time
         }
 
+        val newIndex = j
         newTimeArray[j++] = runTime
 
         while (i < timeArray.size) {
@@ -102,11 +123,14 @@ class DataManager(filesDir: File, defaultDistances: Array<String>) {
         }
 
         timeMap[runDistance] = newTimeArray
+        writeData()
+
+        return newIndex
     }
 
-    fun replaceTime(runDistance: String, origTime: String?, newTime: String?) {
-        if ((origTime == null) || (newTime == null)) { return }
-        if (!timeMap.containsKey(runDistance)) { return }
+    fun replaceTime(runDistance: String, origTime: String?, newTime: String?): Int {
+        if ((origTime == null) || (newTime == null)) { return -1 }
+        if (!timeMap.containsKey(runDistance)) { return -1 }
 
         var i = 0
         var j = 0
@@ -126,6 +150,7 @@ class DataManager(filesDir: File, defaultDistances: Array<String>) {
             newTimeArray[j++] = time
         }
 
+        val newIndex = j
         newTimeArray[j++] = newTime
 
         while (i < timeArray.size) {
@@ -140,5 +165,8 @@ class DataManager(filesDir: File, defaultDistances: Array<String>) {
         }
 
         timeMap[runDistance] = newTimeArray
+        writeData()
+
+        return newIndex
     }
 }

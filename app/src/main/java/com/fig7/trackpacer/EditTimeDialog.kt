@@ -52,6 +52,7 @@ class EditTimeDialog: DialogFragment() {
         addButton.text = getString(R.string.add_time, runTimeStr)
         setButton.text = getString(R.string.set_time, runTimeStr)
 
+        // TODO: This should really use a waypoint check (min 5s between waypoints)
         if ((runTimeStr == dialogTime) || ((mins == 0) && (secs<40))) {
             addButton.isEnabled   = false
             addButton.isClickable = false

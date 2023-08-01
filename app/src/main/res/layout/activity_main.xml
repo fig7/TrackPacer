@@ -7,6 +7,47 @@
   tools:context=".MainActivity">
 
   <LinearLayout
+    android:id="@+id/status_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="2dp"
+
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <ImageView
+      android:id="@+id/pacing_status"
+      android:layout_width="16dp"
+      android:layout_height="16dp"
+      android:layout_gravity="center"/>
+
+    <Space
+      android:layout_width="4dp"
+      android:layout_height="20dp"/>
+
+    <ImageView
+      android:id="@+id/phone_status"
+      android:layout_width="20dp"
+      android:layout_height="20dp"/>
+
+    <Space
+      android:layout_width="4dp"
+      android:layout_height="20dp"/>
+
+    <TextView
+      android:id="@+id/delay_setting"
+      android:layout_width="wrap_content"
+      android:layout_height="20dp"
+
+      android:textColor="@color/black"/>
+
+    <Space
+      android:layout_width="4dp"
+      android:layout_height="20dp"/>
+  </LinearLayout>
+
+  <LinearLayout
     android:id="@+id/time_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -14,11 +55,11 @@
 
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+    app:layout_constraintTop_toBottomOf="@id/status_view">
 
     <Space
       android:layout_width="match_parent"
-      android:layout_height="15dp"/>
+      android:layout_height="10dp"/>
 
     <TextView
       android:id="@+id/text_time"
