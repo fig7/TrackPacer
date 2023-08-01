@@ -31,10 +31,11 @@ import kotlin.math.min
 // 5b. Resume -> PacingPaused -> Pacing             Stop: Disabled Play:  Disabled       Pacing resumed   -> Stop: Enabled  Pause: Enabled
 
 
-// Startup screen, App icon, Ship!
+// Ship!
 // Error handling on start / convert to jetpack / code review / ship!
 // Clip recording / replacement / Tabs
 // Add history + set own times (edit times, and edit distances). With Runpacer: could do set a point on a map and set the time (use GPS, eek!).
+// Profiles, clips, settings, history for next version. Run, history, clips, settings tabs
 
 private const val cancelledClip = R.raw.cancelled
 private const val pauseClip     = R.raw.paused
@@ -84,6 +85,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         spinner3.isEnabled   = enabled
         spinner3.isClickable = enabled
+
+        editButton.isEnabled   = enabled
+        editButton.isClickable = enabled
     }
 
     private fun updateTimeSpinner(runDistance: String, timeIndex: Int = -1) {
