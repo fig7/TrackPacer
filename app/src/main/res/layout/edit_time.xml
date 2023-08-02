@@ -25,14 +25,14 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
 
-        android:textColor="@color/black"
+        android:textColor="?android:textColorPrimary"
         android:textSize="32sp"/>
 
       <ImageButton
         android:id="@+id/cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@null"
 
         android:src="@drawable/baseline_close_48"/>
     </LinearLayout>
@@ -46,7 +46,8 @@
       <NumberPicker
         android:id="@+id/min_picker"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:theme="@style/picker_text">
       </NumberPicker>
 
       <TextView
@@ -54,12 +55,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
 
+        android:textColor="@color/black"
+        android:textSize="24sp"
         android:text="@string/time_sep"/>
 
       <NumberPicker
         android:id="@+id/sec_picker"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:theme="@style/picker_text">
       </NumberPicker>
 
       <TextView
@@ -67,12 +71,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
 
+        android:textColor="@color/black"
+        android:textSize="24sp"
         android:text="@string/hths_sep"/>
 
       <NumberPicker
         android:id="@+id/hths_picker"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:theme="@style/picker_text">
       </NumberPicker>
     </LinearLayout>
 
