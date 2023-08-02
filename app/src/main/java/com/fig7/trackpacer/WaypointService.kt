@@ -48,10 +48,12 @@ val clipMap = mapOf(
 
     "1 mile" to arrayOf(0, 1, 2, 3, 4, 5 ,6,  7, 0, 1, 2, 3, 4, 5, 6,  8, 0, 1, 2, 3, 4, 5, 6,  9, 0, 1, 2, 3, 4, 5, 6, fL))
 
-private const val goClip = R.raw.threetwoone
-private const val resumeClip = R.raw.resumed
-private const val goStartOffset = 5000L
-private const val goClipOffset  = 2000L
+
+@Suppress("ConstPropertyName")
+private const val GoStartOffset = 5000L
+
+@Suppress("ConstPropertyName")
+private const val GoClipOffset  = 2000L
 
 class WaypointService : Service(), OnAudioFocusChangeListener {
     private val wsBinder = LocalBinder()
@@ -91,9 +93,9 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         val res = audioManager.requestAudioFocus(focusRequest)
         return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
             prevTime = 0.0
-            startRealtime = SystemClock.elapsedRealtime() + goStartOffset
+            startRealtime = SystemClock.elapsedRealtime() + GoStartOffset
 
-            handler.postDelayed(startRunnable, goClipOffset)
+            handler.postDelayed(startRunnable, GoClipOffset)
             true
         } else {
             stopSelf()
@@ -165,8 +167,8 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
 
         startForeground(1, notification)
 
-        mpStart   = MediaPlayer.create(this, goClip)
-        mpResume  = MediaPlayer.create(this, resumeClip)
+        mpStart   = MediaPlayer.create(this, R.raw.threetwoone)
+        mpResume  = MediaPlayer.create(this, R.raw.resumed)
         mpWaypoint = Array(clipList.size) { i -> MediaPlayer.create(this, clipList[i]) }
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager

@@ -37,9 +37,6 @@ import kotlin.math.min
 // Add history + set own times (edit times, and edit distances). With Runpacer: could do set a point on a map and set the time (use GPS, eek!).
 // Profiles, clips, settings, history for next version. Run, history, clips, settings tabs
 
-private const val cancelledClip = R.raw.cancelled
-private const val pauseClip     = R.raw.paused
-private const val completeClip  = R.raw.complete
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var dataManager: DataManager
@@ -260,7 +257,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             else -> throw IllegalStateException()
         }
 
-        mpPacingCancelled = MediaPlayer.create(this, cancelledClip)
+        mpPacingCancelled = MediaPlayer.create(this, R.raw.cancelled)
         mpPacingCancelled.setOnCompletionListener {
             goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
             goButton.isEnabled = true
@@ -269,7 +266,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             enableSpinners(true)
         }
 
-        mpPacingComplete = MediaPlayer.create(this, completeClip)
+        mpPacingComplete = MediaPlayer.create(this, R.raw.complete)
         mpPacingComplete.setOnCompletionListener {
             goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
             goButton.isEnabled = true
@@ -278,7 +275,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             enableSpinners(true)
         }
 
-        mpPacingPaused = MediaPlayer.create(this, pauseClip)
+        mpPacingPaused = MediaPlayer.create(this, R.raw.paused)
         mpPacingPaused.setOnCompletionListener {
             goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume))
             goButton.isEnabled = true
@@ -324,7 +321,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             }
         }
 
-        registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"))
+        registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), Context.RECEIVER_NOT_EXPORTED)
     }
 
     override fun onResume() {

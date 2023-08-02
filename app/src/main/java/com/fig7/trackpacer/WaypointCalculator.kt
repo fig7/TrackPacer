@@ -47,7 +47,7 @@ class WaypointCalculator {
         totalTime = runTime
 
         var prevTime = 0.0
-        for (i in 0..<waypointList.size) {
+        for (i in waypointList.indices) {
             currentWaypoint = i
             val waypointTime = waypointTime()
             if (waypointTime > resumeTime) {
