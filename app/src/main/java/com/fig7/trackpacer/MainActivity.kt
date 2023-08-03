@@ -244,7 +244,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 enableSpinners(true)
             }
             PacingStatus.PacingPaused -> {
-                goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
+                goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume))
                 goButton.isEnabled = true
                 goButton.isClickable = true
 
