@@ -12,17 +12,18 @@
 
     android:layout_width="320dp"
     android:layout_height="348dp"
-    android:padding="5dp"
+    android:paddingStart="5dp"
+    android:paddingEnd="5dp"
     android:orientation="vertical">
 
     <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="56dp">
 
       <TextView
         android:id="@+id/edit_time_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
 
         android:textColor="?android:textColorPrimary"
@@ -32,8 +33,10 @@
         android:id="@+id/cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@null"
+        android:layout_gravity="center_vertical"
 
+        android:background="@null"
+        android:contentDescription="@string/content_edit_cancel"
         android:src="@drawable/baseline_close_48"/>
     </LinearLayout>
 
@@ -109,12 +112,16 @@
         android:id="@+id/edit_time_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"/>
+        android:layout_gravity="end"
+
+        android:contentDescription="@string/content_time_add"/>
 
       <Button
         android:id="@+id/edit_time_set"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+
+        android:contentDescription="@string/content_time_set"/>
       </LinearLayout>
     </LinearLayout>
 </LinearLayout>

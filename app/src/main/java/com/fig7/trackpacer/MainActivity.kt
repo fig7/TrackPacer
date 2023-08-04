@@ -36,6 +36,7 @@ import kotlin.math.min
 // Clip recording / replacement / Tabs
 // Add history + set own times (edit times, and edit distances). With Runpacer: could do set a point on a map and set the time (use GPS, eek!).
 // Profiles, clips, settings, history for next version. Run, history, clips, settings tabs
+// Share/submit routes + Auto airplane mode setting too
 
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {

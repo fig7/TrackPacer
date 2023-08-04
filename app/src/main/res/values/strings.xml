@@ -24,4 +24,15 @@
   <string name="add_time">Add %1$s</string>
   <string name="set_time">Set to %1$s</string>
   <string name="start_delay">5.00</string>
+
+  <string name="content_pacing_status">Pacing status</string>
+  <string name="content_phone_status">Incoming call detection</string>
+  <string name="content_edit_time">Edit time</string>
+  <string name="content_edit_profile">Edit profile</string>
+  <string name="content_go">Start pacing</string>
+  <string name="content_stop">Stop pacing</string>
+
+  <string name="content_edit_cancel">Cancel edit</string>
+  <string name="content_time_add">Add time</string>
+  <string name="content_time_set">Set time</string>
 </resources>
