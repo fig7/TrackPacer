@@ -50,6 +50,8 @@
         android:id="@+id/min_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
+        android:contentDescription="@string/content_edit_mins"
         android:theme="@style/picker_text">
       </NumberPicker>
 
@@ -66,6 +68,8 @@
         android:id="@+id/sec_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
+        android:contentDescription="@string/content_edit_secs"
         android:theme="@style/picker_text">
       </NumberPicker>
 
@@ -82,6 +86,8 @@
         android:id="@+id/hths_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
+        android:contentDescription="@string/content_edit_hths"
         android:theme="@style/picker_text">
       </NumberPicker>
     </LinearLayout>

@@ -33,6 +33,9 @@
   <string name="content_stop">Stop pacing</string>
 
   <string name="content_edit_cancel">Cancel edit</string>
+  <string name="content_edit_mins">Time minutes</string>
+  <string name="content_edit_secs">Time seconds</string>
+  <string name="content_edit_hths">Time hundredths</string>
   <string name="content_time_add">Add time</string>
   <string name="content_time_set">Set time</string>
 </resources>
