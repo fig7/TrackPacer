@@ -10,40 +10,44 @@
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintBottom_toBottomOf="parent"
 
-    android:layout_width="320dp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingStart="5dp"
-    android:paddingEnd="5dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
 
-    <LinearLayout
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
+
+    <RelativeLayout
       android:layout_width="match_parent"
-      android:layout_height="56dp">
+      android:layout_height="48dp">
 
       <TextView
         android:id="@+id/edit_time_title"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="1"
 
         android:textColor="?android:textColorPrimary"
-        android:textSize="32sp"/>
+        android:textSize="32sp"
+
+        android:maxLines="1"
+        android:autoSizeTextType="uniform"/>
 
       <ImageButton
         android:id="@+id/cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_alignParentEnd="true"
 
         android:background="@null"
         android:contentDescription="@string/content_edit_cancel"
         android:src="@drawable/baseline_close_48"/>
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:gravity="center"
+
       style="@style/picker_style">
 
       <NumberPicker
@@ -95,7 +99,10 @@
     <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:orientation="horizontal">
+      android:orientation="horizontal"
+
+      android:paddingStart="2dp"
+      android:paddingEnd="2dp">
 
       <Button
         android:id="@+id/edit_time_delete"
@@ -122,12 +129,22 @@
 
         android:contentDescription="@string/content_time_add"/>
 
-      <Button
-        android:id="@+id/edit_time_set"
+      <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        android:contentDescription="@string/content_time_set"/>
+        <Space
+          android:layout_width="20dp"
+          android:layout_height="wrap_content"/>
+
+        <Button
+          android:id="@+id/edit_time_set"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+
+          android:contentDescription="@string/content_time_set"/>
+        </LinearLayout>
       </LinearLayout>
     </LinearLayout>
 </LinearLayout>
