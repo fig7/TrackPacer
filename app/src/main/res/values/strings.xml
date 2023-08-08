@@ -7,6 +7,7 @@
   <string name="base_time_s">%1$s.%2$s</string>
   <string name="signed_time">%1$s%2$s</string>
   <string name="label_distance">Distance:</string>
+  <string name="label_lane">Lane:</string>
   <string name="label_time">Time:</string>
   <string name="label_profile">Profile:</string>
   <string name="nextup">Next up: %1$s</string>

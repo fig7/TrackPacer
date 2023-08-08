@@ -15,25 +15,25 @@
     android:pathData="M41.375,0 A41.375,41.375,0,1,0,41.375,82.75"
     android:strokeWidth="32"
     android:fillColor="#00000000"
-    android:strokeColor="#000000"/>
+    android:strokeColor="#B94A3B"/>
 
   <path
     android:pathData="M41.375,0 L125.765,0"
     android:strokeWidth="32"
     android:fillColor="#00000000"
-    android:strokeColor="#000000"/>
+    android:strokeColor="#B94A3B"/>
 
   <path
     android:pathData="M125.765,0 A41.375,41.375,0,1,1,125.765 82.75"
     android:strokeWidth="32"
     android:fillColor="#00000000"
-    android:strokeColor="#000000"/>
+    android:strokeColor="#B94A3B"/>
 
   <path
     android:pathData="M41.375,82.75 L125.765,82.75"
     android:strokeWidth="32"
     android:fillColor="#00000000"
-    android:strokeColor="#000000"/>
+    android:strokeColor="#B94A3B"/>
 
     <path android:fillColor="#FCBC05" android:pathData="M120.765,77.75 h10,v10,h-10z"/>
     <path android:fillColor="#FCBC05" android:pathData="M161.112,45.54 h10,v10,h-10z"/>

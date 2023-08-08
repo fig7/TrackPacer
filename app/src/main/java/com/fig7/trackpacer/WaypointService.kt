@@ -86,9 +86,9 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         fun getService(): WaypointService = this@WaypointService
     }
 
-    fun beginPacing(runDist: String, runTime: Double): Boolean {
+    fun beginPacing(runDist: String, runTime: Double, runLane: Int): Boolean {
         clipIndexList = clipMap[runDist]!!
-        waypointCalculator.initRun(runDist, runTime)
+        waypointCalculator.initRun(runDist, runTime, runLane)
 
         val res = audioManager.requestAudioFocus(focusRequest)
         return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
@@ -103,9 +103,9 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         }
     }
 
-    fun resumePacing(runDist: String, runTime: Double, resumeTime: Long): Boolean {
+    fun resumePacing(runDist: String, runTime: Double, runLane: Int, resumeTime: Long): Boolean {
         clipIndexList = clipMap[runDist]!!
-        prevTime = waypointCalculator.initResume(runDist, runTime, resumeTime.toDouble())
+        prevTime = waypointCalculator.initResume(runDist, runTime, runLane, resumeTime.toDouble())
 
         val res = audioManager.requestAudioFocus(focusRequest)
         return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
