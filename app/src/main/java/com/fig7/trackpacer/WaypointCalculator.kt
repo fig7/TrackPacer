@@ -1,5 +1,7 @@
 package com.fig7.trackpacer
 
+import android.util.Log
+
 val distanceMap = mapOf(
                         "400m"     to 400.0,
                         "800m"     to 800.0,
@@ -38,6 +40,11 @@ val runMultiplier1500= Array(8) { i ->
     ((Math.PI + 0.424201)*r + 168.78 + (6.0*Math.PI*r) + 506.34)/1500.0
 }
 
+val runMultiplierMile = Array(8) { i ->
+    val r = 36.8 + rDiff[i]
+    (8.0*Math.PI*r + 675.12 + 9.34)/1609.34
+}
+
 class WaypointCalculator {
     private lateinit var waypointList: Array<Double>
     private lateinit var waypointArcAngle: Array<Double>
@@ -62,39 +69,46 @@ class WaypointCalculator {
         return (waypointDistance() * totalTime) / totalDistance
     }
 
-    fun initRun(runDist: String, runTime: Double, runLane: Int) {
-        waypointList = waypointMap[runDist]!!
+    private fun initRunParams(runDist: String, runTime: Double, runLane: Int) {
         runLaneIndex = runLane - 1
+        waypointList = waypointMap[runDist]!!
 
-        if (runDist == "1500m") {
-            // Special case, 1500m is 3.75 laps
-            totalDistance = distanceMap[runDist]!! * runMultiplier1500[runLaneIndex]
-            totalTime     = runTime * runMultiplier1500[runLaneIndex]
-            waypointArcAngle = arcAngle1500
-        } else {
-            totalDistance = distanceMap[runDist]!! * runMultiplier[runLaneIndex]
-            totalTime     = runTime * runMultiplier[runLaneIndex]
-            waypointArcAngle = arcAngle
+        when (runDist) {
+            "1500m" -> {
+                // Special case, 1500m is 3.75 laps
+                totalDistance = distanceMap[runDist]!! * runMultiplier1500[runLaneIndex]
+                totalTime = runTime * runMultiplier1500[runLaneIndex]
+                waypointArcAngle = arcAngle1500
+            }
+
+            "1 mile" -> {
+                // Special case, 1 mile is 4 laps + 9.34m
+                totalDistance = distanceMap[runDist]!! * runMultiplierMile[runLaneIndex]
+                totalTime = runTime * runMultiplierMile[runLaneIndex]
+                waypointArcAngle = arcAngle
+            }
+
+            else -> {
+                totalDistance = distanceMap[runDist]!! * runMultiplier[runLaneIndex]
+                totalTime = runTime * runMultiplier[runLaneIndex]
+                waypointArcAngle = arcAngle
+            }
         }
+    }
+
+    fun initRun(runDist: String, runTime: Double, runLane: Int) {
+        initRunParams(runDist, runTime, runLane)
 
         currentWaypoint = 0
         currentExtra    = arcExtra()
+        Log.d("TP", totalDistance.toString())
+        Log.d("TP", totalTime.toString())
+
+        Log.d("TP", waypointTime().toString())
     }
 
     fun initResume(runDist: String, runTime: Double, runLane: Int, resumeTime: Double): Double {
-        waypointList = waypointMap[runDist]!!
-        runLaneIndex = runLane - 1
-
-        if (runDist == "1500m") {
-            // Special case, 1500m is 3.75 laps
-            totalDistance = distanceMap[runDist]!! * runMultiplier1500[runLaneIndex]
-            totalTime     = runTime * runMultiplier1500[runLaneIndex]
-            waypointArcAngle = arcAngle1500
-        } else {
-            totalDistance = distanceMap[runDist]!! * runMultiplier[runLaneIndex]
-            totalTime     = runTime * runMultiplier[runLaneIndex]
-            waypointArcAngle = arcAngle
-        }
+        initRunParams(runDist, runTime, runLane)
 
         var prevTime = 0.0
         for (i in waypointList.indices) {
@@ -121,9 +135,11 @@ class WaypointCalculator {
     }
 
     fun nextWaypoint(): Double {
+        val waypoint1 = waypointTime()
         currentWaypoint += 1
         currentExtra += arcExtra()
 
+        Log.d("TP", (waypointTime()-waypoint1).toString())
         return waypointTime()
     }
 
