@@ -1,7 +1,5 @@
 package com.fig7.trackpacer
 
-import android.util.Log
-
 val distanceMap = mapOf(
                         "400m"     to 400.0,
                         "800m"     to 800.0,
@@ -101,10 +99,10 @@ class WaypointCalculator {
 
         currentWaypoint = 0
         currentExtra    = arcExtra()
-        Log.d("TP", totalDistance.toString())
-        Log.d("TP", totalTime.toString())
+        // Log.d("TP", totalDistance.toString())
+        // Log.d("TP", totalTime.toString())
 
-        Log.d("TP", waypointTime().toString())
+        // Log.d("TP", waypointTime().toString())
     }
 
     fun initResume(runDist: String, runTime: Double, runLane: Int, resumeTime: Double): Double {
@@ -135,11 +133,11 @@ class WaypointCalculator {
     }
 
     fun nextWaypoint(): Double {
-        val waypoint1 = waypointTime()
+        // val waypoint1 = waypointTime()
         currentWaypoint += 1
         currentExtra += arcExtra()
 
-        Log.d("TP", (waypointTime()-waypoint1).toString())
+        // Log.d("TP", (waypointTime()-waypoint1).toString())
         return waypointTime()
     }
 
