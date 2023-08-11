@@ -16,7 +16,8 @@
     android:label="@string/app_name"
     android:supportsRtl="true"
     android:theme="@style/Theme.TrackPacer"
-    android:configChanges="orientation|keyboardHidden">
+    android:configChanges="orientation|keyboardHidden"
+    tools:targetApi="s">
 
     <service
       android:name=".WaypointService"

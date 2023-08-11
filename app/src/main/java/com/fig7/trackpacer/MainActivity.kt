@@ -1,9 +1,11 @@
 package com.fig7.trackpacer
 
 import android.Manifest
+import android.app.NotificationManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -32,15 +34,17 @@ import kotlin.math.min
 
 
 // Ship!
-// Lane selector
 // Error handling on start / convert to jetpack / code review / ship!
 // Clip recording / replacement / Tabs
 // Add history + set own times (edit times, and edit distances). With Runpacer: could do set a point on a map and set the time (use GPS, eek!).
 // Profiles, clips, settings, history for next version. Run, history, clips, settings tabs
 // Share/submit routes + Auto airplane mode setting too
+// 3K/5K setting for start/finish position
+// Add support for 200m indoor running tracks?
 
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+    private lateinit var mNM: NotificationManager
     private lateinit var dataManager: DataManager
     private lateinit var waypointService: WaypointService
 
@@ -179,6 +183,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             pausedTime = getLong("PAUSED_TIME")
         }
 
+        mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         dataManager = DataManager(filesDir,  resources.getStringArray(R.array.distance_array))
         if (!dataManager.dataOk) {
             // TODO: Abort with error
@@ -303,9 +308,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             stopButton.isClickable = true
         }
 
-        supportFragmentManager.setFragmentResultListener("REQUEST_NOTIFICATIONS_DIALOG", this) { _: String, bundle: Bundle ->
-            val resultVal = bundle.getBoolean("RequestResult")
-            if (resultVal) requestNotificationsLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) else stopPacing(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            supportFragmentManager.setFragmentResultListener("REQUEST_NOTIFICATIONS_DIALOG", this) { _: String, bundle: Bundle ->
+                val resultVal = bundle.getBoolean("RequestResult")
+                if (resultVal) requestNotificationsLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) else stopPacing(true)
+            }
         }
 
         supportFragmentManager.setFragmentResultListener("REQUEST_PHONE_DIALOG", this) { _: String, bundle: Bundle ->
@@ -338,7 +345,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             }
         }
 
-        registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), Context.RECEIVER_NOT_EXPORTED)
+        val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
+        registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), receiverFlags )
     }
 
     override fun onResume() {
@@ -393,21 +401,33 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private fun timeToString(timeInMS: Long): String {
         var timeLeft = timeInMS
 
-        val hrs = timeLeft / 3600000L
+        var hrs = timeLeft / 3600000L
         timeLeft -= hrs * 3600000L
 
-        val mins = timeLeft / 60000L
+        var mins = timeLeft / 60000L
         timeLeft -= mins * 60000L
 
-        val secs = timeLeft / 1000L
+        var secs = timeLeft / 1000L
         timeLeft -= secs * 1000L
 
-        return if (hrs > 0) {
+        if (((hrs > 0L) || (mins > 0L)) && (timeLeft > 0L)) {
+            secs += 1L
+            if (secs == 60L) {
+                secs = 0L
+                mins += 1L
+                if (mins == 60L) {
+                    mins = 0L
+                    hrs += 1L
+                }
+            }
+        }
+
+        return if (hrs > 0L) {
             val hrsStr  = String.format("%d", hrs)
             val minsStr = String.format("%02d", mins)
             val secsStr = String.format("%02d", secs)
             getString(R.string.base_time_hms, hrsStr, minsStr, secsStr)
-        } else if (mins > 0) {
+        } else if (mins > 0L) {
             val minsStr = String.format("%d", mins)
             val secsStr = String.format("%02d", secs)
             getString(R.string.base_time_ms, minsStr, secsStr)
@@ -578,15 +598,24 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun checkNotificationsPermission() {
-        when {
-            (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) -> {
-                checkPhonePermission()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) -> {
+                    checkPhonePermission()
+                }
+                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.POST_NOTIFICATIONS) -> {
+                    val dialog = RequestDialog.newDialog("Notifications permission", "TrackPacer uses a background task. This allows pacing to work even when the screen is turned off. A notification will appear when pacing is in progress. However, you must allow notifications for this to work.", "REQUEST_NOTIFICATIONS_DIALOG")
+                    dialog.show(supportFragmentManager, "REQUEST_NOTIFICATIONS_DIALOG")
+                }
+                else -> requestNotificationsLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
-            ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.POST_NOTIFICATIONS) -> {
-                val dialog = RequestDialog.newDialog("Notifications permission", "TrackPacer uses a background task. This allows pacing to work even when the screen is turned off. A notification will appear when pacing is in progress. However, you must allow notifications for this to work.", "REQUEST_NOTIFICATIONS_DIALOG")
-                dialog.show(supportFragmentManager, "REQUEST_NOTIFICATIONS_DIALOG")
-            }
-            else -> requestNotificationsLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else if (!mNM.areNotificationsEnabled()) {
+            stopPacing(true)
+
+            val dialog = InfoDialog.newDialog("Pacing not possible", "Notifications permission is required. Allow notifications if you wish to use TrackPacer.")
+            dialog.show(supportFragmentManager, "CANNOT_FUNCTION_DIALOG")
+        } else {
+            checkPhonePermission()
         }
     }
     private fun checkPhonePermission() {
