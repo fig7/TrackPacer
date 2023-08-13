@@ -34,8 +34,10 @@ import kotlin.math.min
 
 
 // Ship!
+// Fix privacy policy on mobile
 // Error handling on start / convert to jetpack / code review / ship!
 // Clip recording / replacement / Tabs
+// Auto enable flight mode. Auto Lock Screen. Auto unlock screen?
 // Add history + set own times (edit times, and edit distances). With Runpacer: could do set a point on a map and set the time (use GPS, eek!).
 // Profiles, clips, settings, history for next version. Run, history, clips, settings tabs
 // Share/submit routes + Auto airplane mode setting too
