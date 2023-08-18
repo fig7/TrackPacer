@@ -3,6 +3,7 @@
   <string-array name="distance_array">
     <item>400m+    1:30.00,2:00.00</item>
     <item>800m+    3:00.00,4:00.00</item>
+    <item>1000m+   3:45.00,5:00.00</item>
     <item>1200m+   4:30.00,6:00.00</item>
     <item>1500m+   5:37.50,7:30.00</item>
     <item>2000m+   7:30.00,10:00.00</item>

@@ -34,6 +34,7 @@ class EditTimeDialog: DialogFragment() {
             args.putStringArray("times", timeArray)
             args.putString("tag",        tag)
             f.arguments = args
+
             return f
         }
     }

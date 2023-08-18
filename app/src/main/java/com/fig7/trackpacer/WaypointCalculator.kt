@@ -3,6 +3,7 @@ package com.fig7.trackpacer
 val distanceMap = mapOf(
                         "400m"     to 400.0,
                         "800m"     to 800.0,
+                        "1000m"    to 1000.0,
                         "1200m"    to 1200.0,
                         "1500m"    to 1500.0,
                         "2000m"    to 2000.0,
@@ -15,6 +16,7 @@ val distanceMap = mapOf(
 val waypointMap = mapOf(
                         "400m"    to Array(8)   { i -> 50.0 + 50.0*i },
                         "800m"    to Array(16)  { i -> 50.0 + 50.0*i },
+                        "1000m"   to Array(20)  { i -> 50.0 + 50.0*i },
                         "1200m"   to Array(24)  { i -> 50.0 + 50.0*i },
                         "1500m"   to Array(30)  { i -> 50.0 + 50.0*i },
                         "2000m"   to Array(40)  { i -> 50.0 + 50.0*i },

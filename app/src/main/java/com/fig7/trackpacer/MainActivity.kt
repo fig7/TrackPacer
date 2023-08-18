@@ -34,10 +34,14 @@ import kotlin.math.min
 
 
 // Ship!
+// How about "Wait for screen lock before starting (i.e. start the service, but wait for screen off). Then auto-stop on screen unlock. Yeah.
+
 // Fix privacy policy on mobile
+// Add 1K, and update start line image + feature one.
 // Error handling on start / convert to jetpack / code review / ship!
 // Clip recording / replacement / Tabs
 // Auto enable flight mode. Auto Lock Screen. Auto unlock screen?
+// Auto stop using voice recognition, GPS (!?) or detect power button press?
 // Add history + set own times (edit times, and edit distances). With Runpacer: could do set a point on a map and set the time (use GPS, eek!).
 // Profiles, clips, settings, history for next version. Run, history, clips, settings tabs
 // Share/submit routes + Auto airplane mode setting too
@@ -186,9 +190,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         }
 
         mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        dataManager = DataManager(filesDir,  resources.getStringArray(R.array.distance_array))
-        if (!dataManager.dataOk) {
-            // TODO: Abort with error
+        dataManager = DataManager(filesDir)
+        try {
+            dataManager.initDistances(resources.getStringArray(R.array.distance_array))
+        } catch (_: Exception) {
+            val dialog = DataErrorDialog.newDialog("initializing", true)
+            dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
         }
 
         spinnerDistance = findViewById(R.id.spinner_distance)
@@ -323,27 +330,29 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         }
 
         supportFragmentManager.setFragmentResultListener("EDIT_TIME_DIALOG", this) { _: String, bundle: Bundle ->
-            val runDistance = spinnerDistance.selectedItem.toString()
-            when (EditResult.values()[bundle.getInt("EditResult")]) {
-                EditResult.Delete -> {
-                    val newIndex = dataManager.deleteTime(runDistance, bundle.getString("EditTime"))
-                    if (newIndex != -1) {
+            try {
+                val runDistance = spinnerDistance.selectedItem.toString()
+                when (EditResult.values()[bundle.getInt("EditResult")]) {
+                    EditResult.Delete -> {
+                        val newIndex = dataManager.deleteTime(runDistance, bundle.getString("EditTime"))
                         updateTimeSpinner(runDistance, newIndex)
                     }
-                }
-                EditResult.Add -> {
-                    val newIndex = dataManager.addTime(runDistance, bundle.getString("EditTime"))
-                    if (newIndex != -1) {
+
+                    EditResult.Add -> {
+                        val newIndex = dataManager.addTime(runDistance, bundle.getString("EditTime"))
                         updateTimeSpinner(runDistance, newIndex)
                     }
-                }
-                EditResult.Set -> {
-                    val newIndex = dataManager.replaceTime(runDistance, bundle.getString("OrigTime"), bundle.getString("EditTime"))
-                    if (newIndex != -1) {
+
+                    EditResult.Set -> {
+                        val newIndex = dataManager.replaceTime(runDistance, bundle.getString("OrigTime"), bundle.getString("EditTime"))
                         updateTimeSpinner(runDistance, newIndex)
                     }
+
+                    EditResult.Cancel -> {}
                 }
-                else -> { }
+            } catch (_: Exception) {
+                val dialog = DataErrorDialog.newDialog("updating", false)
+                dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
             }
         }
 
