@@ -1,5 +1,11 @@
 <resources>
   <string name="app_name">TrackPacer</string>
+
+  <string name="title_run">Run</string>
+  <string name="title_history">History</string>
+  <string name="title_clips">Audio</string>
+  <string name="title_settings">Settings</string>
+
   <string name="app_pacing">Run pacing in progress…</string>
   <string name="base_time_all">%1$s:%2$s:%3$s.%4$s</string>
   <string name="base_time_hms">%1$s:%2$s:%3$s</string>

@@ -10,14 +10,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlin.math.min
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
+import com.fig7.trackpacer.databinding.ActivityMainBinding
 
 // States
 // 1. Initial:   NotPacing                          Stop: Disabled Play:  Enabled
@@ -47,78 +48,27 @@ import kotlin.math.min
 // Share/submit routes + Auto airplane mode setting too
 // 3K/5K setting for start/finish position
 // Add support for 200m indoor running tracks?
+// Countdown TTS sound boards
 
 
-class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+class MainActivity : AppCompatActivity() {
+    lateinit var dataManager: DataManager
+    var pacingStatus = PacingStatus.NotPacing
+
+    private lateinit var binding: ActivityMainBinding
     private lateinit var mNM: NotificationManager
-    private lateinit var dataManager: DataManager
     private lateinit var waypointService: WaypointService
 
-    private var pacingStatus = PacingStatus.NotPacing
-    private var pausedTime: Long = -1
+    private var runDistance: String = ""
+    private var runLane: Int        = -1
+    private var runTime: Double     = -1.0
+    private var pausedTime: Long    = -1L
 
     private lateinit var mpPacingCancelled: MediaPlayer
     private lateinit var mpPacingPaused: MediaPlayer
     private lateinit var mpPacingComplete: MediaPlayer
 
-    private lateinit var editButton: ImageButton
-    private lateinit var goButton: ImageButton
-    private lateinit var stopButton: ImageButton
-
-    private lateinit var spinnerDistance: Spinner
-    private lateinit var spinnerLane: Spinner
-    private lateinit var spinnerTime: Spinner
-    private lateinit var spinnerProfile: Spinner
-
-    private lateinit var timerView: TextView
-
-    private lateinit var nextUpLabel: TextView
-    private lateinit var nextUpProgress : ProgressBar
-
-    private lateinit var timeToLabel: TextView
-    private lateinit var timeToProgress : ProgressBar
-
     private var broadcastReceiver = ActivityReceiver()
-
-    private fun runTimeFromSpinner(): Double {
-        val runTime = spinnerTime.selectedItem.toString()
-        val runTimeSplit = runTime.split(":")
-        return 1000.0*(runTimeSplit[0].trim().toLong()*60.0 + runTimeSplit[1].toDouble())
-    }
-
-    private fun enableSpinners(enabled: Boolean) {
-        spinnerDistance.isEnabled   = enabled
-        spinnerDistance.isClickable = enabled
-
-        spinnerLane.isEnabled   = enabled
-        spinnerLane.isClickable = enabled
-
-        spinnerTime.isEnabled   = enabled
-        spinnerTime.isClickable = enabled
-
-        spinnerProfile.isEnabled   = enabled
-        spinnerProfile.isClickable = enabled
-
-        editButton.isEnabled   = enabled
-        editButton.isClickable = enabled
-    }
-
-    private fun updateTimeSpinner(runDistance: String, timeIndex: Int = -1) {
-        val spinnerTimeAdapter = ArrayAdapter(this, R.layout.spinner_item, dataManager.timeMap[runDistance]!!)
-        spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        spinnerTime.adapter = spinnerTimeAdapter
-        if (timeIndex != -1) spinnerTime.setSelection(timeIndex)
-    }
-
-    private fun updatePacingStatus() {
-        val pacingIcon = findViewById<ImageView>(R.id.pacing_status)
-        when (pacingStatus) {
-            PacingStatus.NotPacing    -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop_small))
-            PacingStatus.Pacing       -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play_small))
-            PacingStatus.PacingPaused -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause_small))
-            else -> { }
-        }
-    }
 
     private val requestNotificationsLauncher = registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
         if (isGranted) {
@@ -132,9 +82,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private val requestPhoneLauncher = registerForActivityResult(RequestPermission()) {
-        // TODO: Show an icon on the UI for the state of automatic pausing (NB. refresh UI in onResume())
-        // And also for current state (play, pause, stopped) + start delay
-        // Oh, and add a settings page / tab
         startService()
     }
 
@@ -143,14 +90,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val binder = service as WaypointService.LocalBinder
             waypointService = binder.getService()
 
-            val runDistance = spinnerDistance.selectedItem.toString()
-            val runLane     = spinnerLane.selectedItem.toString().toInt()
-            val runTime     = runTimeFromSpinner()
             if (pacingStatus == PacingStatus.ServiceStart) {
                 if (waypointService.beginPacing(runDistance, runTime, runLane)) {
                     pacingStatus = PacingStatus.PacingStart
 
-                    stopButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.stop))
+                    /* stopButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.stop))
                     stopButton.isEnabled = true
                     stopButton.isClickable = true
 
@@ -158,7 +102,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     nextUpProgress.progress = 0
 
                     timeToLabel.text = getString(R.string.timeto, "")
-                    timeToProgress.progress = 0
+                    timeToProgress.progress = 0 */
 
                     handler.postDelayed(runnable, 100)
                 }
@@ -182,7 +126,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val navView       = binding.navView
+        val navController = binding.mainView.getFragment<NavHostFragment>().navController
+        navView.setupWithNavController(navController)
 
         savedInstanceState?.run {
             pacingStatus = PacingStatus.values()[getInt("PACING_STATUS")]
@@ -198,7 +148,18 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
         }
 
-        spinnerDistance = findViewById(R.id.spinner_distance)
+        val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
+        registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), receiverFlags )
+
+        supportFragmentManager.setFragmentResultListener("BEGIN_PACING", this) { _, bundle ->
+            runDistance = bundle.getString("RUN_DISTANCE")!!
+            runLane     = bundle.getInt("RUN_LANE")
+            runTime     = bundle.getDouble("RUN_TIME")
+
+            beginPacing()
+        }
+
+        /* spinnerDistance = findViewById(R.id.spinner_distance)
         val spinnerDistanceAdapter = ArrayAdapter(this, R.layout.spinner_item, dataManager.distanceArray)
         spinnerDistanceAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerDistance.adapter = spinnerDistanceAdapter
@@ -286,35 +247,35 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 enableSpinners(false)
             }
             else -> throw IllegalStateException()
-        }
+        } */
 
         mpPacingCancelled = MediaPlayer.create(this, R.raw.cancelled)
         mpPacingCancelled.setOnCompletionListener {
-            goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
+            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
             goButton.isEnabled = true
             goButton.isClickable = true
 
-            enableSpinners(true)
+            enableSpinners(true) */
         }
 
         mpPacingComplete = MediaPlayer.create(this, R.raw.complete)
         mpPacingComplete.setOnCompletionListener {
-            goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
+            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
             goButton.isEnabled = true
             goButton.isClickable = true
 
-            enableSpinners(true)
+            enableSpinners(true) */
         }
 
         mpPacingPaused = MediaPlayer.create(this, R.raw.paused)
         mpPacingPaused.setOnCompletionListener {
-            goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume))
+            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume))
             goButton.isEnabled = true
             goButton.isClickable = true
 
             stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop))
             stopButton.isEnabled = true
-            stopButton.isClickable = true
+            stopButton.isClickable = true */
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -331,21 +292,21 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         supportFragmentManager.setFragmentResultListener("EDIT_TIME_DIALOG", this) { _: String, bundle: Bundle ->
             try {
-                val runDistance = spinnerDistance.selectedItem.toString()
+                val runDistance = "400m" // spinnerDistance.selectedItem.toString()
                 when (EditResult.values()[bundle.getInt("EditResult")]) {
                     EditResult.Delete -> {
                         val newIndex = dataManager.deleteTime(runDistance, bundle.getString("EditTime"))
-                        updateTimeSpinner(runDistance, newIndex)
+                        // updateTimeSpinner(runDistance, newIndex)
                     }
 
                     EditResult.Add -> {
                         val newIndex = dataManager.addTime(runDistance, bundle.getString("EditTime"))
-                        updateTimeSpinner(runDistance, newIndex)
+                        // updateTimeSpinner(runDistance, newIndex)
                     }
 
                     EditResult.Set -> {
                         val newIndex = dataManager.replaceTime(runDistance, bundle.getString("OrigTime"), bundle.getString("EditTime"))
-                        updateTimeSpinner(runDistance, newIndex)
+                        // updateTimeSpinner(runDistance, newIndex)
                     }
 
                     EditResult.Cancel -> {}
@@ -355,15 +316,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
             }
         }
-
-        val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
-        registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), receiverFlags )
     }
 
     override fun onResume() {
         super.onResume()
 
-        updatePacingStatus()
+        // updatePacingStatus()
 
         val phoneIcon = findViewById<ImageView>(R.id.phone_status)
         val phonePermission = (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
@@ -378,7 +336,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             putInt("PACING_STATUS", pacingStatus.ordinal)
             putLong("PAUSED_TIME", pausedTime)
 
-            putInt("SP_DISTANCE", spinnerDistance.selectedItemPosition)
+            /* putInt("SP_DISTANCE", spinnerDistance.selectedItemPosition)
             putInt("SP_LANE",     spinnerLane.selectedItemPosition)
             putInt("SP_TIME",     spinnerTime.selectedItemPosition)
             putInt("SP_PROFILE",  spinnerProfile.selectedItemPosition)
@@ -389,7 +347,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             putInt("NEXTUP_PROGRESS", nextUpProgress.progress)
 
             putString("TIMETO_LABEL", timeToLabel.text.toString())
-            putInt("TIMETO_PROGRESS", timeToProgress.progress)
+            putInt("TIMETO_PROGRESS", timeToProgress.progress) */
         }
 
         super.onSaveInstanceState(outState)
@@ -399,14 +357,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         super.onDestroy()
 
         unregisterReceiver(broadcastReceiver)
-    }
-
-    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-        val runDistance = spinnerDistance.selectedItem.toString()
-        updateTimeSpinner(runDistance)
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>) {
     }
 
     private fun timeToString(timeInMS: Long): String {
@@ -477,20 +427,20 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             elapsedTime = -elapsedTime
         } else if ((pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume)) {
             pacingStatus = PacingStatus.Pacing
-            updatePacingStatus()
+            // updatePacingStatus()
 
             waypointService.beginRun(elapsedTime)
 
-            goButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.pause))
+            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.pause))
             goButton.isClickable = true
-            goButton.isEnabled = true
+            goButton.isEnabled = true */
         } else {
-            nextUpLabel.text = getString(R.string.nextup, waypointService.waypointName())
-            nextUpProgress.progress = (100.0*waypointService.waypointProgress(elapsedTime)).toInt()
+            /* nextUpLabel.text = getString(R.string.nextup, waypointService.waypointName())
+            nextUpProgress.progress = (100.0*waypointService.waypointProgress(elapsedTime)).toInt() */
 
             var remainingSgn = ""
             var remainingTime = waypointService.timeRemaining(elapsedTime)
-            timeToProgress.progress = min(100, (100.0 - 100.0*(remainingTime / runTimeFromSpinner())).toInt())
+            // timeToProgress.progress = min(100, (100.0 - 100.0*(remainingTime / runTimeFromSpinner())).toInt())
 
             if (remainingTime < 0) {
                 remainingSgn = "-"
@@ -498,11 +448,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             }
 
             val remainingStr = timeToString(remainingTime)
-            timeToLabel.text = getString(R.string.timeto, getString(R.string.signed_time, remainingSgn, remainingStr))
+            // timeToLabel.text = getString(R.string.timeto, getString(R.string.signed_time, remainingSgn, remainingStr))
         }
 
         val elapsedStr = timeToFullString(elapsedTime)
-        timerView.text = getString(R.string.signed_time, elapsedSgn, elapsedStr)
+        // timerView.text = getString(R.string.signed_time, elapsedSgn, elapsedStr)
 
         handler.postDelayed(runnable, 100)
     }
@@ -510,11 +460,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private fun beginPacing() {
         pacingStatus = PacingStatus.CheckPermissionStart
 
-        goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play2))
+        /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play2))
         goButton.isEnabled = false
         goButton.isClickable = false
 
-        enableSpinners(false)
+        enableSpinners(false) */
 
         checkNotificationsPermission()
     }
@@ -522,9 +472,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private fun resumePacing() {
         pacingStatus = PacingStatus.CheckPermissionResume
 
-        goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume2))
+        /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume2))
         goButton.isEnabled = false
-        goButton.isClickable = false
+        goButton.isClickable = false */
 
         checkNotificationsPermission()
     }
@@ -538,7 +488,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private fun pausePacing(silent: Boolean) {
         pacingStatus = PacingStatus.PacingPaused
-        updatePacingStatus()
+        // updatePacingStatus()
 
         pausedTime = waypointService.elapsedTime()
 
@@ -546,41 +496,41 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         handler.removeCallbacks(runnable)
 
         if (silent) {
-            goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume))
+            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume))
             goButton.isEnabled   = true
             goButton.isClickable = true
 
             stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop))
             stopButton.isEnabled   = true
-            stopButton.isClickable = true
+            stopButton.isClickable = true */
         } else {
-            goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause2))
+            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause2))
             goButton.isEnabled   = false
             goButton.isClickable = false
 
             stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop2))
             stopButton.isEnabled   = false
-            stopButton.isClickable = false
+            stopButton.isClickable = false */
 
             mpPacingPaused.start()
         }
     }
 
     private fun stopPacing(silent: Boolean) {
-        stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop2))
+        /* stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop2))
         stopButton.isEnabled   = false
-        stopButton.isClickable = false
+        stopButton.isClickable = false */
 
         if (silent) {
-            goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
+            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
             goButton.isEnabled   = true
             goButton.isClickable = true
 
-            enableSpinners(true)
+            enableSpinners(true) */
         } else {
-            goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play2))
+            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play2))
             goButton.isEnabled   = false
-            goButton.isClickable = false
+            goButton.isClickable = false */
         }
 
         if ((pacingStatus == PacingStatus.Pacing) || (pacingStatus == PacingStatus.PacingStart)) {
@@ -596,7 +546,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         }
 
         pacingStatus = PacingStatus.NotPacing
-        updatePacingStatus()
+        // updatePacingStatus()
     }
 
     fun handleIncomingCall() {

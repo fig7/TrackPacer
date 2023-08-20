@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/mobile_navigation"
+  app:startDestination="@+id/navigation_run">
+
+  <fragment
+    android:id="@+id/navigation_run"
+    android:name="com.fig7.trackpacer.ui.run.RunFragment"
+    android:label="@string/title_run"
+    tools:layout="@layout/fragment_run" />
+
+  <fragment
+    android:id="@+id/navigation_history"
+    android:name="com.fig7.trackpacer.ui.run.RunFragment"
+    android:label="@string/title_history"
+    tools:layout="@layout/fragment_run" />
+
+  <fragment
+    android:id="@+id/navigation_clips"
+    android:name="com.fig7.trackpacer.ui.run.RunFragment"
+    android:label="@string/title_clips"
+    tools:layout="@layout/fragment_run" />
+
+  <fragment
+    android:id="@+id/navigation_settings"
+    android:name="com.fig7.trackpacer.ui.run.RunFragment"
+    android:label="@string/title_settings"
+    tools:layout="@layout/fragment_run" />
+</navigation>
