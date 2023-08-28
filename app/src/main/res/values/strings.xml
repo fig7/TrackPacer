@@ -16,6 +16,7 @@
   <string name="label_lane">Lane:</string>
   <string name="label_time">Time:</string>
   <string name="label_profile">Profile:</string>
+  <string name="label_start">Start &amp; Finish:</string>
   <string name="nextup">Next up: %1$s</string>
   <string name="timeto">Time to target: %1$s</string>
 
@@ -45,4 +46,8 @@
   <string name="content_edit_hths">Time hundredths</string>
   <string name="content_time_add">Add time</string>
   <string name="content_time_set">Set time</string>
+
+  <string name="start_and_finish">Start and finish</string>
+  <string name="on_your_marks">On your marks</string>
+  <string name="laps_1500">3 and \u00BE laps</string>
 </resources>

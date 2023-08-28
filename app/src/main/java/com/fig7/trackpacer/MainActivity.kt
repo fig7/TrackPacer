@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
@@ -50,6 +51,46 @@ import com.fig7.trackpacer.databinding.ActivityMainBinding
 // Add support for 200m indoor running tracks?
 // Countdown TTS sound boards
 
+// Updated UI.
+// Remove Clock + Next up / Time to target components. Add "On your marks...".
+// Then, add Clock, + Next up / Time to target. Remove Distance/lane/time/pace. Add Distance run (when on pace): 407.66m
+// Add Stop / Power start (use power icon!). So, it's either a play button or power button (non-functional)
+// Start & Finish: Graphic with short green line for start, red line for finish. Add numbers, so it's obvious.
+// In center, you can put 1 lap. 2 laps. 3 laps, 3 3/4 laps (First lap is 300m, Last lap is lap 4), 4 laps (+9.34m),
+// 5 laps, 7 1/2 laps (First lap is 200m, or Last lap is 200m, Last lap is lap 8), 12 1/2 laps (First / Last is, Last lap is lap 13)
+// up to 25 laps!
+
+// On running screen, lose bottom navigation.
+
+// On running screen, perhaps have:
+//             Clock
+//
+// Distance:
+//   10000m in L2 (10123.00m)
+//
+// Expected time:
+//   30:25.27 (5:30.21/km)
+//   (30:00.00 when in L1)   // Only show if not in L1!
+//
+// Profile:
+//   Fixed pace
+
+// Distance run (when on pace):
+//   5325.23m
+//
+// Next up: Waypoint (Distance)
+//
+// Time to target:
+//
+// Stop                     Go
+
+// Then have a completion screen. Really just change Next up / Time to target to
+// Pacing complete and saved! You finished 1.567s early or 6.432s late
+// Maybe auto cancel if time is less than 30s? Yes.
+// And buttons to delete (We auto save the workout) and Home. Or just add delete button. Can play again if you want.
+// Perhaps just add another button row. Delete and home. Trash can + home:
+
+// Change stop to Home, when stopped. Yesh. Just do deleting from within history.
 
 class MainActivity : AppCompatActivity() {
     lateinit var dataManager: DataManager
@@ -156,6 +197,7 @@ class MainActivity : AppCompatActivity() {
             runLane     = bundle.getInt("RUN_LANE")
             runTime     = bundle.getDouble("RUN_TIME")
 
+            binding.navView.visibility = View.GONE;
             beginPacing()
         }
 
@@ -178,7 +220,8 @@ class MainActivity : AppCompatActivity() {
         val spinnerTimeAdapter = ArrayAdapter(this, R.layout.spinner_item, dataManager.timeMap[spinnerDistance.selectedItem.toString()]!!)
         spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerTime.adapter = spinnerTimeAdapter
-        savedInstanceState?.run { spinnerTime.setSelection(getInt("SP_TIME")) }
+        // *? Test this, it didn't appear to work! savedInstanceState?.run { spinnerTime.setSelection(getInt("SP_TIME")) }
+        // Maybe need to move spinnerDistance.onItemSelectedListener = this to onResume()? Or something!
 
         spinnerProfile = findViewById(R.id.spinner_profile)
         val profileArray: Array<String> = resources.getStringArray(R.array.profile_array)

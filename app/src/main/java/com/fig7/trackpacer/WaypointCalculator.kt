@@ -26,7 +26,7 @@ val waypointMap = mapOf(
                         "10000m"  to Array(200) { i -> 50.0 + 50.0*i },
                         "1 mile"  to Array(32)  { i -> 59.34 + 50.0*i })
 
-val rDiff        = Array(8) {i -> 1.21875*i }
+val rDiff        = Array(8) {i -> 1.22*i }
 val arcAngle     = arrayOf(1.358696, 1.358696, 0.424201, 0.0, 1.358696, 1.358696, 0.424201, 0.0)
 val arcAngle1500 = arrayOf(0.424201, 0.0, 1.358696, 1.358696, 0.424201, 0.0, 1.358696, 1.358696)
 
