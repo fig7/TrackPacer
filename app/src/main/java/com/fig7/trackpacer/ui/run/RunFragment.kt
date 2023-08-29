@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.Spinner
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.fig7.trackpacer.EditTimeDialog
@@ -16,6 +17,19 @@ import com.fig7.trackpacer.MainActivity
 import com.fig7.trackpacer.PacingStatus
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.databinding.FragmentRunBinding
+
+val RTMap = mapOf(
+    "rt_400m_l1"  to arrayOf(R.string.laps_400, R.string.empty, R.string.empty, R.drawable.rt_400_l1),
+    "rt_800m_l1"  to arrayOf(R.string.laps_800, R.string.ll_2, R.string.empty, R.drawable.rt_400_l1),
+    "rt_1200m_l1" to arrayOf(R.string.laps_1200, R.string.ll_3, R.string.empty, R.drawable.rt_400_l1),
+    "rt_1500m_l1" to arrayOf(R.string.laps_1500, R.string.fl_300m, R.string.ll_4, R.drawable.rt_1500_l1),
+    "rt_1500m_l2" to arrayOf(R.string.laps_1500, R.string.fl_300m, R.string.ll_4, R.drawable.rt_1500_l2),
+    "rt_1500m_l3" to arrayOf(R.string.laps_1500, R.string.fl_300m, R.string.ll_4, R.drawable.rt_1500_l3),
+    "rt_1500m_l4" to arrayOf(R.string.laps_1500, R.string.fl_300m, R.string.ll_4, R.drawable.rt_1500_l4),
+    "rt_1500m_l5" to arrayOf(R.string.laps_1500, R.string.fl_300m, R.string.ll_4, R.drawable.rt_1500_l5),
+    "rt_1500m_l6" to arrayOf(R.string.laps_1500, R.string.fl_300m, R.string.ll_4, R.drawable.rt_1500_l6),
+    "rt_1500m_l7" to arrayOf(R.string.laps_1500, R.string.fl_300m, R.string.ll_4, R.drawable.rt_1500_l7),
+    "rt_1500m_l8" to arrayOf(R.string.laps_1500, R.string.fl_300m, R.string.ll_4, R.drawable.rt_1500_l8))
 
 class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private var binding: FragmentRunBinding? = null
@@ -63,6 +77,27 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         if (timeIndex != -1) spinnerTime.setSelection(timeIndex)
     }
 
+    private fun updateTrackOverlay(runDistance: String, runLane: String) {
+        val overlayDesc  = "rt_" + runDistance + "_l" + runLane
+        val overlayArray = RTMap[overlayDesc]!!
+        val runView = binding!!
+
+        val labelSF = runView.labelStartFinish
+        labelSF.text = getString(R.string.label_start, runDistance)
+
+        val lapCounter = runView.labelLaps
+        lapCounter.text = getString(overlayArray[0])
+
+        val lapDesc1 = runView.labelLapDesc1
+        lapDesc1.text = getString(overlayArray[1])
+
+        val lastDesc2 = runView.labelLapDesc2
+        lastDesc2.text = getString(overlayArray[2])
+
+        val trackOverlay = runView.runningTrackOverlay
+        trackOverlay.setImageDrawable(ContextCompat.getDrawable(requireContext(), overlayArray[3]))
+    }
+
     private fun updatePacingStatus(pacingStatus: PacingStatus) {
         val runView = binding!!
         val pacingIcon = runView.pacingStatus
@@ -100,7 +135,9 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         val spinnerLaneAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, laneArray)
         spinnerLaneAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerLane.adapter = spinnerLaneAdapter
+
         savedInstanceState?.run { val spinnerLanePos = getInt("SP_LANE"); spinnerLane.setSelection(spinnerLanePos)  }
+        spinnerLane.onItemSelectedListener = this
 
         spinnerTime = runView.spinnerTime
         val spinnerTimeAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.timeMap[spinnerDistance.selectedItem.toString()]!!)
@@ -191,7 +228,10 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         val runDistance = spinnerDistance.selectedItem.toString()
+        val runLane = spinnerLane.selectedItem.toString()
+
         updateTimeSpinner(runDistance)
+        updateTrackOverlay(runDistance, runLane)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {

@@ -238,25 +238,37 @@
       android:layout_weight="1">
 
       <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/label_start_finish"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="start"
 
         android:textColor="?android:textColorPrimary"
-        android:textSize="18sp"
-        android:text="@string/label_start"/>
+        android:textSize="18sp"/>
 
       <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <ImageView
+          android:id="@+id/running_track"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:contentDescription="@string/start_and_finish"
-          android:src="@drawable/running_track_400_1"
 
-          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent"
+
+          android:src="@drawable/running_track"/>
+
+
+        <ImageView
+          android:id="@+id/running_track_overlay"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:contentDescription="@string/start_and_finish2"
+
+          app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintTop_toTopOf="parent"/>
 
         <LinearLayout
@@ -269,34 +281,30 @@
           app:layout_constraintTop_toTopOf="parent"
           app:layout_constraintBottom_toBottomOf="parent">
 
-        <TextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:gravity="center_horizontal"
+          <TextView
+            android:id="@+id/label_laps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
 
-          android:textColor="?android:textColorPrimary"
-          android:textSize="18sp"
-
-          android:text="@string/laps_1500" />
+            android:textColor="?android:textColorPrimary"
+            android:textSize="18sp"/>
 
           <TextView
+            android:id="@+id/label_lap_desc1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
             android:textColor="?android:textColorPrimary"
-            android:textSize="18sp"
-
-            android:text="First lap is 300m" />
+            android:textSize="18sp"/>
 
           <TextView
+            android:id="@+id/label_lap_desc2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
             android:textColor="?android:textColorPrimary"
-            android:textSize="18sp"
-
-            android:text="Last lap is lap 4" />
-
+            android:textSize="18sp"/>
         </LinearLayout>
       </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
