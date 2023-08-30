@@ -45,6 +45,25 @@ val runMultiplierMile = Array(8) { i ->
     (8.0*Math.PI*r + 675.12 + 9.34)/1609.34
 }
 
+fun distanceFor(runDist: String, runLane: Int): Double {
+    val runLaneIndex = runLane - 1
+    return when (runDist) {
+        "1500m" -> {
+            // Special case, 1500m is 3.75 laps
+            distanceMap[runDist]!! * runMultiplier1500[runLaneIndex]
+        }
+
+        "1 mile" -> {
+            // Special case, 1 mile is 4 laps + 9.34m
+            distanceMap[runDist]!! * runMultiplierMile[runLaneIndex]
+        }
+
+        else -> {
+            distanceMap[runDist]!! * runMultiplier[runLaneIndex]
+        }
+    }
+}
+
 class WaypointCalculator {
     private lateinit var waypointList: Array<Double>
     private lateinit var waypointArcAngle: Array<Double>

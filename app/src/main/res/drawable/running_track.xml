@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
   android:width="360dp"
-  android:height="192dp"
+  android:height="199dp"
   android:viewportWidth="360"
-  android:viewportHeight="192">
+  android:viewportHeight="199">
 
   <group
     android:scaleX="2.0"
-    android:scaleY="2.0">
+    android:scaleY="2.0"
+    android:translateY="7.0">
 
     <path
       android:pathData="M46.26,4.88 A41.38,41.38,0,1,0,46.26,87.64"

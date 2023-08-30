@@ -11,17 +11,17 @@
     android:translateY="7.0">
 
     <path
-      android:pathData="M128.65,83.37 A2,2,0,1,1,132.65,83.37 A2,2,0,1,1,128.65,83.37"
+      android:pathData="M119.31,91.91 A2,2,0,1,1,123.31,91.91 A2,2,0,1,1,119.31,91.91"
       android:fillColor="#00FF00"/>
 
     <path
       android:pathData="M136.64,78.00 A36,36,0,0,0,160.64,56.50"
-      android:strokeWidth="1.0"
+      android:strokeWidth="1"
       android:strokeColor="#0000FF"/>
 
     <path
       android:pathData="M160.64,56.50 L158.00,57.50"
-      android:strokeWidth="1.0"
+      android:strokeWidth="1"
       android:strokeColor="#0000FF"/>
 
     <path
@@ -30,7 +30,7 @@
       android:strokeColor="#0000FF"/>
 
     <path
-      android:pathData="M127.65,83.37 A3,3,0,1,1,133.65,83.37 A3,3,0,1,1,127.65,83.37"
+      android:pathData="M127.65,91.91 A3,3,0,1,1,133.65,91.91 A3,3,0,1,1,127.65,91.91"
       android:strokeWidth="2.0"
       android:strokeColor="#FF0000"/>
   </group>
