@@ -224,7 +224,7 @@
             app:layout_constraintDimensionRatio="1:1"
 
             android:contentDescription="@string/content_edit_profile"
-            style="@style/disabled_edit_style"/>
+            style="@style/help_style"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
       </LinearLayout>
     </LinearLayout>
