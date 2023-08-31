@@ -12,12 +12,14 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.activityViewModels
 import com.fig7.trackpacer.EditTimeDialog
 import com.fig7.trackpacer.MainActivity
 import com.fig7.trackpacer.PacingStatus
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.databinding.FragmentRunBinding
 import com.fig7.trackpacer.distanceFor
+import com.fig7.trackpacer.vm.RunViewModel
 
 val RTMap = mapOf(
     "rt_400m_l1"   to arrayOf(R.string.laps_400, R.string.empty, R.string.empty, R.drawable.rt_400_l1),
@@ -120,9 +122,10 @@ val RTMap = mapOf(
     "rt_1 mile_l8" to arrayOf(R.string.laps_mile, R.string.fl_mile, R.string.ll_4, R.drawable.rt_mile_l8))
 
 class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
-    private var binding: FragmentRunBinding? = null
     private lateinit var afm: FragmentManager
+    private val runViewModel: RunViewModel by activityViewModels()
 
+    private var binding: FragmentRunBinding? = null
     private lateinit var spinnerDistance: Spinner
     private lateinit var spinnerLane: Spinner
     private lateinit var spinnerTime: Spinner
@@ -155,17 +158,20 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         editButton.isClickable = enabled
     }
 
-    private fun updateTimeSpinner(runDistance: String, timeIndex: Int = -1) {
-        val mainActivity = activity as MainActivity
-        val dataManager = mainActivity.dataManager
+    private fun updateTimeSpinner(timeIndex: Int = -1) {
+        val dataManager = runViewModel.dataManager
+        val runDist = spinnerDistance.selectedItem.toString()
 
-        val spinnerTimeAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, dataManager.timeMap[runDistance]!!)
+        val spinnerTimeAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, dataManager.timeMap[runDist]!!)
         spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerTime.adapter = spinnerTimeAdapter
         if (timeIndex != -1) spinnerTime.setSelection(timeIndex)
     }
 
-    private fun updateTrackOverlay(runDist: String, runLane: String) {
+    private fun updateTrackOverlay() {
+        val runDist = spinnerDistance.selectedItem.toString()
+        val runLane = spinnerLane.selectedItem.toString()
+
         val overlayDesc  = "rt_" + runDist + "_l" + runLane
         val overlayArray = RTMap[overlayDesc]!!
         val runView = binding!!
@@ -213,7 +219,7 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         afm = mainActivity.supportFragmentManager
 
         val fragmentContext = requireContext()
-        val dataManager     = mainActivity.dataManager
+        val dataManager     = runViewModel.dataManager
         val runView         = binding!!
 
         val timerView = runView.textTime
@@ -240,7 +246,11 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         val spinnerTimeAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.timeMap[spinnerDistance.selectedItem.toString()]!!)
         spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerTime.adapter = spinnerTimeAdapter
+
         savedInstanceState?.run { spinnerTime.setSelection(getInt("SP_TIME")) }
+        runViewModel.selectedTime.observe(viewLifecycleOwner) { newIndex: Int ->
+            updateTimeSpinner(newIndex)
+        }
 
         spinnerProfile = runView.spinnerProfile
         val profileArray: Array<String> = resources.getStringArray(R.array.profile_array)
@@ -265,6 +275,13 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         editButton = runView.buttonTime
         editButton.setOnClickListener {
             val dialog = EditTimeDialog.newDialog(spinnerTime.selectedItem.toString(), dataManager.timeMap[spinnerDistance.selectedItem.toString()]!!, "EDIT_TIME_DIALOG")
+            parentFragmentManager.setFragmentResultListener("EDIT_TIME_DIALOG", this) { requestKey: String, result: Bundle ->
+                parentFragmentManager.clearFragmentResult(requestKey)
+
+                result.putString("EditDist", spinnerDistance.selectedItem.toString())
+                afm.setFragmentResult(requestKey, result)
+        }
+
             dialog.show(parentFragmentManager, "EDIT_TIME_DIALOG")
         }
 
@@ -324,11 +341,8 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        val runDistance = spinnerDistance.selectedItem.toString()
-        val runLane = spinnerLane.selectedItem.toString()
-
-        updateTimeSpinner(runDistance)
-        updateTrackOverlay(runDistance, runLane)
+        updateTimeSpinner()
+        updateTrackOverlay()
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {

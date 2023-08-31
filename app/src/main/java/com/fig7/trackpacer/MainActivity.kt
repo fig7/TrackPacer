@@ -13,6 +13,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
@@ -20,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.fig7.trackpacer.databinding.ActivityMainBinding
+import com.fig7.trackpacer.vm.RunViewModel
 
 // States
 // 1. Initial:   NotPacing                          Stop: Disabled Play:  Enabled
@@ -90,10 +92,12 @@ import com.fig7.trackpacer.databinding.ActivityMainBinding
 // And buttons to delete (We auto save the workout) and Home. Or just add delete button. Can play again if you want.
 // Perhaps just add another button row. Delete and home. Trash can + home:
 
-// Change stop to Home, when stopped. Yesh. Just do deleting from within history.
+// Change stop to Home, when stopped. Yes. Just do deleting from within history.
 
 class MainActivity : AppCompatActivity() {
-    lateinit var dataManager: DataManager
+    private val runViewModel: RunViewModel by viewModels()
+
+    // Move to pacing view model?
     var pacingStatus = PacingStatus.NotPacing
 
     private lateinit var binding: ActivityMainBinding
@@ -168,6 +172,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if(!runViewModel.dataManagerOK) {
+            val dialog = DataErrorDialog.newDialog("initializing", true)
+            dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -181,13 +190,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        dataManager = DataManager(filesDir)
-        try {
-            dataManager.initDistances(resources.getStringArray(R.array.distance_array))
-        } catch (_: Exception) {
-            val dialog = DataErrorDialog.newDialog("initializing", true)
-            dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
-        }
 
         val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
         registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), receiverFlags )
@@ -197,7 +199,7 @@ class MainActivity : AppCompatActivity() {
             runLane     = bundle.getInt("RUN_LANE")
             runTime     = bundle.getDouble("RUN_TIME")
 
-            binding.navView.visibility = View.GONE;
+            binding.navView.visibility = View.GONE
             beginPacing()
         }
 
@@ -335,21 +337,22 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager.setFragmentResultListener("EDIT_TIME_DIALOG", this) { _: String, bundle: Bundle ->
             try {
-                val runDistance = "400m" // spinnerDistance.selectedItem.toString()
+                val dataManager = runViewModel.dataManager
+                val runDist = bundle.getString("EditDist")!!
                 when (EditResult.values()[bundle.getInt("EditResult")]) {
                     EditResult.Delete -> {
-                        val newIndex = dataManager.deleteTime(runDistance, bundle.getString("EditTime"))
-                        // updateTimeSpinner(runDistance, newIndex)
+                        val newIndex = dataManager.deleteTime(runDist, bundle.getString("EditTime"))
+                        runViewModel.selectTime(newIndex)
                     }
 
                     EditResult.Add -> {
-                        val newIndex = dataManager.addTime(runDistance, bundle.getString("EditTime"))
-                        // updateTimeSpinner(runDistance, newIndex)
+                        val newIndex = dataManager.addTime(runDist, bundle.getString("EditTime"))
+                        runViewModel.selectTime(newIndex)
                     }
 
                     EditResult.Set -> {
-                        val newIndex = dataManager.replaceTime(runDistance, bundle.getString("OrigTime"), bundle.getString("EditTime"))
-                        // updateTimeSpinner(runDistance, newIndex)
+                        val newIndex = dataManager.replaceTime(runDist, bundle.getString("OrigTime"), bundle.getString("EditTime"))
+                        runViewModel.selectTime(newIndex)
                     }
 
                     EditResult.Cancel -> {}
