@@ -45,5 +45,12 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+
+    <activity
+      android:name=".PacingActivity"
+      android:exported="false"
+      android:screenOrientation="portrait"
+      tools:ignore="LockedOrientationActivity">
+    </activity>
   </application>
 </manifest>

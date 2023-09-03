@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/pacing_navigation"
+  app:startDestination="@+id/navigation_pace">
+
+  <fragment
+    android:id="@+id/navigation_pace"
+    android:name="com.fig7.trackpacer.ui.pace.PaceFragment"
+    android:label="@string/title_pace"
+    tools:layout="@layout/fragment_pace" />
+</navigation>

@@ -20,6 +20,19 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions += "tier"
+    productFlavors {
+        create("free") {
+            dimension = "tier"
+            applicationId = "com.fig7.trackpacer"
+        }
+
+        create("pro") {
+            dimension = "tier"
+            applicationId = "com.fig7.trackpacer.pro"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true

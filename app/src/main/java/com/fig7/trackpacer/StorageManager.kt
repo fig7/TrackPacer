@@ -3,7 +3,7 @@ package com.fig7.trackpacer
 import java.io.File
 import java.io.IOException
 
-class DataManager(filesDir: File) {
+class StorageManager(filesDir: File) {
     private val dataDir: File
 
     lateinit var distanceArray: Array<String>

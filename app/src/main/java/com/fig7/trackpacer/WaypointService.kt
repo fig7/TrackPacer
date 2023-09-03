@@ -96,7 +96,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         fun getService(): WaypointService = this@WaypointService
     }
 
-    fun beginPacing(runDist: String, runTime: Double, runLane: Int): Boolean {
+    fun beginPacing(runDist: String, runLane: Int, runTime: Double): Boolean {
         clipIndexList = clipMap[runDist]!!
         waypointCalculator.initRun(runDist, runTime, runLane)
 

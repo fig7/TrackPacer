@@ -9,12 +9,14 @@
   <string name="app_pacing">Run pacing in progress…</string>
   <string name="base_time_all">%1$s:%2$s:%3$s.%4$s</string>
   <string name="base_time_hms">%1$s:%2$s:%3$s</string>
+  <string name="base_time_mss">%1$s:%2$s.%3$s</string>
   <string name="base_time_ms">%1$s:%2$s</string>
   <string name="base_time_s">%1$s.%2$s</string>
   <string name="signed_time">%1$s%2$s</string>
   <string name="label_distance">Distance:</string>
   <string name="label_lane">Lane:</string>
   <string name="label_time">Time:</string>
+  <string name="label_target_time">Target time:</string>
   <string name="label_profile">Profile:</string>
   <string name="label_start">Start to Finish (%1$s):</string>
   <string name="nextup">Next up: %1$s</string>
@@ -36,8 +38,10 @@
   <string name="content_pacing_status">Pacing status</string>
   <string name="content_phone_status">Incoming call detection</string>
   <string name="content_edit_time">Edit time</string>
+
   <!-- Pro version <string name="content_edit_profile">Edit profile</string> -->
   <string name="content_edit_profile">Profile help</string>
+
   <string name="content_go">Start pacing</string>
   <string name="content_stop">Stop pacing</string>
 
@@ -80,4 +84,10 @@
   <string name="ll_25">Last lap is lap 25</string>
 
   <string name="empty"/>
+  <string name="title_pace">Pace</string>
+
+  <string name="pace_dist">%1$s in L%2$d</string>
+  <string name="pace_laps">(%1$s)</string>
+  <string name="pace_pace">(%1$s/km)</string>
+  <string name="label_pace_run">Distance run (on pace):</string>
 </resources>

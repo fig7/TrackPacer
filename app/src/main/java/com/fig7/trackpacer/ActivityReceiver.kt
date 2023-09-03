@@ -8,7 +8,7 @@ class ActivityReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context == null) { return }
 
-        val activity = context as MainActivity
+        val activity = context as PacingActivity
         activity.handleIncomingCall()
     }
 }

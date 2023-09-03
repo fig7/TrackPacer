@@ -1,5 +1,6 @@
 package com.fig7.trackpacer.ui.run
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,20 +9,21 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.Spinner
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
+import com.fig7.trackpacer.BuildConfig
 import com.fig7.trackpacer.EditTimeDialog
+import com.fig7.trackpacer.InfoDialog
 import com.fig7.trackpacer.MainActivity
-import com.fig7.trackpacer.PacingStatus
+import com.fig7.trackpacer.PacingActivity
 import com.fig7.trackpacer.R
+import com.fig7.trackpacer.data.StorageModel
 import com.fig7.trackpacer.databinding.FragmentRunBinding
 import com.fig7.trackpacer.distanceFor
-import com.fig7.trackpacer.vm.RunViewModel
 
-val RTMap = mapOf(
+val rtMap = mapOf(
     "rt_400m_l1"   to arrayOf(R.string.laps_400, R.string.empty, R.string.empty, R.drawable.rt_400_l1),
     "rt_400m_l2"   to arrayOf(R.string.laps_400, R.string.empty, R.string.empty, R.drawable.rt_400_l2),
     "rt_400m_l3"   to arrayOf(R.string.laps_400, R.string.empty, R.string.empty, R.drawable.rt_400_l3),
@@ -121,19 +123,43 @@ val RTMap = mapOf(
     "rt_1 mile_l7" to arrayOf(R.string.laps_mile, R.string.fl_mile, R.string.ll_4, R.drawable.rt_mile_l7),
     "rt_1 mile_l8" to arrayOf(R.string.laps_mile, R.string.fl_mile, R.string.ll_4, R.drawable.rt_mile_l8))
 
-class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
+private fun rtLaps(runDist: String, runLane: Int): Int {
+    val rtKey   = "rt_" + runDist + "_l" + runLane.toString()
+    val rtArray = rtMap[rtKey]!!
+    return rtArray[0]
+}
+
+private fun rtDesc1(runDist: String, runLane: Int): Int {
+    val rtKey   = "rt_" + runDist + "_l" + runLane.toString()
+    val rtArray = rtMap[rtKey]!!
+    return rtArray[1]
+}
+
+private fun rtDesc2(runDist: String, runLane: Int): Int {
+    val rtKey  = "rt_" + runDist + "_l" + runLane.toString()
+    val rtArray = rtMap[rtKey]!!
+    return rtArray[2]
+}
+
+private fun rtOverlay(runDist: String, runLane: Int): Int {
+    val rtKey  = "rt_" + runDist + "_l" + runLane.toString()
+    val rtArray = rtMap[rtKey]!!
+    return rtArray[3]
+}
+
+class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var afm: FragmentManager
-    private val runViewModel: RunViewModel by activityViewModels()
+    private val storageModel: StorageModel by activityViewModels()
+    private val runViewModel:  RunViewModel  by activityViewModels()
 
     private var binding: FragmentRunBinding? = null
-    private lateinit var spinnerDistance: Spinner
+    private lateinit var spinnerDist: Spinner
     private lateinit var spinnerLane: Spinner
     private lateinit var spinnerTime: Spinner
     private lateinit var spinnerProfile: Spinner
 
-    private lateinit var editButton: ImageButton
-    private lateinit var goButton: ImageButton
-    private lateinit var stopButton: ImageButton
+    private lateinit var editTimeButton: ImageButton
+    private lateinit var editProfileButton: ImageButton
 
     private fun runTimeFromSpinner(): Double {
         val runTime = spinnerTime.selectedItem.toString()
@@ -141,26 +167,9 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         return 1000.0*(runTimeSplit[0].trim().toLong()*60.0 + runTimeSplit[1].toDouble())
     }
 
-    private fun enableSpinners(enabled: Boolean) {
-        spinnerDistance.isEnabled   = enabled
-        spinnerDistance.isClickable = enabled
-
-        spinnerLane.isEnabled   = enabled
-        spinnerLane.isClickable = enabled
-
-        spinnerTime.isEnabled   = enabled
-        spinnerTime.isClickable = enabled
-
-        spinnerProfile.isEnabled   = enabled
-        spinnerProfile.isClickable = enabled
-
-        editButton.isEnabled   = enabled
-        editButton.isClickable = enabled
-    }
-
     private fun updateTimeSpinner(timeIndex: Int = -1) {
-        val dataManager = runViewModel.dataManager
-        val runDist = spinnerDistance.selectedItem.toString()
+        val dataManager = storageModel.storageManager
+        val runDist = spinnerDist.selectedItem.toString()
 
         val spinnerTimeAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, dataManager.timeMap[runDist]!!)
         spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
@@ -169,47 +178,32 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     private fun updateTrackOverlay() {
-        val runDist = spinnerDistance.selectedItem.toString()
-        val runLane = spinnerLane.selectedItem.toString()
-
-        val overlayDesc  = "rt_" + runDist + "_l" + runLane
-        val overlayArray = RTMap[overlayDesc]!!
+        val runDist = spinnerDist.selectedItem.toString()
+        val runLane = spinnerLane.selectedItem.toString().toInt()
         val runView = binding!!
 
-        val runLaneInt= runLane.toInt()
-        val totalDist = distanceFor(runDist, runLaneInt)
+        val totalDist = distanceFor(runDist, runLane)
         val totalDistStr =
             if(runDist == "1 mile") {
-                if (runLaneInt == 1) runDist else String.format("%.2f miles", totalDist/1609.34)
+                if (runLane == 1) runDist else String.format("%.2f miles", totalDist/1609.34)
             } else {
-                if (runLaneInt == 1) String.format("%dm", totalDist.toInt()) else String.format("%.2fm", totalDist)
+                if (runLane == 1) String.format("%dm", totalDist.toInt()) else String.format("%.2fm", totalDist)
             }
 
         val labelSF = runView.labelStartFinish
         labelSF.text = getString(R.string.label_start, totalDistStr)
 
         val lapCounter = runView.labelLaps
-        lapCounter.text = getString(overlayArray[0])
+        lapCounter.text = getString(rtLaps(runDist, runLane))
 
         val lapDesc1 = runView.labelLapDesc1
-        lapDesc1.text = getString(overlayArray[1])
+        lapDesc1.text = getString(rtDesc1(runDist, runLane))
 
         val lastDesc2 = runView.labelLapDesc2
-        lastDesc2.text = getString(overlayArray[2])
+        lastDesc2.text = getString(rtDesc2(runDist, runLane))
 
         val trackOverlay = runView.runningTrackOverlay
-        trackOverlay.setImageDrawable(ContextCompat.getDrawable(requireContext(), overlayArray[3]))
-    }
-
-    private fun updatePacingStatus(pacingStatus: PacingStatus) {
-        val runView = binding!!
-        val pacingIcon = runView.pacingStatus
-        when (pacingStatus) {
-            PacingStatus.NotPacing    -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.stop_small))
-            PacingStatus.Pacing       -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.play_small))
-            PacingStatus.PacingPaused -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.pause_small))
-            else -> { }
-        }
+        trackOverlay.setImageDrawable(ContextCompat.getDrawable(requireContext(), rtOverlay(runDist, runLane)))
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -219,19 +213,16 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         afm = mainActivity.supportFragmentManager
 
         val fragmentContext = requireContext()
-        val dataManager     = runViewModel.dataManager
+        val dataManager     = storageModel.storageManager
         val runView         = binding!!
 
-        val timerView = runView.textTime
-        timerView.text = savedInstanceState?.getString("TIMER_VAL") ?: getString(R.string.base_time_all, "00", "00", "00", "000")
-
-        spinnerDistance = runView.spinnerDistance
+        spinnerDist = runView.spinnerDistance
         val spinnerDistanceAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.distanceArray)
         spinnerDistanceAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        spinnerDistance.adapter = spinnerDistanceAdapter
+        spinnerDist.adapter = spinnerDistanceAdapter
 
-        savedInstanceState?.run { val spinnerDistancePos = getInt("SP_DISTANCE"); spinnerDistance.setSelection(spinnerDistancePos)  }
-        spinnerDistance.onItemSelectedListener = this
+        savedInstanceState?.run { val spinnerDistancePos = getInt("SP_DISTANCE"); spinnerDist.setSelection(spinnerDistancePos)  }
+        spinnerDist.onItemSelectedListener = this
 
         spinnerLane = runView.spinnerLane
         val laneArray: Array<String> = resources.getStringArray(R.array.lane_array)
@@ -243,7 +234,7 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         spinnerLane.onItemSelectedListener = this
 
         spinnerTime = runView.spinnerTime
-        val spinnerTimeAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.timeMap[spinnerDistance.selectedItem.toString()]!!)
+        val spinnerTimeAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.timeMap[spinnerDist.selectedItem.toString()]!!)
         spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerTime.adapter = spinnerTimeAdapter
 
@@ -259,77 +250,55 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
         spinnerProfile.adapter = spinnerProfileAdapter
         savedInstanceState?.run { spinnerTime.setSelection(getInt("SP_PROFILE")) }
 
-        val nextUpLabel = runView.nextupLabel
-        nextUpLabel.text = savedInstanceState?.getString("NEXTUP_LABEL") ?: getString(R.string.nextup, "")
-
-        val nextUpProgress = runView.nextupProgress
-        nextUpProgress.progress = savedInstanceState?.getInt("NEXTUP_PROGRESS") ?: 0
-
-        val timeToLabel = runView.timetoLabel
-        timeToLabel.text = savedInstanceState?.getString("TIMETO_LABEL") ?: getString(R.string.timeto, "")
-
-        val timeToProgress = runView.timetoProgress
-        timeToProgress.progress = savedInstanceState?.getInt("TIMETO_PROGRESS") ?: 0
-
-        val pacingStatus = mainActivity.pacingStatus
-        editButton = runView.buttonTime
-        editButton.setOnClickListener {
-            val dialog = EditTimeDialog.newDialog(spinnerTime.selectedItem.toString(), dataManager.timeMap[spinnerDistance.selectedItem.toString()]!!, "EDIT_TIME_DIALOG")
+        editTimeButton = runView.buttonTime
+        editTimeButton.setOnClickListener {
+            val dialog = EditTimeDialog.newDialog(spinnerTime.selectedItem.toString(), dataManager.timeMap[spinnerDist.selectedItem.toString()]!!, "EDIT_TIME_DIALOG")
             parentFragmentManager.setFragmentResultListener("EDIT_TIME_DIALOG", this) { requestKey: String, result: Bundle ->
                 parentFragmentManager.clearFragmentResult(requestKey)
 
-                result.putString("EditDist", spinnerDistance.selectedItem.toString())
-                afm.setFragmentResult(requestKey, result)
+                result.putString("EditDist", spinnerDist.selectedItem.toString())
+                afm.setFragmentResult("EDIT_TIME", result)
         }
 
             dialog.show(parentFragmentManager, "EDIT_TIME_DIALOG")
         }
 
-        goButton = runView.buttonGo
-        goButton.setOnClickListener {
-            when (pacingStatus) {
-                PacingStatus.NotPacing    -> {
-                    val beginPacingBundle = Bundle()
-                    beginPacingBundle.putString("RUN_DISTANCE", spinnerDistance.selectedItem.toString())
-                    beginPacingBundle.putInt("RUN_LANE",        spinnerLane.selectedItem.toString().toInt())
-                    beginPacingBundle.putDouble("RUN_TIME",     runTimeFromSpinner())
-                    afm.setFragmentResult("BEGIN_PACING", beginPacingBundle)
-                }
-                PacingStatus.PacingPaused -> { /* mainActivity.resumePacing() */ }
-                PacingStatus.Pacing       -> { /* mainActivity.pausePacing(false) */ }
-                else                      -> throw IllegalStateException()
+        editProfileButton = runView.buttonProfile
+
+        @Suppress("KotlinConstantConditions")
+        if(BuildConfig.FLAVOR == "free") {
+            editProfileButton.setOnClickListener {
+                val dialog = InfoDialog.newDialog("Create profiles",
+                    "Profiles are a feature that allow you to incorporate changes to your pace. "
+                            +"Perhaps you want to run at a slower pace, or stop to recover, between fast intervals. Speed up and slow down, you decide when!\n\n"
+                            +"Profiles will only be available in the pro version of TrackPacer, which is coming soon...")
+
+                dialog.show(parentFragmentManager, "PROFILE_PRO_DIALOG")
             }
         }
 
-        stopButton = runView.buttonStop
-        stopButton.setOnClickListener {
-            /* mainActivity.stopPacing(false) */
-        }
+        val oymButton = runView.buttonOym
+        oymButton.setOnClickListener {
+            val bundle = Bundle()
+            val runDist = spinnerDist.selectedItem.toString()
+            bundle.putString("RunDist", runDist)
 
-        when (pacingStatus) {
-            PacingStatus.NotPacing -> {
-                goButton.setImageDrawable(AppCompatResources.getDrawable(fragmentContext, R.drawable.play))
-                goButton.isEnabled = true
-                goButton.isClickable = true
+            val runLane = spinnerLane.selectedItem.toString().toInt()
+            bundle.putInt("RunLane", runLane)
 
-                stopButton.setImageDrawable(AppCompatResources.getDrawable(fragmentContext, R.drawable.stop2))
-                stopButton.isEnabled = false
-                stopButton.isClickable = false
+            val runProf = spinnerProfile.selectedItem.toString()
+            bundle.putString("RunProf", runProf)
 
-                enableSpinners(true)
-            }
-            PacingStatus.PacingPaused -> {
-                goButton.setImageDrawable(AppCompatResources.getDrawable(fragmentContext, R.drawable.resume))
-                goButton.isEnabled = true
-                goButton.isClickable = true
+            val runLaps = rtLaps(runDist, runLane)
+            bundle.putString("RunLaps", getString(runLaps))
 
-                stopButton.setImageDrawable(AppCompatResources.getDrawable(fragmentContext, R.drawable.stop))
-                stopButton.isEnabled = true
-                stopButton.isClickable = true
+            val runTime = runTimeFromSpinner()
+            bundle.putDouble("RunTime", runTime)
 
-                enableSpinners(false)
-            }
-            else -> throw IllegalStateException()
+            val intent = Intent(requireContext(), PacingActivity::class.java)
+            intent.putExtras(bundle)
+
+            startActivity(intent)
         }
 
         return runView.root
@@ -341,7 +310,10 @@ class RunFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        updateTimeSpinner()
+        if(p0 == spinnerDist) {
+            updateTimeSpinner()
+        }
+
         updateTrackOverlay()
     }
 
