@@ -70,18 +70,20 @@ class PaceFragment: Fragment() {
         timeLeft -= hrs * 3600000L
 
         val mins = timeLeft / 60000L
-        val minsStr = String.format("%02d", mins)
         timeLeft -= mins * 60000L
 
         val secs = timeLeft / 1000L
-        val secsStr = String.format("%02d", secs)
         timeLeft -= secs * 1000L
 
         val msStr = String.format("%02d", timeLeft/10L)
         return if(hrs > 0) {
             val hrsStr = String.format("%d", hrs)
+            val minsStr = String.format("%02d", mins)
+            val secsStr = String.format("%02d", secs)
             getString(R.string.base_time_all, hrsStr, minsStr, secsStr, msStr)
         } else {
+            val minsStr = String.format("%d", mins)
+            val secsStr = String.format("%02d", secs)
             getString(R.string.base_time_mss, minsStr, secsStr, msStr)
         }
     }
