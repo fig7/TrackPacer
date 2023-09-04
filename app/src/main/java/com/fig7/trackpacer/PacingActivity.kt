@@ -45,27 +45,15 @@ class PacingActivity : AppCompatActivity() {
             val runDist = pacingModel.runDist
             val runLane = pacingModel.runLane
             val runTime = pacingModel.runTime
-            var pacingStatus = pacingModel.pacingStatus
+            val pacingStatus = pacingModel.pacingStatus.value
             if (pacingStatus == PacingStatus.ServiceStart) {
                 if (waypointService.beginPacing(runDist, runLane, runTime)) {
-                    pacingStatus = PacingStatus.PacingStart
-
-                    /* stopButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.stop))
-                    stopButton.isEnabled = true
-                    stopButton.isClickable = true
-
-                    nextUpLabel.text = getString(R.string.nextup, "")
-                    nextUpProgress.progress = 0
-
-                    timeToLabel.text = getString(R.string.timeto, "")
-                    timeToProgress.progress = 0 */
-
+                    pacingModel.setPacingStatus(PacingStatus.PacingStart)
                     handler.postDelayed(runnable, 100)
                 }
             } else { // ServiceResume
                 if (waypointService.resumePacing(runDist, runTime, runLane, pacingModel.pausedTime)) {
-                    pacingStatus = PacingStatus.PacingResume
-
+                    pacingModel.setPacingStatus(PacingStatus.PacingResume)
                     handler.postDelayed(runnable, 100)
                 }
             }
@@ -106,27 +94,17 @@ class PacingActivity : AppCompatActivity() {
 
         mpPacingCancelled = MediaPlayer.create(this, R.raw.cancelled)
         mpPacingCancelled.setOnCompletionListener {
-            pacingModel.pacingStatus = PacingStatus.NotPacing
+            pacingModel.setPacingStatus(PacingStatus.NotPacing)
         }
 
         mpPacingComplete = MediaPlayer.create(this, R.raw.complete)
         mpPacingComplete.setOnCompletionListener {
-            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
-            goButton.isEnabled = true
-            goButton.isClickable = true
-
-            enableSpinners(true) */
+            pacingModel.setPacingStatus(PacingStatus.NotPacing)
         }
 
         mpPacingPaused = MediaPlayer.create(this, R.raw.paused)
         mpPacingPaused.setOnCompletionListener {
-            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume))
-            goButton.isEnabled = true
-            goButton.isClickable = true
-
-            stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop))
-            stopButton.isEnabled = true
-            stopButton.isClickable = true */
+            pacingModel.setPacingStatus(PacingStatus.PacingPaused)
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -145,6 +123,18 @@ class PacingActivity : AppCompatActivity() {
             beginPacing()
         }
 
+        supportFragmentManager.setFragmentResultListener("PAUSE_PACING", this) { _, _ ->
+            pausePacing(false)
+        }
+
+        supportFragmentManager.setFragmentResultListener("RESUME_PACING", this) { _, _ ->
+            resumePacing()
+        }
+
+        supportFragmentManager.setFragmentResultListener("STOP_PACING", this) { _, _ ->
+            stopPacing(false)
+        }
+
         val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
         registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), receiverFlags)
     }
@@ -157,96 +147,57 @@ class PacingActivity : AppCompatActivity() {
 
 
     private fun beginPacing() {
-        pacingModel.pacingStatus = PacingStatus.CheckPermissionStart
-
-        /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play2))
-        goButton.isEnabled = false
-        goButton.isClickable = false
-
-        enableSpinners(false) */
-
+        pacingModel.setPacingStatus(PacingStatus.CheckPermissionStart)
         checkNotificationsPermission()
     }
 
     private fun resumePacing() {
-        pacingModel.pacingStatus = PacingStatus.CheckPermissionResume
-
-        /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume2))
-        goButton.isEnabled = false
-        goButton.isClickable = false */
-
+        pacingModel.setPacingStatus(PacingStatus.CheckPermissionResume)
         checkNotificationsPermission()
     }
 
     private fun startService() {
-        pacingModel.pacingStatus = if (pacingModel.pacingStatus == PacingStatus.CheckPermissionStart) PacingStatus.ServiceStart else PacingStatus.ServiceResume
+        val pacingStatus = pacingModel.pacingStatus.value
+        pacingModel.setPacingStatus(if (pacingStatus == PacingStatus.CheckPermissionStart) PacingStatus.ServiceStart else PacingStatus.ServiceResume)
 
         val intent = Intent(this, WaypointService::class.java)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     private fun pausePacing(silent: Boolean) {
-        pacingModel.pacingStatus = PacingStatus.PacingPaused
-        // updatePacingStatus()
-
-        pacingModel.pausedTime = waypointService.elapsedTime()
-
         unbindService(connection)
         handler.removeCallbacks(runnable)
 
+        pacingModel.pausedTime = waypointService.elapsedTime()
         if (silent) {
-            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.resume))
-            goButton.isEnabled   = true
-            goButton.isClickable = true
-
-            stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop))
-            stopButton.isEnabled   = true
-            stopButton.isClickable = true */
+            pacingModel.setPacingStatus(PacingStatus.PacingPaused)
         } else {
-            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause2))
-            goButton.isEnabled   = false
-            goButton.isClickable = false
-
-            stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop2))
-            stopButton.isEnabled   = false
-            stopButton.isClickable = false */
-
+            pacingModel.setPacingStatus(PacingStatus.PacingPause)
             mpPacingPaused.start()
         }
     }
 
     private fun stopPacing(silent: Boolean) {
-        /* stopButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop2))
-        stopButton.isEnabled   = false
-        stopButton.isClickable = false */
-
-        if (silent) {
-            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
-            goButton.isEnabled   = true
-            goButton.isClickable = true
-
-            enableSpinners(true) */
-        } else {
-            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play2))
-            goButton.isEnabled   = false
-            goButton.isClickable = false */
-        }
-
-        var pacingStatus = pacingModel.pacingStatus
+        val pacingStatus = pacingModel.pacingStatus.value
         if ((pacingStatus == PacingStatus.Pacing) || (pacingStatus == PacingStatus.PacingStart)) {
             unbindService(connection)
             handler.removeCallbacks(runnable)
 
-            if (!silent) {
-                val mp = if (pacingStatus == PacingStatus.Pacing) mpPacingComplete else mpPacingCancelled
-                mp.start()
+            if (silent) {
+                pacingModel.setPacingStatus(PacingStatus.NotPacing)
+            } else if (pacingStatus == PacingStatus.Pacing) {
+                pacingModel.setPacingStatus(PacingStatus.PacingComplete)
+                mpPacingComplete.start()
+            } else {
+                pacingModel.setPacingStatus(PacingStatus.PacingCancel)
+                mpPacingCancelled.start()
             }
         } else if ((pacingStatus == PacingStatus.PacingPaused) && !silent) {
+            pacingModel.setPacingStatus(PacingStatus.PacingComplete)
             mpPacingComplete.start()
+        } else {
+            pacingModel.setPacingStatus(PacingStatus.NotPacing)
         }
-
-        pacingModel.pacingStatus = PacingStatus.NotPacing
-        // updatePacingStatus()
     }
 
     private fun checkNotificationsPermission() {
@@ -283,111 +234,31 @@ class PacingActivity : AppCompatActivity() {
         }
     }
 
-    private fun timeToString(timeInMS: Long): String {
-        var timeLeft = timeInMS
-
-        var hrs = timeLeft / 3600000L
-        timeLeft -= hrs * 3600000L
-
-        var mins = timeLeft / 60000L
-        timeLeft -= mins * 60000L
-
-        var secs = timeLeft / 1000L
-        timeLeft -= secs * 1000L
-
-        if (((hrs > 0L) || (mins > 0L)) && (timeLeft > 0L)) {
-            secs += 1L
-            if (secs == 60L) {
-                secs = 0L
-                mins += 1L
-                if (mins == 60L) {
-                    mins = 0L
-                    hrs += 1L
-                }
-            }
-        }
-
-        return if (hrs > 0L) {
-            val hrsStr  = String.format("%d", hrs)
-            val minsStr = String.format("%02d", mins)
-            val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_hms, hrsStr, minsStr, secsStr)
-        } else if (mins > 0L) {
-            val minsStr = String.format("%d", mins)
-            val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_ms, minsStr, secsStr)
-        } else {
-            val secsStr = String.format("%d", secs)
-            val msStr = String.format("%03d", timeLeft)
-            getString(R.string.base_time_s, secsStr, msStr)
-        }
-    }
-
-    private fun timeToFullString(timeInMS: Long): String {
-        var timeLeft = timeInMS
-
-        val hrs = timeLeft / 3600000L
-        val hrsStr = String.format("%02d", hrs)
-        timeLeft -= hrs * 3600000L
-
-        val mins = timeLeft / 60000L
-        val minsStr = String.format("%02d", mins)
-        timeLeft -= mins * 60000L
-
-        val secs = timeLeft / 1000L
-        val secsStr = String.format("%02d", secs)
-        timeLeft -= secs * 1000L
-
-        val msStr = String.format("%03d", timeLeft)
-        return getString(R.string.base_time_all, hrsStr, minsStr, secsStr, msStr)
-    }
-
     private fun handleTimeUpdate() {
-        var elapsedSgn = ""
-        var elapsedTime = waypointService.elapsedTime()
-
-        var pacingStatus = pacingModel.pacingStatus
-        if (elapsedTime < 0) {
-            elapsedSgn = "-"
-            elapsedTime = -elapsedTime
-        } else if ((pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume)) {
-            pacingStatus = PacingStatus.Pacing
-            // updatePacingStatus()
-
-            waypointService.beginRun(elapsedTime)
-
-            /* goButton.setImageDrawable(AppCompatResources.getDrawable(this@MainActivity, R.drawable.pause))
-            goButton.isClickable = true
-            goButton.isEnabled = true */
-        } else {
-            /* nextUpLabel.text = getString(R.string.nextup, waypointService.waypointName())
-            nextUpProgress.progress = (100.0*waypointService.waypointProgress(elapsedTime)).toInt() */
-
-            var remainingSgn = ""
-            var remainingTime = waypointService.timeRemaining(elapsedTime)
-            // timeToProgress.progress = min(100, (100.0 - 100.0*(remainingTime / runTimeFromSpinner())).toInt())
-
-            if (remainingTime < 0) {
-                remainingSgn = "-"
-                remainingTime = -remainingTime
+        val elapsedTime = waypointService.elapsedTime()
+        if (elapsedTime >= 0L) {
+            val pacingStatus = pacingModel.pacingStatus.value
+            if ((pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume)) {
+                pacingModel.setPacingStatus(PacingStatus.Pacing)
+                waypointService.beginRun(elapsedTime)
+            } else {
+                val name = waypointService.waypointName()
+                val progress = waypointService.waypointProgress(elapsedTime)
+                val remainingTime = waypointService.timeRemaining(elapsedTime)
+                pacingModel.setWaypointProgress(name, progress, remainingTime)
             }
-
-            val remainingStr = timeToString(remainingTime)
-            // timeToLabel.text = getString(R.string.timeto, getString(R.string.signed_time, remainingSgn, remainingStr))
         }
 
-        val elapsedStr = timeToFullString(elapsedTime)
-        // timerView.text = getString(R.string.signed_time, elapsedSgn, elapsedStr)
-
+        pacingModel.setElapsedTime(elapsedTime)
         handler.postDelayed(runnable, 100)
     }
 
     fun handleIncomingCall() {
-        when (pacingModel.pacingStatus) {
+        when (pacingModel.pacingStatus.value) {
             PacingStatus.NotPacing ->    return
             PacingStatus.PacingPaused -> return
-            PacingStatus.Pacing ->       return // pausePacing(true)
-            else ->                      return // stopPacing(true)
+            PacingStatus.Pacing ->       pausePacing(true)
+            else ->                      stopPacing(true)
         }
     }
 }

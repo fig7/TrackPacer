@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.fig7.trackpacer.PacingStatus
+import java.lang.Double.NaN
 
 class PacingModel: ViewModel() {
     var runDist = ""
@@ -11,13 +12,44 @@ class PacingModel: ViewModel() {
     var runProf = ""
     var runLane = -1
     var runTime = -1.0
-
     var pausedTime = -1L
 
-    // pacingStatus needs to be live, so it can be observed
-    var pacingStatus = PacingStatus.NotPacing
-    // From PacingCancel to NotPacing
-    // goButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.play))
-    // goButton.isEnabled = true
-    // goButton.isClickable = true
+    private val mutablePacingStatus = MutableLiveData<PacingStatus>()
+    val pacingStatus: LiveData<PacingStatus> get() = mutablePacingStatus
+
+    private val mutableElapsedTime = MutableLiveData<Long>()
+    val elapsedTime: LiveData<Long> get() = mutableElapsedTime
+
+    private var mutableWaypointName = MutableLiveData<String>()
+    val waypointName: LiveData<String> get() = mutableWaypointName
+
+    private val mutableWaypointProgress = MutableLiveData<Double>()
+    val waypointProgress: LiveData<Double> get() = mutableWaypointProgress
+
+    private val mutableWaypointRemaining = MutableLiveData<Long?>()
+    val waypointRemaining: LiveData<Long?> get() = mutableWaypointRemaining
+
+    init {
+        setPacingStatus(PacingStatus.NotPacing)
+    }
+
+    fun setPacingStatus(pacingStatus: PacingStatus) {
+        mutablePacingStatus.value = pacingStatus
+    }
+
+    fun setElapsedTime(elapsedTime: Long) {
+        mutableElapsedTime.value = elapsedTime
+    }
+
+    fun setWaypointProgress(waypointName: String, waypointProgress: Double, waypointRemaining: Long) {
+        mutableWaypointName.value      = waypointName
+        mutableWaypointProgress.value  = waypointProgress
+        mutableWaypointRemaining.value = waypointRemaining
+    }
+
+    fun resetWaypointProgress() {
+        mutableWaypointName.value      = ""
+        mutableWaypointProgress.value  = 0.0
+        mutableWaypointRemaining.value = null
+    }
 }

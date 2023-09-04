@@ -90,7 +90,7 @@
   <Space
     android:id="@+id/time_view_spacer"
     android:layout_width="match_parent"
-    android:layout_height="24dp"
+    android:layout_height="32dp"
 
     app:layout_constraintTop_toBottomOf="@id/time_view"/>
 
@@ -102,38 +102,35 @@
     android:paddingHorizontal="25dp"
 
     app:layout_constraintTop_toBottomOf="@id/time_view_spacer"
-    app:layout_constraintBottom_toTopOf="@id/running_button_view">
+    app:layout_constraintBottom_toTopOf="@+id/running_button_view">
 
     <LinearLayout
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical"
 
-      android:paddingBottom="20dp">
+      android:paddingBottom="30dp">
 
       <TextView
+        android:id="@+id/label_pacing_dist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
 
         android:textColor="?android:textColorPrimary"
-        android:textSize="18sp"
-        android:text="@string/label_distance"/>
+        android:textSize="18sp"/>
 
       <TextView
         android:id="@+id/pacing_dist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+
+        android:maxLines="1"
+        android:autoSizeTextType="uniform"
 
         android:textColor="?android:textColorPrimary"
-        android:textSize="36sp"/>
-
-      <TextView
-        android:id="@+id/pacing_laps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:textColor="?android:textColorPrimary"
-        android:textSize="36sp"/>
+        android:textSize="32sp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -141,28 +138,25 @@
       android:layout_height="wrap_content"
       android:orientation="vertical"
 
-      android:paddingBottom="20dp">
+      android:paddingBottom="30dp">
 
       <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
 
         android:textColor="?android:textColorPrimary"
         android:textSize="18sp"
-        android:text="@string/label_target_time"/>
+        android:text="@string/label_target_time2"/>
 
       <TextView
         android:id="@+id/pacing_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
 
-        android:textColor="?android:textColorPrimary"
-        android:textSize="32sp"/>
-
-      <TextView
-        android:id="@+id/pacing_pace"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:autoSizeTextType="uniform"
 
         android:textColor="?android:textColorPrimary"
         android:textSize="32sp"/>
@@ -174,18 +168,19 @@
       android:orientation="vertical">
 
       <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="start"
+        android:layout_gravity="center_horizontal"
 
         android:textColor="?android:textColorPrimary"
         android:textSize="18sp"
-        android:text="@string/label_profile"/>
+        android:text="@string/label_profile2"/>
 
       <TextView
         android:id="@+id/pacing_prof"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
 
         android:textColor="?android:textColorPrimary"
         android:textSize="32sp"/>
@@ -195,11 +190,9 @@
       android:id="@+id/progress_view"
       android:layout_width="match_parent"
       android:layout_height="0dp"
-      android:gravity="center_vertical"
       android:layout_weight="1"
-      android:orientation="vertical"
-
-      app:layout_constraintBottom_toTopOf="@id/running_button_view">
+      android:gravity="center_vertical"
+      android:orientation="vertical">
 
       <TextView
         android:id="@+id/dist_run_label"
@@ -264,11 +257,11 @@
   </LinearLayout>
 
   <LinearLayout
-    android:id="@+id/running_button_view"
+    android:id="@id/running_button_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:gravity="center"
+    android:gravity="center_horizontal"
 
     android:paddingTop="10dp"
 
