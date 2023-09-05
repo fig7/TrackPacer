@@ -32,6 +32,9 @@ class PacingModel: ViewModel() {
     private val mutableDistRun = MutableLiveData<Double>()
     val distRun: LiveData<Double> get() = mutableDistRun
 
+    private val mutableServiceReady = MutableLiveData<Boolean>()
+    val serviceReady: LiveData<Boolean> get() = mutableServiceReady
+
     init {
         setPacingStatus(PacingStatus.NotPacing)
     }
@@ -58,5 +61,9 @@ class PacingModel: ViewModel() {
         mutableWaypointName.value      = ""
         mutableWaypointProgress.value  = 0.0
         mutableWaypointRemaining.value = null
+    }
+
+    fun setServiceReady(serviceReady: Boolean) {
+        mutableServiceReady.value = serviceReady
     }
 }

@@ -42,6 +42,7 @@ class PacingActivity : AppCompatActivity() {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as WaypointService.LocalBinder
             waypointService = binder.getService()
+            pacingModel.setServiceReady(true)
 
             val runDist = pacingModel.runDist
             val runLane = pacingModel.runLane
@@ -81,6 +82,10 @@ class PacingActivity : AppCompatActivity() {
 
     private fun isPacing(pacingStatus: PacingStatus? = pacingModel.pacingStatus.value): Boolean {
         return ((pacingStatus == PacingStatus.Pacing) || (pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume))
+    }
+
+    private fun serviceReady(): Boolean {
+        return (pacingModel.serviceReady.value ?: false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,7 +164,7 @@ class PacingActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        if(isPacing()) {
+        if(isPacing() && serviceReady()) {
             handleTimeUpdate()
         }
     }
@@ -168,8 +173,7 @@ class PacingActivity : AppCompatActivity() {
         super.onDestroy()
 
         if (isPacing()) {
-            unbindService(serviceConnection)
-            handler.removeCallbacks(pacingRunnable)
+            unbindService()
         }
 
         if(isFinishing) {
@@ -205,13 +209,25 @@ class PacingActivity : AppCompatActivity() {
         bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
-    private fun pausePacing(silent: Boolean) {
+    private fun unbindService() {
         handler.removeCallbacks(pacingRunnable)
+        unbindService(serviceConnection)
 
+        pacingModel.setServiceReady(false)
+    }
+
+    private fun stopService() {
+        handler.removeCallbacks(pacingRunnable)
         unbindService(serviceConnection)
         stopService(serviceIntent)
 
+        pacingModel.setServiceReady(false)
+    }
+
+    private fun pausePacing(silent: Boolean) {
         pacingModel.pausedTime = waypointService.elapsedTime()
+        stopService()
+
         if (silent) {
             pacingModel.setPacingStatus(PacingStatus.PacingPaused)
         } else {
@@ -223,10 +239,7 @@ class PacingActivity : AppCompatActivity() {
     private fun stopPacing(silent: Boolean) {
         val pacingStatus = pacingModel.pacingStatus.value
         if (isPacing(pacingStatus)) {
-            handler.removeCallbacks(pacingRunnable)
-
-            unbindService(serviceConnection)
-            stopService(serviceIntent)
+            stopService()
 
             if (silent) {
                 pacingModel.setPacingStatus(PacingStatus.NotPacing)

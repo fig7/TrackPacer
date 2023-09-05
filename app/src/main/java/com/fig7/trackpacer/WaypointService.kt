@@ -69,7 +69,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
     private val wsBinder = LocalBinder()
 
     private var startRealtime = -1L
-    private var prevTime  = -1.0
+    private var prevTime      = -1.0
 
     private lateinit var mNM: NotificationManager
     private lateinit var audioManager: AudioManager
@@ -82,7 +82,13 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
     }
 
     private val startRunnable = Runnable {
+        beginRun()
         mpStart.start()
+    }
+
+    private val resumeRunnable = Runnable {
+        beginRun()
+        mpResume.start()
     }
 
     private lateinit var mpStart: MediaPlayer
@@ -104,7 +110,6 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
             prevTime = 0.0
             startRealtime = SystemClock.elapsedRealtime() + GoStartOffset
-
             handler.postDelayed(startRunnable, GoClipOffset)
             true
         } else {
@@ -120,7 +125,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         val res = audioManager.requestAudioFocus(focusRequest)
         return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
             startRealtime = SystemClock.elapsedRealtime() - resumeTime
-            mpResume.start()
+            resumeRunnable.run()
             true
         } else {
             stopSelf()
@@ -197,8 +202,13 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
             build()
         }
 
-        mpStart.setOnCompletionListener  { audioManager.abandonAudioFocusRequest(focusRequest); beginRun() }
-        mpResume.setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
+        mpStart.setOnCompletionListener {
+            audioManager.abandonAudioFocusRequest(focusRequest)
+        }
+
+        mpResume.setOnCompletionListener {
+            audioManager.abandonAudioFocusRequest(focusRequest)
+        }
 
         for( i in 0..<fL ) mpWaypoint[i].setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
         mpWaypoint[fL].setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest); wakeLock.release() }
