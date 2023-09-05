@@ -1,10 +1,7 @@
 package com.fig7.trackpacer
 
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentManager
-import com.fig7.trackpacer.data.PacingModel
 import com.fig7.trackpacer.databinding.ActivityCompletionBinding
 
 class CompletionActivity: AppCompatActivity() {
@@ -34,5 +31,9 @@ class CompletionActivity: AppCompatActivity() {
         }
 
         // Save state (via HistoryModel)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
     }
 }

@@ -75,7 +75,7 @@
 
     android:textColor="?android:textColorPrimary"
     android:textSize="42sp"
-    android:text="Pacing complete!"
+    android:text="Pacing result"
 
     android:maxLines="1"
     android:autoSizeTextType="uniform"/>
@@ -103,7 +103,7 @@
       android:layout_width="180dp"
       android:layout_height="80dp"
 
-      android:src="@drawable/baseline_close_red_48"
+      android:src="@drawable/baseline_delete_forever_48"
       android:contentDescription="@string/content_close"
       android:scaleType="centerInside"/>
 
