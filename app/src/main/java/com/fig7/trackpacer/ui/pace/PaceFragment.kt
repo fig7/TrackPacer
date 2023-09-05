@@ -23,8 +23,9 @@ import java.lang.Integer.min
 import kotlin.math.abs
 
 class PaceFragment: Fragment() {
-    private lateinit var afm: FragmentManager
     private var binding: FragmentPaceBinding? = null
+
+    private lateinit var afm: FragmentManager
     private val pacingModel: PacingModel by activityViewModels()
 
     private lateinit var distRun: TextView
@@ -190,7 +191,7 @@ class PaceFragment: Fragment() {
         timeToProgress = paceView.timetoProgress
         timeToProgress.progress = 0
 
-        pacingModel.waypointRemaining.observe(viewLifecycleOwner) { remainingTime: Long? ->
+        pacingModel.timeRemaining.observe(viewLifecycleOwner) { remainingTime: Long? ->
             if(remainingTime == null) {
                 distRun.text = ""
 

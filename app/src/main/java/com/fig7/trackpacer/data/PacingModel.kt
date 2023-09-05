@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.fig7.trackpacer.PacingStatus
-import java.lang.Double.NaN
 
 class PacingModel: ViewModel() {
     var runDist = ""
@@ -26,8 +25,8 @@ class PacingModel: ViewModel() {
     private val mutableWaypointProgress = MutableLiveData<Double>()
     val waypointProgress: LiveData<Double> get() = mutableWaypointProgress
 
-    private val mutableWaypointRemaining = MutableLiveData<Long?>()
-    val waypointRemaining: LiveData<Long?> get() = mutableWaypointRemaining
+    private val mutableTimeRemaining = MutableLiveData<Long?>()
+    val timeRemaining: LiveData<Long?> get() = mutableTimeRemaining
 
     private val mutableDistRun = MutableLiveData<Double>()
     val distRun: LiveData<Double> get() = mutableDistRun
@@ -51,16 +50,16 @@ class PacingModel: ViewModel() {
         mutableDistRun.value = distRun
     }
 
-    fun setWaypointProgress(waypointName: String, waypointProgress: Double, waypointRemaining: Long) {
+    fun setWaypointProgress(waypointName: String, waypointProgress: Double, timeRemaining: Long) {
         mutableWaypointName.value      = waypointName
         mutableWaypointProgress.value  = waypointProgress
-        mutableWaypointRemaining.value = waypointRemaining
+        mutableTimeRemaining.value     = timeRemaining
     }
 
     fun resetWaypointProgress() {
         mutableWaypointName.value      = ""
         mutableWaypointProgress.value  = 0.0
-        mutableWaypointRemaining.value = null
+        mutableTimeRemaining.value     = null
     }
 
     fun setServiceReady(serviceReady: Boolean) {

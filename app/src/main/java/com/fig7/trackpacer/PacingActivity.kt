@@ -22,7 +22,8 @@ import androidx.core.content.ContextCompat
 import com.fig7.trackpacer.data.PacingModel
 import com.fig7.trackpacer.databinding.ActivityPaceBinding
 
-class PacingActivity : AppCompatActivity() {
+
+class PacingActivity: AppCompatActivity() {
     private val pacingModel: PacingModel by viewModels()
 
     private lateinit var binding: ActivityPaceBinding
@@ -116,6 +117,19 @@ class PacingActivity : AppCompatActivity() {
         mpPacingComplete = MediaPlayer.create(this, R.raw.complete)
         mpPacingComplete.setOnCompletionListener {
             pacingModel.setPacingStatus(PacingStatus.NotPacing)
+
+            val resultBundle = Bundle()
+            resultBundle.putString("RunDist", pacingModel.runDist)
+            resultBundle.putString("RunProf", pacingModel.runProf)
+            resultBundle.putInt(   "RunLane", pacingModel.runLane)
+            resultBundle.putDouble("RunTime", pacingModel.runTime)
+
+            val intent = Intent(this, CompletionActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
+            intent.putExtras(resultBundle)
+
+            startActivity(intent)
+            finish()
         }
 
         mpPacingPaused = MediaPlayer.create(this, R.raw.paused)
@@ -172,12 +186,11 @@ class PacingActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        if (isPacing()) {
+        val pacing = isPacing()
+        if (pacing && isFinishing) {
+            stopService()
+        } else if (pacing) {
             unbindService()
-        }
-
-        if(isFinishing) {
-            stopService(serviceIntent)
         }
 
         unregisterReceiver(broadcastReceiver)

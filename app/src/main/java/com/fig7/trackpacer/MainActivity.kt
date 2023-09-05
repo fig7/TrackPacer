@@ -83,7 +83,7 @@ import com.fig7.trackpacer.ui.run.RunViewModel
 // Perhaps just add another button row. Delete and home. Trash can + home:
 // Or just done?
 
-class MainActivity : AppCompatActivity() {
+class MainActivity: AppCompatActivity() {
     private val storageModel: StorageModel by viewModels()
     private val runViewModel: RunViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding

@@ -1,7 +1,11 @@
 <resources>
+  <string name="empty"/>
   <string name="app_name">TrackPacer</string>
 
   <string name="title_run">Run</string>
+  <string name="title_pace">Pace</string>
+  <string name="title_completion">Completion</string>
+
   <string name="title_history">History</string>
   <string name="title_clips">Audio</string>
   <string name="title_settings">Settings</string>
@@ -53,6 +57,7 @@
   <string name="content_edit_hths">Time hundredths</string>
   <string name="content_time_add">Add time</string>
   <string name="content_time_set">Set time</string>
+  <string name="content_close">Close (without saving)</string>
 
   <string name="start_and_finish">Start to finish</string>
   <string name="start_and_finish2">Start to finish markers</string>
@@ -86,12 +91,11 @@
   <string name="ll_13">Last lap is lap 13</string>
   <string name="ll_25">Last lap is lap 25</string>
 
-  <string name="empty"/>
-  <string name="title_pace">Pace</string>
-
   <string name="pace_dist">%1$s (%2$s)</string>
   <string name="pace_pace">%1$s (%2$s/km)</string>
 
   <string name="label_pace_run">Distance run (on pace):</string>
   <string name="pace_dist_run">%1$.2fm</string>
+
+  <string name="save_result">Save</string>
 </resources>

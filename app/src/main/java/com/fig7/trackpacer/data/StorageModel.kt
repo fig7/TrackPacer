@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.fig7.trackpacer.StorageManager
 import com.fig7.trackpacer.R
 
-class StorageModel(application: Application) :AndroidViewModel(application) {
+class StorageModel(application: Application): AndroidViewModel(application) {
     val storageManager = StorageManager(application.filesDir)
     var storageDataOK = true
 
