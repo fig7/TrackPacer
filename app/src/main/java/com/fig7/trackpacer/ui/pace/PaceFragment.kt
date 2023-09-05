@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -33,6 +34,7 @@ class PaceFragment: Fragment() {
     private lateinit var timeToLabel: TextView
     private lateinit var timeToProgress: ProgressBar
 
+    private lateinit var setButton: Button
     private lateinit var goButton: ImageButton
     private lateinit var stopButton: ImageButton
 
@@ -202,6 +204,15 @@ class PaceFragment: Fragment() {
             }
         }
 
+        setButton = paceView.buttonSet
+        setButton.setOnClickListener {
+            val resultBundle = Bundle()
+            when (pacingModel.pacingStatus.value) {
+                PacingStatus.NotPacing -> afm.setFragmentResult("BEGIN_PACING", resultBundle)
+                else -> throw IllegalStateException()
+            }
+        }
+
         goButton = paceView.buttonGo
         goButton.setOnClickListener {
             val resultBundle = Bundle()
@@ -223,15 +234,21 @@ class PaceFragment: Fragment() {
 
             when(pacingStatus) {
                 PacingStatus.NotPacing -> {
-                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play))
-                    goButton.isEnabled = true; goButton.isClickable = true
+                    setButton.visibility = View.VISIBLE
+                    setButton.isEnabled = true; setButton.isClickable = true
+
+                    goButton.visibility = View.GONE
+                    goButton.isEnabled = false; goButton.isClickable = false
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
                     stopButton.isEnabled = false; stopButton.isClickable = false
                 }
 
                 PacingStatus.CheckPermissionStart -> {
-                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play2))
+                    setButton.visibility = View.VISIBLE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.GONE
                     goButton.isEnabled = false; goButton.isClickable = false
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
@@ -239,7 +256,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.ServiceStart -> {
-                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play2))
+                    setButton.visibility = View.VISIBLE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.GONE
                     goButton.isEnabled = false; goButton.isClickable = false
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
@@ -249,7 +269,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.PacingStart -> {
-                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play2))
+                    setButton.visibility = View.VISIBLE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.GONE
                     goButton.isEnabled = false; goButton.isClickable = false
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
@@ -257,6 +280,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.Pacing -> {
+                    setButton.visibility = View.GONE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.VISIBLE
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.pause))
                     goButton.isClickable = true; goButton.isEnabled = true
 
@@ -265,6 +292,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.PacingPause -> {
+                    setButton.visibility = View.GONE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.VISIBLE
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.pause2))
                     goButton.isEnabled = false; goButton.isClickable = false
 
@@ -273,6 +304,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.PacingPaused -> {
+                    setButton.visibility = View.GONE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.VISIBLE
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.resume))
                     goButton.isEnabled = true; goButton.isClickable = true
 
@@ -281,6 +316,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.CheckPermissionResume -> {
+                    setButton.visibility = View.GONE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.VISIBLE
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.resume2))
                     goButton.isEnabled = false; goButton.isClickable = false
 
@@ -289,6 +328,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.ServiceResume -> {
+                    setButton.visibility = View.GONE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.VISIBLE
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.resume2))
                     goButton.isEnabled = false; goButton.isClickable = false
 
@@ -297,6 +340,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.PacingResume -> {
+                    setButton.visibility = View.GONE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.VISIBLE
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.resume2))
                     goButton.isEnabled = false; goButton.isClickable = false
 
@@ -305,7 +352,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.PacingCancel -> {
-                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play2))
+                    setButton.visibility = View.VISIBLE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.GONE
                     goButton.isEnabled = false; goButton.isClickable = false
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
@@ -313,7 +363,10 @@ class PaceFragment: Fragment() {
                 }
 
                 PacingStatus.PacingComplete -> {
-                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play2))
+                    setButton.visibility = View.VISIBLE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.GONE
                     goButton.isEnabled = false; goButton.isClickable = false
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
