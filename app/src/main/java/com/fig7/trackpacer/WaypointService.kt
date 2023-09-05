@@ -128,9 +128,9 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         }
     }
 
-    fun beginRun(elapsedTime: Long) {
+    private fun beginRun() {
         val nextTime   = waypointCalculator.waypointTime()
-        val updateTime = (nextTime - elapsedTime.toDouble()).toLong()
+        val updateTime = (nextTime - elapsedTime().toDouble()).toLong()
         if (updateTime >= 0L)  handler.postDelayed(waypointRunnable, updateTime)
     }
 
@@ -140,6 +140,10 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
 
     fun timeRemaining(elapsedTime: Long): Long {
         return waypointCalculator.runTime() - elapsedTime
+    }
+
+    fun distOnPace(elapsedTime: Long): Double {
+        return waypointCalculator.distOnPace(elapsedTime)
     }
 
     fun waypointName(): String {
@@ -193,7 +197,8 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
             build()
         }
 
-        mpStart.setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
+        mpStart.setOnCompletionListener  { audioManager.abandonAudioFocusRequest(focusRequest); beginRun() }
+        mpResume.setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
 
         for( i in 0..<fL ) mpWaypoint[i].setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
         mpWaypoint[fL].setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest); wakeLock.release() }
@@ -217,13 +222,6 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
 
     override fun onBind(intent: Intent?): IBinder {
         return wsBinder
-    }
-
-    override fun onUnbind(intent: Intent?): Boolean {
-        super.onUnbind(intent)
-
-        stopSelf()
-        return false
     }
 
     override fun onAudioFocusChange(focusChange: Int) {

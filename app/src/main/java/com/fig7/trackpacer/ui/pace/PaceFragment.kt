@@ -18,6 +18,7 @@ import com.fig7.trackpacer.data.PacingModel
 import com.fig7.trackpacer.databinding.FragmentPaceBinding
 import com.fig7.trackpacer.distanceFor
 import com.fig7.trackpacer.timeFor
+import java.lang.Integer.min
 import kotlin.math.abs
 
 class PaceFragment: Fragment() {
@@ -25,6 +26,7 @@ class PaceFragment: Fragment() {
     private var binding: FragmentPaceBinding? = null
     private val pacingModel: PacingModel by activityViewModels()
 
+    private lateinit var distRun: TextView
     private lateinit var nextUpLabel: TextView
     private lateinit var nextUpProgress: ProgressBar
 
@@ -35,7 +37,8 @@ class PaceFragment: Fragment() {
     private lateinit var stopButton: ImageButton
 
     private fun timeToString(timeInMS: Long): String {
-        var timeLeft = timeInMS
+        var timeLeft = abs(timeInMS)
+        val sgnStr   = if (timeInMS < 0) "-" else ""
 
         var hrs = timeLeft / 3600000L
         timeLeft -= hrs * 3600000L
@@ -62,20 +65,21 @@ class PaceFragment: Fragment() {
             val hrsStr  = String.format("%d", hrs)
             val minsStr = String.format("%02d", mins)
             val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_hms, hrsStr, minsStr, secsStr)
+            getString(R.string.base_time_hms, sgnStr, hrsStr, minsStr, secsStr)
         } else if (mins > 0L) {
             val minsStr = String.format("%d", mins)
             val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_ms, minsStr, secsStr)
+            getString(R.string.base_time_ms, sgnStr, minsStr, secsStr)
         } else {
             val secsStr = String.format("%d", secs)
             val msStr = String.format("%03d", timeLeft)
-            getString(R.string.base_time_s, secsStr, msStr)
+            getString(R.string.base_time_s, sgnStr, secsStr, msStr)
         }
     }
 
     private fun timeToAlmostFullString(timeInMS: Long): String {
-        var timeLeft = timeInMS
+        var timeLeft = abs(timeInMS)
+        val sgnStr   = if (timeInMS < 0) "-" else ""
 
         val hrs = timeLeft / 3600000L
         timeLeft -= hrs * 3600000L
@@ -91,17 +95,17 @@ class PaceFragment: Fragment() {
             val hrsStr = String.format("%d", hrs)
             val minsStr = String.format("%02d", mins)
             val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_all, "", hrsStr, minsStr, secsStr, msStr)
+            getString(R.string.base_time_all, sgnStr, hrsStr, minsStr, secsStr, msStr)
         } else {
             val minsStr = String.format("%d", mins)
             val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_mss, minsStr, secsStr, msStr)
+            getString(R.string.base_time_mss, sgnStr, minsStr, secsStr, msStr)
         }
     }
 
     private fun timeToFullString(timeInMS: Long): String {
         var timeLeft = abs(timeInMS)
-        val sgnStr  = if (timeInMS < 0) "-" else ""
+        val sgnStr   = if (timeInMS < 0) "-" else ""
 
         val hrs = timeLeft / 3600000L
         val hrsStr = String.format("%02d", hrs)
@@ -126,8 +130,8 @@ class PaceFragment: Fragment() {
         val mainActivity = activity as PacingActivity
         afm = mainActivity.supportFragmentManager
 
-        val timerView = paceView.textTime
-        timerView.text = savedInstanceState?.getString("TIMER_VAL") ?: timeToFullString(0L)
+        val timerView = paceView.timeView
+        timerView.text = timeToFullString(0L)
         pacingModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime: Long ->
             timerView.text = timeToFullString(elapsedTime)
         }
@@ -161,17 +165,58 @@ class PaceFragment: Fragment() {
         val runTimeView = paceView.pacingTime
         runTimeView.text = getString(R.string.pace_pace, totalTimeStr, totalPaceStr)
 
+        distRun = paceView.distRun
+        distRun.text = ""
+
         nextUpLabel = paceView.nextupLabel
-        nextUpLabel.text = savedInstanceState?.getString("NEXTUP_LABEL") ?: getString(R.string.nextup, "")
+        nextUpLabel.text = getString(R.string.nextup, "")
+
+        pacingModel.waypointName.observe(viewLifecycleOwner) { waypointName: String ->
+            nextUpLabel.text = getString(R.string.nextup, waypointName)
+        }
 
         nextUpProgress = paceView.nextupProgress
-        nextUpProgress.progress = savedInstanceState?.getInt("NEXTUP_PROGRESS") ?: 0
+        nextUpProgress.progress = 0
+
+        pacingModel.waypointProgress.observe(viewLifecycleOwner) { progress: Double ->
+            nextUpProgress.progress = (100.0*progress).toInt()
+        }
 
         timeToLabel = paceView.timetoLabel
-        timeToLabel.text = savedInstanceState?.getString("TIMETO_LABEL") ?: getString(R.string.timeto, "")
+        timeToLabel.text = getString(R.string.timeto, "")
 
         timeToProgress = paceView.timetoProgress
-        timeToProgress.progress = savedInstanceState?.getInt("TIMETO_PROGRESS") ?: 0
+        timeToProgress.progress = 0
+
+        pacingModel.waypointRemaining.observe(viewLifecycleOwner) { remainingTime: Long? ->
+            if(remainingTime == null) {
+                distRun.text = ""
+
+                timeToLabel.text = getString(R.string.timeto, "")
+                timeToProgress.progress = 0
+            } else {
+                distRun.text = getString(R.string.pace_dist_run, pacingModel.distRun.value)
+
+                timeToLabel.text = getString(R.string.timeto, timeToString(remainingTime))
+                timeToProgress.progress = min(100, (100.0 - 100.0*(remainingTime / pacingModel.runTime)).toInt())
+            }
+        }
+
+        goButton = paceView.buttonGo
+        goButton.setOnClickListener {
+            val resultBundle = Bundle()
+            when (pacingModel.pacingStatus.value) {
+                PacingStatus.NotPacing    -> afm.setFragmentResult("BEGIN_PACING",  resultBundle)
+                PacingStatus.PacingPaused -> afm.setFragmentResult("RESUME_PACING", resultBundle)
+                PacingStatus.Pacing       -> afm.setFragmentResult("PAUSE_PACING",  resultBundle)
+                else                      -> throw IllegalStateException()
+            }
+        }
+
+        stopButton = paceView.buttonStop
+        stopButton.setOnClickListener {
+            afm.setFragmentResult("STOP_PACING",  Bundle())
+        }
 
         pacingModel.pacingStatus.observe(viewLifecycleOwner) { pacingStatus: PacingStatus ->
             val ourContext = context ?: return@observe
@@ -188,20 +233,35 @@ class PaceFragment: Fragment() {
                 PacingStatus.CheckPermissionStart -> {
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play2))
                     goButton.isEnabled = false; goButton.isClickable = false
+
+                    stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
+                    stopButton.isEnabled = false; stopButton.isClickable = false
                 }
 
                 PacingStatus.ServiceStart -> {
+                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play2))
+                    goButton.isEnabled = false; goButton.isClickable = false
+
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
                     stopButton.isEnabled = true; stopButton.isClickable = true
 
                     pacingModel.resetWaypointProgress()
                 }
 
-                PacingStatus.PacingStart ->  { }
-                PacingStatus.PacingResume -> { }
+                PacingStatus.PacingStart -> {
+                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.play2))
+                    goButton.isEnabled = false; goButton.isClickable = false
+
+                    stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
+                    stopButton.isEnabled = true; stopButton.isClickable = true
+                }
+
                 PacingStatus.Pacing -> {
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.pause))
                     goButton.isClickable = true; goButton.isEnabled = true
+
+                    stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
+                    stopButton.isEnabled = true; stopButton.isClickable = true
                 }
 
                 PacingStatus.PacingPause -> {
@@ -223,9 +283,23 @@ class PaceFragment: Fragment() {
                 PacingStatus.CheckPermissionResume -> {
                     goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.resume2))
                     goButton.isEnabled = false; goButton.isClickable = false
+
+                    stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
+                    stopButton.isEnabled = false; stopButton.isClickable = false
                 }
 
                 PacingStatus.ServiceResume -> {
+                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.resume2))
+                    goButton.isEnabled = false; goButton.isClickable = false
+
+                    stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
+                    stopButton.isEnabled = true; stopButton.isClickable = true
+                }
+
+                PacingStatus.PacingResume -> {
+                    goButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.resume2))
+                    goButton.isEnabled = false; goButton.isClickable = false
+
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
                     stopButton.isEnabled = true; stopButton.isClickable = true
                 }
@@ -248,57 +322,12 @@ class PaceFragment: Fragment() {
             }
         }
 
-        goButton = paceView.buttonGo
-        goButton.setOnClickListener {
-            val resultBundle = Bundle()
-            when (pacingModel.pacingStatus.value) {
-                PacingStatus.NotPacing    -> afm.setFragmentResult("BEGIN_PACING",  resultBundle)
-                PacingStatus.PacingPaused -> afm.setFragmentResult("RESUME_PACING", resultBundle)
-                PacingStatus.Pacing       -> afm.setFragmentResult("PAUSE_PACING",  resultBundle)
-                else                      -> throw IllegalStateException()
-            }
-        }
-
-        // Do live updates for go button
-        // No longer needed. When not pacing these items are not visible!
-        /* when (pacingStatus) {
-            PacingStatus.NotPacing -> {
-                goButton.setImageDrawable(AppCompatResources.getDrawable(fragmentContext, R.drawable.play))
-                goButton.isEnabled = true
-                goButton.isClickable = true
-
-                stopButton.setImageDrawable(AppCompatResources.getDrawable(fragmentContext, R.drawable.stop2))
-                stopButton.isEnabled = false
-                stopButton.isClickable = false
-
-                enableSpinners(true)
-            }
-            PacingStatus.PacingPaused -> {
-                goButton.setImageDrawable(AppCompatResources.getDrawable(fragmentContext, R.drawable.resume))
-                goButton.isEnabled = true
-                goButton.isClickable = true
-
-                stopButton.setImageDrawable(AppCompatResources.getDrawable(fragmentContext, R.drawable.stop))
-                stopButton.isEnabled = true
-                stopButton.isClickable = true
-
-                enableSpinners(false)
-            }
-            else -> throw IllegalStateException()
-        } */
-
-        stopButton = paceView.buttonStop
-        stopButton.setOnClickListener {
-            afm.setFragmentResult("STOP_PACING",  Bundle())
-        }
-
-        // Do live updates for stop button
-
         return paceView.root
     }
 
 
         // Potentially re-implementing this in the pace view is ok.
+    // Or just code it as a fragment? Yes, or just as a view?
     /* private fun updatePacingStatus(pacingStatus: PacingStatus) {
         val pacingView = binding!!
         val pacingIcon = pacingView.pacingStatus

@@ -34,10 +34,11 @@ class PacingActivity : AppCompatActivity() {
     private lateinit var mpPacingComplete: MediaPlayer
 
     private val handler  = Handler(Looper.getMainLooper())
-    private val runnable = Runnable { handleTimeUpdate() }
+    private val pacingRunnable = Runnable { handleTimeUpdate() }
     private var broadcastReceiver = ActivityReceiver()
 
-    private val connection = object : ServiceConnection {
+    private lateinit var serviceIntent: Intent
+    private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as WaypointService.LocalBinder
             waypointService = binder.getService()
@@ -49,14 +50,14 @@ class PacingActivity : AppCompatActivity() {
             if (pacingStatus == PacingStatus.ServiceStart) {
                 if (waypointService.beginPacing(runDist, runLane, runTime)) {
                     pacingModel.setPacingStatus(PacingStatus.PacingStart)
-                    handler.postDelayed(runnable, 100)
                 }
-            } else { // ServiceResume
+            } else if(pacingStatus == PacingStatus.ServiceResume) {
                 if (waypointService.resumePacing(runDist, runTime, runLane, pacingModel.pausedTime)) {
                     pacingModel.setPacingStatus(PacingStatus.PacingResume)
-                    handler.postDelayed(runnable, 100)
                 }
             }
+
+            handler.postDelayed(pacingRunnable, 100)
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
@@ -78,10 +79,20 @@ class PacingActivity : AppCompatActivity() {
         startService()
     }
 
+    private fun isPacing(pacingStatus: PacingStatus? = pacingModel.pacingStatus.value): Boolean {
+        return ((pacingStatus == PacingStatus.Pacing) || (pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         mNM = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        serviceIntent = Intent(this, WaypointService::class.java)
+
+        if(isPacing()) {
+            bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
+
         binding = ActivityPaceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -139,12 +150,42 @@ class PacingActivity : AppCompatActivity() {
         registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), receiverFlags)
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        handler.removeCallbacks(pacingRunnable)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if(isPacing()) {
+            handleTimeUpdate()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+
+        if (isPacing()) {
+            unbindService(serviceConnection)
+            handler.removeCallbacks(pacingRunnable)
+        }
+
+        if(isFinishing) {
+            stopService(serviceIntent)
+        }
 
         unregisterReceiver(broadcastReceiver)
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        val pacingStatus = pacingModel.pacingStatus.value
+        if(pacingStatus == PacingStatus.NotPacing) {
+            super.onBackPressed()
+        }
+    }
 
     private fun beginPacing() {
         pacingModel.setPacingStatus(PacingStatus.CheckPermissionStart)
@@ -160,13 +201,15 @@ class PacingActivity : AppCompatActivity() {
         val pacingStatus = pacingModel.pacingStatus.value
         pacingModel.setPacingStatus(if (pacingStatus == PacingStatus.CheckPermissionStart) PacingStatus.ServiceStart else PacingStatus.ServiceResume)
 
-        val intent = Intent(this, WaypointService::class.java)
-        bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        startService(serviceIntent)
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
     private fun pausePacing(silent: Boolean) {
-        unbindService(connection)
-        handler.removeCallbacks(runnable)
+        handler.removeCallbacks(pacingRunnable)
+
+        unbindService(serviceConnection)
+        stopService(serviceIntent)
 
         pacingModel.pausedTime = waypointService.elapsedTime()
         if (silent) {
@@ -179,9 +222,11 @@ class PacingActivity : AppCompatActivity() {
 
     private fun stopPacing(silent: Boolean) {
         val pacingStatus = pacingModel.pacingStatus.value
-        if ((pacingStatus == PacingStatus.Pacing) || (pacingStatus == PacingStatus.PacingStart)) {
-            unbindService(connection)
-            handler.removeCallbacks(runnable)
+        if (isPacing(pacingStatus)) {
+            handler.removeCallbacks(pacingRunnable)
+
+            unbindService(serviceConnection)
+            stopService(serviceIntent)
 
             if (silent) {
                 pacingModel.setPacingStatus(PacingStatus.NotPacing)
@@ -240,17 +285,19 @@ class PacingActivity : AppCompatActivity() {
             val pacingStatus = pacingModel.pacingStatus.value
             if ((pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume)) {
                 pacingModel.setPacingStatus(PacingStatus.Pacing)
-                waypointService.beginRun(elapsedTime)
             } else {
-                val name = waypointService.waypointName()
-                val progress = waypointService.waypointProgress(elapsedTime)
+                val distRun = waypointService.distOnPace(elapsedTime)
+                pacingModel.setDistRun(distRun)
+
+                val name          = waypointService.waypointName()
+                val progress      = waypointService.waypointProgress(elapsedTime)
                 val remainingTime = waypointService.timeRemaining(elapsedTime)
                 pacingModel.setWaypointProgress(name, progress, remainingTime)
             }
         }
 
         pacingModel.setElapsedTime(elapsedTime)
-        handler.postDelayed(runnable, 100)
+        handler.postDelayed(pacingRunnable, 100)
     }
 
     fun handleIncomingCall() {

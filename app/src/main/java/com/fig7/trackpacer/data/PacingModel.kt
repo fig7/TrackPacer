@@ -29,6 +29,9 @@ class PacingModel: ViewModel() {
     private val mutableWaypointRemaining = MutableLiveData<Long?>()
     val waypointRemaining: LiveData<Long?> get() = mutableWaypointRemaining
 
+    private val mutableDistRun = MutableLiveData<Double>()
+    val distRun: LiveData<Double> get() = mutableDistRun
+
     init {
         setPacingStatus(PacingStatus.NotPacing)
     }
@@ -39,6 +42,10 @@ class PacingModel: ViewModel() {
 
     fun setElapsedTime(elapsedTime: Long) {
         mutableElapsedTime.value = elapsedTime
+    }
+
+    fun setDistRun(distRun: Double) {
+        mutableDistRun.value = distRun
     }
 
     fun setWaypointProgress(waypointName: String, waypointProgress: Double, waypointRemaining: Long) {

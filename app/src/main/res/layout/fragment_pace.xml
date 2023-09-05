@@ -64,28 +64,20 @@
 
     app:layout_constraintTop_toBottomOf="@id/status_view"/>
 
-  <LinearLayout
+  <TextView
     android:id="@+id/time_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
 
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/status_view_spacer">
+    app:layout_constraintTop_toBottomOf="@id/status_view_spacer"
 
-    <TextView
-      android:id="@+id/text_time"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+    android:textColor="?android:textColorPrimary"
+    android:textSize="52sp"
 
-      android:textColor="?android:textColorPrimary"
-      android:textSize="50sp"
-      android:gravity="center"
-
-      android:maxLines="1"
-      android:autoSizeTextType="uniform"/>
-  </LinearLayout>
+    android:maxLines="1"
+    android:autoSizeTextType="uniform"/>
 
   <Space
     android:id="@+id/time_view_spacer"
@@ -115,7 +107,6 @@
         android:id="@+id/label_pacing_dist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
 
         android:textColor="?android:textColorPrimary"
         android:textSize="18sp"/>
@@ -124,7 +115,6 @@
         android:id="@+id/pacing_dist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
 
         android:maxLines="1"
         android:autoSizeTextType="uniform"
@@ -143,7 +133,6 @@
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
 
         android:textColor="?android:textColorPrimary"
         android:textSize="18sp"
@@ -153,7 +142,6 @@
         android:id="@+id/pacing_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
 
         android:maxLines="1"
         android:autoSizeTextType="uniform"
@@ -170,7 +158,6 @@
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
 
         android:textColor="?android:textColorPrimary"
         android:textSize="18sp"
@@ -180,7 +167,6 @@
         android:id="@+id/pacing_prof"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
 
         android:textColor="?android:textColorPrimary"
         android:textSize="32sp"/>
@@ -210,6 +196,10 @@
 
         android:textColor="?android:textColorPrimary"
         android:textSize="32sp"/>
+
+      <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp"/>
 
       <TextView
         android:id="@+id/nextup_label"

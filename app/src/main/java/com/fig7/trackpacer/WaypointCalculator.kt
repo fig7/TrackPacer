@@ -89,7 +89,7 @@ class WaypointCalculator {
     private var currentWaypoint = -1
     private var currentExtra    = -1.0
 
-    private var totalDistance = -1.0
+    private var totalDist = -1.0
     private var totalTime     = -1.0
     private var runLaneIndex  = -1
 
@@ -104,7 +104,7 @@ class WaypointCalculator {
     }
 
     fun waypointTime(): Double {
-        return (waypointDistance() * totalTime) / totalDistance
+        return (waypointDistance() * totalTime) / totalDist
     }
 
     private fun initRunParams(runDist: String, runTime: Double, runLane: Int) {
@@ -114,20 +114,20 @@ class WaypointCalculator {
         when (runDist) {
             "1500m" -> {
                 // Special case, 1500m is 3.75 laps
-                totalDistance = distanceMap[runDist]!! * runMultiplier1500[runLaneIndex]
+                totalDist = distanceMap[runDist]!! * runMultiplier1500[runLaneIndex]
                 totalTime = runTime * runMultiplier1500[runLaneIndex]
                 waypointArcAngle = arcAngle1500
             }
 
             "1 mile" -> {
                 // Special case, 1 mile is 4 laps + 9.34m
-                totalDistance = distanceMap[runDist]!! * runMultiplierMile[runLaneIndex]
+                totalDist = distanceMap[runDist]!! * runMultiplierMile[runLaneIndex]
                 totalTime = runTime * runMultiplierMile[runLaneIndex]
                 waypointArcAngle = arcAngle
             }
 
             else -> {
-                totalDistance = distanceMap[runDist]!! * runMultiplier[runLaneIndex]
+                totalDist = distanceMap[runDist]!! * runMultiplier[runLaneIndex]
                 totalTime = runTime * runMultiplier[runLaneIndex]
                 waypointArcAngle = arcAngle
             }
@@ -183,5 +183,9 @@ class WaypointCalculator {
 
     fun runTime(): Long {
         return totalTime.toLong()
+    }
+
+    fun distOnPace(elapsedTime: Long): Double {
+        return if(elapsedTime > totalTime) totalDist else (elapsedTime.toDouble()*totalDist)/totalTime
     }
 }
