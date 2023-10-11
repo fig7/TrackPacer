@@ -7,7 +7,7 @@
   tools:context=".ui.pace.PaceFragment">
 
   <LinearLayout
-    android:id="@+id/status_view"
+    android:id="@+id/pace_status_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -18,7 +18,7 @@
     app:layout_constraintTop_toTopOf="parent">
 
     <ImageView
-      android:id="@+id/pacing_status"
+      android:id="@+id/pace_pacing_status"
       android:layout_width="20dp"
       android:layout_height="20dp"
       android:layout_gravity="center"
@@ -31,7 +31,7 @@
       android:layout_height="match_parent"/>
 
     <ImageView
-      android:id="@+id/phone_status"
+      android:id="@+id/pace_phone_status"
       android:layout_width="24dp"
       android:layout_height="24dp"
       android:layout_gravity="center"
@@ -44,11 +44,10 @@
       android:layout_height="match_parent"/>
 
     <TextView
-      android:id="@+id/delay_setting"
+      android:id="@+id/pace_delay_setting"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
-      android:text="5.00"
 
       android:textColor="?android:textColorPrimary"
       android:textSize="18sp"/>
@@ -65,7 +64,7 @@
 
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/status_view"
+    app:layout_constraintTop_toBottomOf="@id/pace_status_view"
 
     android:textColor="?android:textColorPrimary"
     android:textSize="52sp"

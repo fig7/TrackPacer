@@ -132,17 +132,6 @@ class MainActivity: AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        val phoneIcon = findViewById<ImageView>(R.id.phone_status)
-        val phonePermission = (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(this, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
-
-        val delaySetting = findViewById<TextView>(R.id.delay_setting)
-        delaySetting.setText(R.string.start_delay)
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         /* outState.run {
             putInt("PACING_STATUS", pacingStatus.ordinal)

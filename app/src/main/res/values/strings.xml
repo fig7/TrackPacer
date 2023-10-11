@@ -98,4 +98,22 @@
   <string name="pace_dist_run">%1$.2fm</string>
 
   <string name="save_result">Save</string>
+
+  <string name="label_completion_pacing_on">Pacing on</string>
+  <string name="label_completion_dist">Distance run</string>
+  <string name="label_completion_prof">Profile</string>
+  <string name="label_completion_tgt_time">Target time</string>
+  <string name="label_completion_act_time">Actual time</string>
+  <string name="label_completion_pce_result">Pacing result</string>
+
+  <string name="completion_dist_label">Distance run (at \"%1$s\")</string>
+  <string name="completion_dist">%1$s (%2$s in L%3$d)</string>
+
+  <string name="completion_early">%1$s early</string>
+  <string name="completion_seconds_early">%1$s seconds early</string>
+
+  <string name="completion_late">%1$s late</string>
+  <string name="completion_seconds_late">%1$s seconds late</string>
+
+  <string name="label_completion_notes">Your notes:</string>
 </resources>

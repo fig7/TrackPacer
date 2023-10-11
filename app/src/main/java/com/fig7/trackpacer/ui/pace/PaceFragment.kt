@@ -1,14 +1,18 @@
 package com.fig7.trackpacer.ui.pace
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
@@ -17,10 +21,9 @@ import com.fig7.trackpacer.PacingStatus
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.PacingModel
 import com.fig7.trackpacer.databinding.FragmentPaceBinding
-import com.fig7.trackpacer.distanceFor
-import com.fig7.trackpacer.timeFor
+import com.fig7.trackpacer.util.timeToFullString
+import com.fig7.trackpacer.util.timeToString
 import java.lang.Integer.min
-import kotlin.math.abs
 
 class PaceFragment: Fragment() {
     private var binding: FragmentPaceBinding? = null
@@ -38,93 +41,7 @@ class PaceFragment: Fragment() {
     private lateinit var setButton: Button
     private lateinit var goButton: ImageButton
     private lateinit var stopButton: ImageButton
-
-    private fun timeToString(timeInMS: Long): String {
-        var timeLeft = abs(timeInMS)
-        val sgnStr   = if (timeInMS < 0) "-" else ""
-
-        var hrs = timeLeft / 3600000L
-        timeLeft -= hrs * 3600000L
-
-        var mins = timeLeft / 60000L
-        timeLeft -= mins * 60000L
-
-        var secs = timeLeft / 1000L
-        timeLeft -= secs * 1000L
-
-        if (((hrs > 0L) || (mins > 0L)) && (timeLeft > 0L)) {
-            secs += 1L
-            if (secs == 60L) {
-                secs = 0L
-                mins += 1L
-                if (mins == 60L) {
-                    mins = 0L
-                    hrs += 1L
-                }
-            }
-        }
-
-        return if (hrs > 0L) {
-            val hrsStr  = String.format("%d", hrs)
-            val minsStr = String.format("%02d", mins)
-            val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_hms, sgnStr, hrsStr, minsStr, secsStr)
-        } else if (mins > 0L) {
-            val minsStr = String.format("%d", mins)
-            val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_ms, sgnStr, minsStr, secsStr)
-        } else {
-            val secsStr = String.format("%d", secs)
-            val msStr = String.format("%03d", timeLeft)
-            getString(R.string.base_time_s, sgnStr, secsStr, msStr)
-        }
-    }
-
-    private fun timeToAlmostFullString(timeInMS: Long): String {
-        var timeLeft = abs(timeInMS)
-        val sgnStr   = if (timeInMS < 0) "-" else ""
-
-        val hrs = timeLeft / 3600000L
-        timeLeft -= hrs * 3600000L
-
-        val mins = timeLeft / 60000L
-        timeLeft -= mins * 60000L
-
-        val secs = timeLeft / 1000L
-        timeLeft -= secs * 1000L
-
-        val msStr = String.format("%02d", timeLeft/10L)
-        return if(hrs > 0) {
-            val hrsStr = String.format("%d", hrs)
-            val minsStr = String.format("%02d", mins)
-            val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_all, sgnStr, hrsStr, minsStr, secsStr, msStr)
-        } else {
-            val minsStr = String.format("%d", mins)
-            val secsStr = String.format("%02d", secs)
-            getString(R.string.base_time_mss, sgnStr, minsStr, secsStr, msStr)
-        }
-    }
-
-    private fun timeToFullString(timeInMS: Long): String {
-        var timeLeft = abs(timeInMS)
-        val sgnStr   = if (timeInMS < 0) "-" else ""
-
-        val hrs = timeLeft / 3600000L
-        val hrsStr = String.format("%02d", hrs)
-        timeLeft -= hrs * 3600000L
-
-        val mins = timeLeft / 60000L
-        val minsStr = String.format("%02d", mins)
-        timeLeft -= mins * 60000L
-
-        val secs = timeLeft / 1000L
-        val secsStr = String.format("%02d", secs)
-        timeLeft -= secs * 1000L
-
-        val msStr = String.format("%03d", timeLeft)
-        return getString(R.string.base_time_all, sgnStr, hrsStr, minsStr, secsStr, msStr)
-    }
+    private lateinit var pacingIcon: ImageView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentPaceBinding.inflate(inflater, container, false)
@@ -134,39 +51,22 @@ class PaceFragment: Fragment() {
         afm = mainActivity.supportFragmentManager
 
         val timerView = paceView.timeView
-        timerView.text = timeToFullString(0L)
+        timerView.text = timeToFullString(resources, 0L)
         pacingModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime: Long ->
-            timerView.text = timeToFullString(elapsedTime)
+            timerView.text = timeToFullString(resources, elapsedTime)
         }
 
-        val runDist = pacingModel.runDist
-        val runLane = pacingModel.runLane
-        val runTime = pacingModel.runTime
-        val totalDist = distanceFor(runDist, runLane)
-        val totalDistStr =
-            if(runDist == "1 mile") {
-                if(runLane == 1) runDist else String.format("%.2f miles", totalDist/1609.34)
-            } else {
-                if (runLane == 1) String.format("%dm", totalDist.toInt()) else String.format("%.2fm", totalDist)
-            }
-
-        val totalTime = timeFor(runDist, runLane, runTime)
-        val totalTimeStr = timeToAlmostFullString(totalTime.toLong())
-
-        val totalPace = (1000.0 * totalTime) / totalDist
-        val totalPaceStr = timeToString(totalPace.toLong())
-
         val runDistLabel = paceView.labelPacingDist
-        runDistLabel.text = getString(R.string.label_distance2, runLane)
+        runDistLabel.text = getString(R.string.label_distance2, pacingModel.runLane)
 
         val runDistView = paceView.pacingDist
-        runDistView.text = getString(R.string.pace_dist, totalDistStr, pacingModel.runLaps)
+        runDistView.text = getString(R.string.pace_dist, pacingModel.totalDistStr, pacingModel.runLaps)
 
         val runProfView = paceView.pacingProf
         runProfView.text = pacingModel.runProf
 
         val runTimeView = paceView.pacingTime
-        runTimeView.text = getString(R.string.pace_pace, totalTimeStr, totalPaceStr)
+        runTimeView.text = getString(R.string.pace_pace, pacingModel.totalTimeStr, pacingModel.totalPaceStr)
 
         distRun = paceView.distRun
         distRun.text = ""
@@ -200,7 +100,7 @@ class PaceFragment: Fragment() {
             } else {
                 distRun.text = getString(R.string.pace_dist_run, pacingModel.distRun.value)
 
-                timeToLabel.text = getString(R.string.timeto, timeToString(remainingTime))
+                timeToLabel.text = getString(R.string.timeto, timeToString(resources, remainingTime))
                 timeToProgress.progress = min(100, (100.0 - 100.0*(remainingTime / pacingModel.runTime)).toInt())
             }
         }
@@ -230,6 +130,7 @@ class PaceFragment: Fragment() {
             afm.setFragmentResult("STOP_PACING",  Bundle())
         }
 
+        pacingIcon = paceView.pacePacingStatus
         pacingModel.pacingStatus.observe(viewLifecycleOwner) { pacingStatus: PacingStatus ->
             val ourContext = context ?: return@observe
 
@@ -243,6 +144,8 @@ class PaceFragment: Fragment() {
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
                     stopButton.isEnabled = false; stopButton.isClickable = false
+
+                    pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.stop_small))
                 }
 
                 PacingStatus.CheckPermissionStart -> {
@@ -290,6 +193,8 @@ class PaceFragment: Fragment() {
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
                     stopButton.isEnabled = true; stopButton.isClickable = true
+
+                    pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.play_small))
                 }
 
                 PacingStatus.PacingPause -> {
@@ -314,6 +219,8 @@ class PaceFragment: Fragment() {
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
                     stopButton.isEnabled = true; stopButton.isClickable = true
+
+                    pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.pause_small))
                 }
 
                 PacingStatus.CheckPermissionResume -> {
@@ -379,17 +286,29 @@ class PaceFragment: Fragment() {
         return paceView.root
     }
 
+    override fun onResume() {
+        super.onResume()
 
-        // Potentially re-implementing this in the pace view is ok.
-    // Or just code it as a fragment? Yes, or just as a view?
-    /* private fun updatePacingStatus(pacingStatus: PacingStatus) {
-        val pacingView = binding!!
-        val pacingIcon = pacingView.pacingStatus
-        when (pacingStatus) {
+        val paceView = binding!!
+        val context = requireContext()
+
+        val phoneIcon = paceView.pacePhoneStatus
+        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
+
+        val delaySetting = paceView.paceDelaySetting
+        delaySetting.setText(R.string.start_delay)
+
+        when(pacingModel.pacingStatus.value) {
             PacingStatus.NotPacing    -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.stop_small))
             PacingStatus.Pacing       -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.play_small))
             PacingStatus.PacingPaused -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.pause_small))
             else -> { }
         }
-    } */
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
+    }
 }

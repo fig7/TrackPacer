@@ -1,6 +1,8 @@
 package com.fig7.trackpacer.ui.run
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +10,10 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -209,7 +214,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentRunBinding.inflate(inflater, container, false)
 
-        val mainActivity    = activity as MainActivity
+        val mainActivity = activity as MainActivity
         afm = mainActivity.supportFragmentManager
 
         val fragmentContext = requireContext()
@@ -258,7 +263,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
                 result.putString("EditDist", spinnerDist.selectedItem.toString())
                 afm.setFragmentResult("EDIT_TIME", result)
-        }
+            }
 
             dialog.show(parentFragmentManager, "EDIT_TIME_DIALOG")
         }
@@ -302,6 +307,20 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         return runView.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val runView = binding!!
+        val context = requireContext()
+
+        val phoneIcon = runView.runPhoneStatus
+        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
+
+        val delaySetting = runView.runDelaySetting
+        delaySetting.setText(R.string.start_delay)
     }
 
     override fun onDestroyView() {

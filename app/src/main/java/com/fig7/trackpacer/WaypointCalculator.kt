@@ -89,7 +89,7 @@ class WaypointCalculator {
     private var currentWaypoint = -1
     private var currentExtra    = -1.0
 
-    private var totalDist = -1.0
+    private var totalDist     = -1.0
     private var totalTime     = -1.0
     private var runLaneIndex  = -1
 

@@ -11,7 +11,14 @@ class PacingModel: ViewModel() {
     var runProf = ""
     var runLane = -1
     var runTime = -1.0
+
     var pausedTime = -1L
+
+    var totalDist = -1.0
+
+    var totalDistStr = ""
+    var totalTimeStr = ""
+    var totalPaceStr = ""
 
     private val mutablePacingStatus = MutableLiveData<PacingStatus>()
     val pacingStatus: LiveData<PacingStatus> get() = mutablePacingStatus

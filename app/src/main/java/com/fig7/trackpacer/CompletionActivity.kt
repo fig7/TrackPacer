@@ -1,31 +1,36 @@
 package com.fig7.trackpacer
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.fig7.trackpacer.data.ResultModel
 import com.fig7.trackpacer.databinding.ActivityCompletionBinding
+import java.lang.AssertionError
 
 class CompletionActivity: AppCompatActivity() {
     private lateinit var binding: ActivityCompletionBinding
 
-    private lateinit var runDist: String
-    private lateinit var runProf: String
-    private var runLane = -1
-    private var runTime = -1.0
+    private val resultModel: ResultModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if(intent.extras == null) { throw AssertionError("CompletionActivity::onCreate(): extras is null") }
 
         binding = ActivityCompletionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val initData = intent.extras!!
-        runDist = initData.getString("RunDist")!!
-        runProf = initData.getString("RunProf")!!
-        runLane = initData.getInt("RunLane")
-        runTime = initData.getDouble("RunTime")
+        resultModel.startTime    = initData.getLong("StartTime")
+        resultModel.runDist      = initData.getString("RunDist")!!
+        resultModel.runLane      = initData.getInt("RunLane")
+        resultModel.runProf      = initData.getString("RunProf")!!
+        resultModel.totalDistStr = initData.getString("TotalDistStr")!!
+        resultModel.totalTimeStr = initData.getString("TotalTimeStr")!!
+        resultModel.totalPaceStr = initData.getString("TotalPaceStr")!!
+        resultModel.actualTimeStr = initData.getString("ActualTimeStr")!!
+        resultModel.actualPaceStr = initData.getString("ActualPaceStr")!!
+        resultModel.earlyLateStr  = initData.getString("EarlyLateStr")!!
 
-        // Display results (via CompletionViewModel)
-        // Grab buttons and act on them
         supportFragmentManager.setFragmentResultListener("CLOSE_ME", this) { _: String, _: Bundle ->
             finish()
         }
