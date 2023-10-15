@@ -1,4 +1,4 @@
-package com.fig7.trackpacer
+package com.fig7.trackpacer.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -20,13 +20,13 @@
     tools:targetApi="s">
 
     <service
-      android:name=".WaypointService"
+      android:name=".waypoint.WaypointService"
       android:foregroundServiceType="mediaPlayback"
 
       android:exported="false"
       android:stopWithTask="true"/>
 
-    <receiver android:name=".PhoneStateReceiver"
+    <receiver android:name=".receiver.PhoneStateReceiver"
       android:exported="false">
 
       <intent-filter>

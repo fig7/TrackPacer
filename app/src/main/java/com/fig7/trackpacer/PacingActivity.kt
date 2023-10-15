@@ -14,17 +14,24 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.fig7.trackpacer.dialog.InfoDialog
+import com.fig7.trackpacer.dialog.RequestDialog
 import com.fig7.trackpacer.data.PacingModel
 import com.fig7.trackpacer.data.ResultModel
 import com.fig7.trackpacer.databinding.ActivityPaceBinding
+import com.fig7.trackpacer.enums.PacingStatus
+import com.fig7.trackpacer.receiver.ActivityReceiver
 import com.fig7.trackpacer.util.timeToAlmostFullString
-import com.fig7.trackpacer.util.timeToMinuteString
 import com.fig7.trackpacer.util.timeToString
+import com.fig7.trackpacer.waypoint.WaypointService
+import com.fig7.trackpacer.waypoint.distanceFor
+import com.fig7.trackpacer.waypoint.timeFor
 
 
 class PacingActivity: AppCompatActivity() {
@@ -128,13 +135,6 @@ class PacingActivity: AppCompatActivity() {
         val totalPace = (1000.0 * totalTime) / pacingModel.totalDist
         pacingModel.totalPaceStr = timeToString(resources, totalPace.toLong())
 
-        resultModel.runDist   = pacingModel.runDist
-        resultModel.runLane   = pacingModel.runLane
-        resultModel.runProf   = pacingModel.runProf
-        resultModel.totalDistStr = pacingModel.totalDistStr
-        resultModel.totalTimeStr = pacingModel.totalTimeStr
-        resultModel.totalPaceStr = pacingModel.totalPaceStr
-
         mpPacingCancelled = MediaPlayer.create(this, R.raw.cancelled)
         mpPacingCancelled.setOnCompletionListener {
             pacingModel.setPacingStatus(PacingStatus.NotPacing)
@@ -145,16 +145,7 @@ class PacingActivity: AppCompatActivity() {
             pacingModel.setPacingStatus(PacingStatus.NotPacing)
 
             val resultBundle = Bundle()
-            resultBundle.putLong(  "StartTime",     resultModel.startTime)
-            resultBundle.putString("RunDist",       resultModel.runDist)
-            resultBundle.putInt(   "RunLane",       resultModel.runLane)
-            resultBundle.putString("RunProf",       resultModel.runProf)
-            resultBundle.putString("TotalDistStr",  resultModel.totalDistStr)
-            resultBundle.putString("TotalTimeStr",  resultModel.totalTimeStr)
-            resultBundle.putString("TotalPaceStr",  resultModel.totalPaceStr)
-            resultBundle.putString("ActualTimeStr", resultModel.actualTimeStr)
-            resultBundle.putString("ActualPaceStr", resultModel.actualPaceStr)
-            resultBundle.putString("EarlyLateStr",  resultModel.earlyLateStr)
+            resultBundle.putParcelable("resultParcel", resultModel.resultData)
 
             val intent = Intent(this, CompletionActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
@@ -199,6 +190,12 @@ class PacingActivity: AppCompatActivity() {
 
         val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
         registerReceiver(broadcastReceiver, IntentFilter("TrackPacer.PAUSE_PACING"), receiverFlags)
+
+        // Ignore back button presses (if we are pacing or about to start pacing)
+        val backPressedCallback = onBackPressedDispatcher.addCallback(this) { }
+        pacingModel.pacingStatus.observe(this) { pacingStatus ->
+            backPressedCallback.isEnabled = (pacingStatus != PacingStatus.NotPacing)
+        }
     }
 
     override fun onPause() {
@@ -226,14 +223,6 @@ class PacingActivity: AppCompatActivity() {
         }
 
         unregisterReceiver(broadcastReceiver)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        val pacingStatus = pacingModel.pacingStatus.value
-        if(pacingStatus == PacingStatus.NotPacing) {
-            super.onBackPressed()
-        }
     }
 
     private fun beginPacing() {
@@ -288,25 +277,8 @@ class PacingActivity: AppCompatActivity() {
 
             if (silent) {
                 pacingModel.setPacingStatus(PacingStatus.NotPacing)
-            } else if (pacingStatus == PacingStatus.Pacing) {
-                val actualTime = pacingModel.elapsedTime.value!!
-                resultModel.actualTimeStr = timeToAlmostFullString(resources, actualTime)
-
-                val actualPace = (1000.0 * actualTime) / pacingModel.totalDist
-                resultModel.actualPaceStr = timeToMinuteString(resources, actualPace.toLong())
-
-                val totalTime = timeFor(pacingModel.runDist, pacingModel.runLane, pacingModel.runTime)
-                var timeDiff = actualTime - totalTime.toLong()
-                if (timeDiff < 0L) {
-                    timeDiff = -timeDiff
-
-                    val timeDiffRes = if (timeDiff  < 60000L) R.string.completion_seconds_early else R.string.completion_early
-                    resultModel.earlyLateStr = getString(timeDiffRes, timeToString(resources, timeDiff))
-                } else {
-                    val timeDiffRes = if (timeDiff  < 60000L) R.string.completion_seconds_late else R.string.completion_late
-                    resultModel.earlyLateStr = getString(timeDiffRes, timeToString(resources, timeDiff))
-                }
-
+            } else if ((pacingStatus == PacingStatus.Pacing) && (pacingModel.elapsedTimeL >= 40000L)) {
+                resultModel.setPacingResult(resources, pacingModel)
                 pacingModel.setPacingStatus(PacingStatus.PacingComplete)
                 mpPacingComplete.start()
             } else {
@@ -314,8 +286,14 @@ class PacingActivity: AppCompatActivity() {
                 mpPacingCancelled.start()
             }
         } else if ((pacingStatus == PacingStatus.PacingPaused) && !silent) {
-            pacingModel.setPacingStatus(PacingStatus.PacingComplete)
-            mpPacingComplete.start()
+            if (pacingModel.elapsedTimeL >= 40000L) {
+                resultModel.setPacingResult(resources, pacingModel)
+                pacingModel.setPacingStatus(PacingStatus.PacingComplete)
+                mpPacingComplete.start()
+            } else {
+                pacingModel.setPacingStatus(PacingStatus.PacingCancel)
+                mpPacingCancelled.start()
+            }
         } else {
             pacingModel.setPacingStatus(PacingStatus.NotPacing)
         }
@@ -361,7 +339,7 @@ class PacingActivity: AppCompatActivity() {
             val pacingStatus = pacingModel.pacingStatus.value
             if ((pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume)) {
                 pacingModel.setPacingStatus(PacingStatus.Pacing)
-                resultModel.startTime = System.currentTimeMillis()
+                resultModel.initPacingResult(System.currentTimeMillis(), pacingModel)
             } else {
                 val distRun = waypointService.distOnPace(elapsedTime)
                 pacingModel.setDistRun(distRun)

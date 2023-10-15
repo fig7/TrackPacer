@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
@@ -32,6 +33,7 @@ class CompletionFragment: Fragment() {
     private lateinit var completionTgtTime: TextView
     private lateinit var completionActTime: TextView
     private lateinit var completionDiff: TextView
+    private lateinit var completionNotes: EditText
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentCompletionBinding.inflate(inflater, container, false)
@@ -40,26 +42,37 @@ class CompletionFragment: Fragment() {
         val mainActivity = activity as CompletionActivity
         afm = mainActivity.supportFragmentManager
 
-        val df = SimpleDateFormat("d MMM, yyyy 'at' HH:mm", Locale.getDefault())
-        val netDate = Date(resultModel.startTime)
+        val resultData = resultModel.resultData
+        val netDate = Date(resultData.runDate)
 
         completionDate = completionView.completionDate
-        completionDate.text = df.format(netDate)
+        completionDate.text = SimpleDateFormat("d MMM, yyyy 'at' HH:mm", Locale.getDefault()).format(netDate)
 
         completionDistLabel = completionView.labelCompletionDist
-        completionDistLabel.text = getString(R.string.completion_dist_label, resultModel.runProf)
+        completionDistLabel.text = getString(R.string.completion_dist_label, resultData.runProf)
 
         completionDist = completionView.completionDist
-        completionDist.text = getString(R.string.completion_dist, resultModel.totalDistStr, resultModel.runDist, resultModel.runLane)
+        completionDist.text = getString(R.string.completion_dist, resultData.totalDistStr, resultData.runDist, resultData.runLane)
 
         completionTgtTime = completionView.completionTgtTime
-        completionTgtTime.text = getString(R.string.pace_pace, resultModel.totalTimeStr, resultModel.totalPaceStr)
+        completionTgtTime.text = getString(R.string.pace_pace, resultData.totalTimeStr, resultData.totalPaceStr)
 
         completionActTime = completionView.completionActTime
-        completionActTime.text = getString(R.string.pace_pace, resultModel.actualTimeStr, resultModel.actualPaceStr)
+        completionActTime.text = getString(R.string.pace_pace, resultData.actualTimeStr, resultData.actualPaceStr)
 
         completionDiff = completionView.completionDiff
-        completionDiff.text = resultModel.earlyLateStr
+        completionDiff.text = resultData.earlyLateStr
+
+        completionNotes = completionView.completionNotes
+
+        val saveButton = completionView.buttonSave
+        saveButton.setOnClickListener {
+            resultData.runNotes = completionNotes.text.toString()
+
+            val resultBundle = Bundle()
+            resultBundle.putParcelable("resultParcel", resultData)
+            afm.setFragmentResult("SAVE_ME", resultBundle)
+        }
 
         val closeButton = completionView.buttonClose
         closeButton.setOnClickListener { afm.setFragmentResult("CLOSE_ME", Bundle()) }

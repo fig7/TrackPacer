@@ -1,5 +1,6 @@
-package com.fig7.trackpacer
+package com.fig7.trackpacer.manager
 
+import com.fig7.trackpacer.tpVersion
 import java.io.File
 import java.io.IOException
 
@@ -10,7 +11,6 @@ class StorageManager(filesDir: File) {
     var timeMap = mutableMapOf<String, Array<String>>()
 
     private lateinit var currentVersion: String
-    private val latestVersion = "1.3"
 
     init {
         dataDir = File(filesDir, "Data")
@@ -20,7 +20,7 @@ class StorageManager(filesDir: File) {
         if (dataDir.exists()) {
             readVersion()
             readData()
-            if (currentVersion != latestVersion) {
+            if (currentVersion != tpVersion) {
               updateData(defaultDistances)
             }
         } else {
@@ -31,6 +31,7 @@ class StorageManager(filesDir: File) {
     private fun readVersion() {
         val versionFile = File(dataDir, "version.dat")
         if (!versionFile.exists()) {
+            // Version before version file existed
             currentVersion = "1.2"
             return
         }
@@ -40,7 +41,7 @@ class StorageManager(filesDir: File) {
 
     private fun writeVersion() {
         val versionFile = File(dataDir, "version.dat")
-        versionFile.writeText(latestVersion)
+        versionFile.writeText(tpVersion)
     }
 
     private fun initData(defaultDistances: Array<String>) {

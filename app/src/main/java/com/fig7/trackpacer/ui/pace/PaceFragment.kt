@@ -17,7 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import com.fig7.trackpacer.PacingActivity
-import com.fig7.trackpacer.PacingStatus
+import com.fig7.trackpacer.enums.PacingStatus
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.PacingModel
 import com.fig7.trackpacer.databinding.FragmentPaceBinding

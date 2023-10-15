@@ -1,4 +1,4 @@
-package com.fig7.trackpacer
+package com.fig7.trackpacer.waypoint
 
 val distanceMap = mapOf(
                         "400m"     to 400.0,

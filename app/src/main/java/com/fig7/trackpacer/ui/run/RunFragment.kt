@@ -10,23 +10,21 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.Spinner
-import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import com.fig7.trackpacer.BuildConfig
-import com.fig7.trackpacer.EditTimeDialog
-import com.fig7.trackpacer.InfoDialog
+import com.fig7.trackpacer.dialog.EditTimeDialog
+import com.fig7.trackpacer.dialog.InfoDialog
 import com.fig7.trackpacer.MainActivity
 import com.fig7.trackpacer.PacingActivity
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.StorageModel
 import com.fig7.trackpacer.databinding.FragmentRunBinding
-import com.fig7.trackpacer.distanceFor
+import com.fig7.trackpacer.waypoint.distanceFor
 
 val rtMap = mapOf(
     "rt_400m_l1"   to arrayOf(R.string.laps_400, R.string.empty, R.string.empty, R.drawable.rt_400_l1),
@@ -154,10 +152,12 @@ private fun rtOverlay(runDist: String, runLane: Int): Int {
 
 class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var afm: FragmentManager
+    private var binding: FragmentRunBinding? = null
+
     private val storageModel: StorageModel by activityViewModels()
     private val runViewModel:  RunViewModel  by activityViewModels()
+    private var initializingSpinners = 0
 
-    private var binding: FragmentRunBinding? = null
     private lateinit var spinnerDist: Spinner
     private lateinit var spinnerLane: Spinner
     private lateinit var spinnerTime: Spinner
@@ -172,14 +172,14 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         return 1000.0*(runTimeSplit[0].trim().toLong()*60.0 + runTimeSplit[1].toDouble())
     }
 
-    private fun updateTimeSpinner(timeIndex: Int = -1) {
+    private fun updateTimeSpinner(newIndex: Int = 0) {
         val dataManager = storageModel.storageManager
         val runDist = spinnerDist.selectedItem.toString()
 
         val spinnerTimeAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, dataManager.timeMap[runDist]!!)
         spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerTime.adapter = spinnerTimeAdapter
-        if (timeIndex != -1) spinnerTime.setSelection(timeIndex)
+        spinnerTime.setSelection(newIndex)
     }
 
     private fun updateTrackOverlay() {
@@ -221,39 +221,46 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         val dataManager     = storageModel.storageManager
         val runView         = binding!!
 
+        initializingSpinners = 3
+        val spinnerDistSelection = runViewModel.selectedDist.value!!
+        val spinnerLaneSelection = runViewModel.selectedLane.value!!
+        val spinnerTimeSelection = runViewModel.selectedTime.value!!
+        val spinnerDistStr = dataManager.distanceArray[spinnerDistSelection]
+
+        val spinnerDistAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.distanceArray)
+        spinnerDistAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
+
         spinnerDist = runView.spinnerDistance
-        val spinnerDistanceAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.distanceArray)
-        spinnerDistanceAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        spinnerDist.adapter = spinnerDistanceAdapter
+        spinnerDist.adapter = spinnerDistAdapter
+        spinnerDist.setSelection(spinnerDistSelection)
 
-        savedInstanceState?.run { val spinnerDistancePos = getInt("SP_DISTANCE"); spinnerDist.setSelection(spinnerDistancePos)  }
-        spinnerDist.onItemSelectedListener = this
-
-        spinnerLane = runView.spinnerLane
         val laneArray: Array<String> = resources.getStringArray(R.array.lane_array)
         val spinnerLaneAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, laneArray)
         spinnerLaneAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        spinnerLane.adapter = spinnerLaneAdapter
 
-        savedInstanceState?.run { val spinnerLanePos = getInt("SP_LANE"); spinnerLane.setSelection(spinnerLanePos)  }
-        spinnerLane.onItemSelectedListener = this
+        spinnerLane = runView.spinnerLane
+        spinnerLane.adapter = spinnerLaneAdapter
+        spinnerLane.setSelection(spinnerLaneSelection)
+
+        val spinnerTimeAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.timeMap[spinnerDistStr]!!)
+        spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
 
         spinnerTime = runView.spinnerTime
-        val spinnerTimeAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, dataManager.timeMap[spinnerDist.selectedItem.toString()]!!)
-        spinnerTimeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerTime.adapter = spinnerTimeAdapter
-
-        savedInstanceState?.run { spinnerTime.setSelection(getInt("SP_TIME")) }
-        runViewModel.selectedTime.observe(viewLifecycleOwner) { newIndex: Int ->
-            updateTimeSpinner(newIndex)
-        }
+        spinnerLane.setSelection(spinnerTimeSelection)
 
         spinnerProfile = runView.spinnerProfile
         val profileArray: Array<String> = resources.getStringArray(R.array.profile_array)
         val spinnerProfileAdapter = ArrayAdapter(fragmentContext, R.layout.spinner_item, profileArray)
         spinnerProfileAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerProfile.adapter = spinnerProfileAdapter
-        savedInstanceState?.run { spinnerTime.setSelection(getInt("SP_PROFILE")) }
+
+        spinnerDist.onItemSelectedListener = this
+        spinnerLane.onItemSelectedListener = this
+        spinnerTime.onItemSelectedListener = this
+        runViewModel.selectedTime.observe(viewLifecycleOwner) { newIndex: Int ->
+            updateTimeSpinner(newIndex)
+        }
 
         editTimeButton = runView.buttonTime
         editTimeButton.setOnClickListener {
@@ -306,6 +313,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
             startActivity(intent)
         }
 
+        updateTrackOverlay()
         return runView.root
     }
 
@@ -330,7 +338,24 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         if(p0 == spinnerDist) {
-            updateTimeSpinner()
+            runViewModel.selectDist(spinnerDist.selectedItemPosition)
+
+            if(initializingSpinners == 0) {
+                updateTimeSpinner()
+            }
+        }
+
+        if(p0 == spinnerLane) {
+            runViewModel.selectLane(spinnerLane.selectedItemPosition)
+        }
+
+        if(p0 == spinnerTime) {
+            runViewModel.selectTime(spinnerTime.selectedItemPosition)
+        }
+
+        if(initializingSpinners > 0) {
+            --initializingSpinners
+            return
         }
 
         updateTrackOverlay()

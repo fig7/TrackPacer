@@ -1,9 +1,10 @@
-package com.fig7.trackpacer
+package com.fig7.trackpacer.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import com.fig7.trackpacer.R
 
 class InfoDialog: DialogFragment() {
     private lateinit var dialogTitle: String

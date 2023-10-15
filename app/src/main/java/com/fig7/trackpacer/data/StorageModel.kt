@@ -2,7 +2,7 @@ package com.fig7.trackpacer.data
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.fig7.trackpacer.StorageManager
+import com.fig7.trackpacer.manager.StorageManager
 import com.fig7.trackpacer.R
 
 class StorageModel(application: Application): AndroidViewModel(application) {

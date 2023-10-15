@@ -183,6 +183,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingBottom="5dp"
 
         android:labelFor="@+id/completion_notes"
         android:textColor="?android:textColorPrimary"
@@ -196,7 +197,8 @@
       android:layout_weight="1"
 
       android:gravity="top|start"
-      android:background="@null"
+      android:background="@drawable/text_back"
+      android:padding="12dp"
       android:inputType="textCapSentences|textMultiLine"
 
       android:importantForAutofill="no" />

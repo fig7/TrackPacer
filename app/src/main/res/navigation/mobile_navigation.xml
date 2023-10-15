@@ -13,9 +13,9 @@
 
   <fragment
     android:id="@+id/navigation_history"
-    android:name="com.fig7.trackpacer.ui.run.RunFragment"
+    android:name="com.fig7.trackpacer.ui.history.HistoryFragment"
     android:label="@string/title_history"
-    tools:layout="@layout/fragment_run" />
+    tools:layout="@layout/fragment_history" />
 
   <fragment
     android:id="@+id/navigation_clips"

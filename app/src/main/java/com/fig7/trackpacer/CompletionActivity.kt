@@ -1,16 +1,22 @@
 package com.fig7.trackpacer
 
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.fig7.trackpacer.dialog.InfoDialog
+import com.fig7.trackpacer.data.HistoryModel
+import com.fig7.trackpacer.data.ResultData
 import com.fig7.trackpacer.data.ResultModel
 import com.fig7.trackpacer.databinding.ActivityCompletionBinding
-import java.lang.AssertionError
+
 
 class CompletionActivity: AppCompatActivity() {
     private lateinit var binding: ActivityCompletionBinding
 
     private val resultModel: ResultModel by viewModels()
+    private val historyModel: HistoryModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,25 +26,41 @@ class CompletionActivity: AppCompatActivity() {
         setContentView(binding.root)
 
         val initData = intent.extras!!
-        resultModel.startTime    = initData.getLong("StartTime")
-        resultModel.runDist      = initData.getString("RunDist")!!
-        resultModel.runLane      = initData.getInt("RunLane")
-        resultModel.runProf      = initData.getString("RunProf")!!
-        resultModel.totalDistStr = initData.getString("TotalDistStr")!!
-        resultModel.totalTimeStr = initData.getString("TotalTimeStr")!!
-        resultModel.totalPaceStr = initData.getString("TotalPaceStr")!!
-        resultModel.actualTimeStr = initData.getString("ActualTimeStr")!!
-        resultModel.actualPaceStr = initData.getString("ActualPaceStr")!!
-        resultModel.earlyLateStr  = initData.getString("EarlyLateStr")!!
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            resultModel.resultData = initData.getParcelable("resultParcel", ResultData::class.java)!!
+        } else {
+            @Suppress("DEPRECATION")
+            resultModel.resultData = initData.getParcelable("resultParcel")!!
+        }
+
+        supportFragmentManager.setFragmentResultListener("SAVE_ME", this) { _: String, resultBundle: Bundle ->
+            val resultData: ResultData
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                resultData = resultBundle.getParcelable("resultParcel", ResultData::class.java)!!
+            } else {
+                @Suppress("DEPRECATION")
+                resultData = resultBundle.getParcelable("resultParcel")!!
+            }
+
+            val historyManager = historyModel.historyManager
+            if(!historyManager.saveHistory(resultData)) {
+                val dialog = InfoDialog.newDialog("Error saving result",
+                "An error occurred while saving the pacing result." +
+                        "The result was not saved. Please try saving again.")
+
+                dialog.show(supportFragmentManager, "HISTORY_SAVING_DIALOG")
+                return@setFragmentResultListener
+            }
+
+            finish()
+        }
 
         supportFragmentManager.setFragmentResultListener("CLOSE_ME", this) { _: String, _: Bundle ->
             finish()
         }
 
-        // Save state (via HistoryModel)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+        // Ignore back button presses (we want the user to explicitly choose an option)
+        onBackPressedDispatcher.addCallback(this) { }
     }
 }

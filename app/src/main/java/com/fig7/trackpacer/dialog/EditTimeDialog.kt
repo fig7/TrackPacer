@@ -1,4 +1,4 @@
-package com.fig7.trackpacer
+package com.fig7.trackpacer.dialog
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +9,8 @@ import android.widget.ImageButton
 import android.widget.NumberPicker
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
+import com.fig7.trackpacer.enums.EditResult
+import com.fig7.trackpacer.R
 
 class EditTimeDialog: DialogFragment() {
     private lateinit var dialogTime: String

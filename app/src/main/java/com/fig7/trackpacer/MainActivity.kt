@@ -1,16 +1,16 @@
 package com.fig7.trackpacer
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.fig7.trackpacer.dialog.StorageErrorDialog
+import com.fig7.trackpacer.data.HistoryModel
 import com.fig7.trackpacer.data.StorageModel
 import com.fig7.trackpacer.databinding.ActivityMainBinding
+import com.fig7.trackpacer.dialog.HistoryErrorDialog
+import com.fig7.trackpacer.enums.EditResult
 import com.fig7.trackpacer.ui.run.RunViewModel
 
 // * Please update for new states
@@ -83,8 +83,12 @@ import com.fig7.trackpacer.ui.run.RunViewModel
 // Perhaps just add another button row. Delete and home. Trash can + home:
 // Or just done?
 
+const val tpVersion = "1.3"
+
 class MainActivity: AppCompatActivity() {
     private val storageModel: StorageModel by viewModels()
+    private val historyModel: HistoryModel by viewModels()
+
     private val runViewModel: RunViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
 
@@ -92,8 +96,19 @@ class MainActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         if(!storageModel.storageDataOK) {
-            val dialog = DataErrorDialog.newDialog("initializing", true)
+            val dialog = StorageErrorDialog.newDialog("initializing", true)
             dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
+        }
+
+        if(!historyModel.historyDataOK) {
+            val dialog = HistoryErrorDialog.newDialog("initializing", true)
+            dialog.show(supportFragmentManager, "HISTORY_ERROR_DIALOG")
+        }
+
+        historyModel.loadHistory()
+        if(!historyModel.historyDataOK) {
+            val dialog = HistoryErrorDialog.newDialog("loading", true)
+            dialog.show(supportFragmentManager, "HISTORY_ERROR_DIALOG")
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -105,52 +120,30 @@ class MainActivity: AppCompatActivity() {
 
         supportFragmentManager.setFragmentResultListener("EDIT_TIME", this) { _: String, bundle: Bundle ->
             try {
-                val dataManager = storageModel.storageManager
+                val storageManager = storageModel.storageManager
                 val runDist = bundle.getString("EditDist")!!
                 when (EditResult.values()[bundle.getInt("EditResult")]) {
                     EditResult.Delete -> {
-                        val newIndex = dataManager.deleteTime(runDist, bundle.getString("EditTime"))
+                        val newIndex = storageManager.deleteTime(runDist, bundle.getString("EditTime"))
                         runViewModel.selectTime(newIndex)
                     }
 
                     EditResult.Add -> {
-                        val newIndex = dataManager.addTime(runDist, bundle.getString("EditTime"))
+                        val newIndex = storageManager.addTime(runDist, bundle.getString("EditTime"))
                         runViewModel.selectTime(newIndex)
                     }
 
                     EditResult.Set -> {
-                        val newIndex = dataManager.replaceTime(runDist, bundle.getString("OrigTime"), bundle.getString("EditTime"))
+                        val newIndex = storageManager.replaceTime(runDist, bundle.getString("OrigTime"), bundle.getString("EditTime"))
                         runViewModel.selectTime(newIndex)
                     }
 
                     EditResult.Cancel -> {}
                 }
             } catch (_: Exception) {
-                val dialog = DataErrorDialog.newDialog("updating", false)
+                val dialog = StorageErrorDialog.newDialog("updating", false)
                 dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
             }
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        /* outState.run {
-            putInt("PACING_STATUS", pacingStatus.ordinal)
-            putLong("PAUSED_TIME", pausedTime)
-
-            /* putInt("SP_DISTANCE", spinnerDistance.selectedItemPosition)
-            putInt("SP_LANE",     spinnerLane.selectedItemPosition)
-            putInt("SP_TIME",     spinnerTime.selectedItemPosition)
-            putInt("SP_PROFILE",  spinnerProfile.selectedItemPosition)
-
-            putString("TIMER_VAL", timerView.text.toString())
-
-            putString("NEXTUP_LABEL", nextUpLabel.text.toString())
-            putInt("NEXTUP_PROGRESS", nextUpProgress.progress)
-
-            putString("TIMETO_LABEL", timeToLabel.text.toString())
-            putInt("TIMETO_PROGRESS", timeToProgress.progress) */
-        } */
-
-        super.onSaveInstanceState(outState)
     }
 }
