@@ -1,5 +1,6 @@
 package com.fig7.trackpacer.manager
 
+import androidx.compose.runtime.mutableStateListOf
 import com.fig7.trackpacer.data.ResultData
 import org.json.JSONException
 import org.json.JSONObject
@@ -7,11 +8,15 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.FileTime
 import java.util.UUID
 
 class HistoryManager(filesDir: File) {
     private val historyDir: File
-    private lateinit var historyArray: Array<ResultData>
+    private var historyModified: FileTime? = null
+    val historyList = mutableStateListOf<ResultData>()
 
     init {
         historyDir = File(filesDir, "History")
@@ -22,17 +27,22 @@ class HistoryManager(filesDir: File) {
     }
 
     fun loadHistory() {
-        val folderList = historyDir.list() ?: throw IOException()
-        folderList.sort()
+        val historyDirAttr = Files.readAttributes(historyDir.toPath(), BasicFileAttributes::class.java)
+        val lastModified = historyDirAttr.lastModifiedTime()
+        if(lastModified.equals(historyModified)) {
+            return
+        }
 
-        historyArray = Array(folderList.size) { ResultData() }
-        for ((i, result) in folderList.withIndex()) {
-            val resultFile = File(historyDir, result)
+        val folderList = historyDir.list() ?: throw IOException()
+        historyList.clear()
+
+        for (resultUUID in folderList) {
+            val resultFile = File(historyDir, resultUUID)
             val resultText = resultFile.readText()
 
             val json = JSONObject(resultText)
             val keys: Iterator<String> = json.keys()
-            val resultData = historyArray[i]
+            val resultData = ResultData()
             for (key in keys) {
                 when (key) {
                     "runVersion" -> resultData.runVersion = json.getString(key)
@@ -53,7 +63,13 @@ class HistoryManager(filesDir: File) {
                     "runNotes" -> resultData.runNotes = json.getString(key)
                 }
             }
+
+            resultData.resultUUID = resultUUID
+            historyList.add(resultData)
         }
+
+        historyList.sortWith(compareByDescending { it.runDate })
+        historyModified = lastModified
     }
 
     fun saveHistory(resultData: ResultData): Boolean {
@@ -82,8 +98,10 @@ class HistoryManager(filesDir: File) {
         }
 
         var historyFile: File
+        var resultUUID: String
         do {
-            historyFile = File(historyDir, UUID.randomUUID().toString())
+            resultUUID = UUID.randomUUID().toString()
+            historyFile = File(historyDir, resultUUID)
         } while(historyFile.exists())
 
         try {
@@ -95,5 +113,15 @@ class HistoryManager(filesDir: File) {
         }
 
         return true
+    }
+
+    fun deleteHistory(resultIndex: Int): Boolean {
+        val resultFile = File(historyDir, historyList[resultIndex].resultUUID)
+        if(resultFile.delete()) {
+            historyList.removeAt(resultIndex)
+            return true
+        }
+
+        return false
     }
 }

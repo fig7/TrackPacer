@@ -105,12 +105,6 @@ class MainActivity: AppCompatActivity() {
             dialog.show(supportFragmentManager, "HISTORY_ERROR_DIALOG")
         }
 
-        historyModel.loadHistory()
-        if(!historyModel.historyDataOK) {
-            val dialog = HistoryErrorDialog.newDialog("loading", true)
-            dialog.show(supportFragmentManager, "HISTORY_ERROR_DIALOG")
-        }
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -124,18 +118,18 @@ class MainActivity: AppCompatActivity() {
                 val runDist = bundle.getString("EditDist")!!
                 when (EditResult.values()[bundle.getInt("EditResult")]) {
                     EditResult.Delete -> {
-                        val newIndex = storageManager.deleteTime(runDist, bundle.getString("EditTime"))
-                        runViewModel.selectTime(newIndex)
+                        val newTimeIndex = storageManager.deleteTime(runDist, bundle.getString("EditTime"))
+                        runViewModel.resetDist(newTimeIndex)
                     }
 
                     EditResult.Add -> {
-                        val newIndex = storageManager.addTime(runDist, bundle.getString("EditTime"))
-                        runViewModel.selectTime(newIndex)
+                        val newTimeIndex = storageManager.addTime(runDist, bundle.getString("EditTime"))
+                        runViewModel.resetDist(newTimeIndex)
                     }
 
                     EditResult.Set -> {
-                        val newIndex = storageManager.replaceTime(runDist, bundle.getString("OrigTime"), bundle.getString("EditTime"))
-                        runViewModel.selectTime(newIndex)
+                        val newTimeIndex = storageManager.replaceTime(runDist, bundle.getString("OrigTime"), bundle.getString("EditTime"))
+                        runViewModel.resetDist(newTimeIndex)
                     }
 
                     EditResult.Cancel -> {}
@@ -144,6 +138,16 @@ class MainActivity: AppCompatActivity() {
                 val dialog = StorageErrorDialog.newDialog("updating", false)
                 dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
             }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        historyModel.loadHistory()
+        if(!historyModel.historyDataOK) {
+            val dialog = HistoryErrorDialog.newDialog("loading", true)
+            dialog.show(supportFragmentManager, "HISTORY_ERROR_DIALOG")
         }
     }
 }

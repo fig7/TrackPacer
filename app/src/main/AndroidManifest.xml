@@ -59,5 +59,12 @@
       android:screenOrientation="portrait"
       tools:ignore="LockedOrientationActivity">
     </activity>
+
+    <activity
+      android:name=".PastActivity"
+      android:exported="false"
+      android:screenOrientation="portrait"
+      tools:ignore="LockedOrientationActivity">
+    </activity>
   </application>
 </manifest>

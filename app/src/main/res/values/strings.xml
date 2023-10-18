@@ -31,6 +31,7 @@
   <string name="ok">OK</string>
   <string name="request_cancel">Cancel</string>
   <string name="request_continue">Continue</string>
+  <string name="request_delete">Delete</string>
 
   <string name="edit_time_all">%1$s:%2$s.%3$s</string>
   <string name="edit_time_title">Edit %1$s</string>
@@ -116,4 +117,7 @@
   <string name="completion_seconds_late">%1$s seconds late</string>
 
   <string name="label_completion_notes">Your notes:</string>
+
+  <string name="pacing_history">Pacing history</string>
+  <string name="title_past">Past</string>
 </resources>
