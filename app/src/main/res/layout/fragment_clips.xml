@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context=".ui.audio.ClipsFragment">
+
+  <LinearLayout
+    android:id="@+id/clips_status_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="4dp"
+    android:paddingHorizontal="4dp"
+
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <ImageView
+      android:id="@+id/clips_phone_status"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_gravity="center"
+      android:gravity="center"
+
+      android:contentDescription="@string/content_phone_status"/>
+
+    <Space
+      android:layout_width="4dp"
+      android:layout_height="match_parent"/>
+
+    <TextView
+      android:id="@+id/clips_delay_setting"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+
+      android:textColor="?android:textColorPrimary"
+      android:textSize="18sp"/>
+
+    <Space
+      android:layout_width="4dp"
+      android:layout_height="match_parent"/>
+  </LinearLayout>
+
+  <TextView
+    android:id="@+id/clips_header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:paddingHorizontal="25dp"
+
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/clips_status_view"
+
+    android:text="@string/clips_audio"
+    android:textColor="?android:textColorPrimary"
+    android:textSize="42sp"/>
+
+  <TextView
+    android:id="@+id/clips_preview"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:paddingTop="10dp"
+    android:paddingHorizontal="25dp"
+
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/clips_header"
+
+    android:textColor="?android:textColorPrimary"
+    android:textSize="18sp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

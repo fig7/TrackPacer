@@ -120,4 +120,7 @@
 
   <string name="pacing_history">Pacing history</string>
   <string name="title_past">Past</string>
+
+  <string name="clips_audio">Clips and Audio</string>
+  <string name="settings">Settings</string>
 </resources>

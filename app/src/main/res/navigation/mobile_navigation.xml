@@ -19,13 +19,13 @@
 
   <fragment
     android:id="@+id/navigation_clips"
-    android:name="com.fig7.trackpacer.ui.run.RunFragment"
+    android:name="com.fig7.trackpacer.ui.audio.ClipsFragment"
     android:label="@string/title_clips"
-    tools:layout="@layout/fragment_run" />
+    tools:layout="@layout/fragment_clips" />
 
   <fragment
     android:id="@+id/navigation_settings"
-    android:name="com.fig7.trackpacer.ui.run.RunFragment"
+    android:name="com.fig7.trackpacer.ui.settings.SettingsFragment"
     android:label="@string/title_settings"
-    tools:layout="@layout/fragment_run" />
+    tools:layout="@layout/fragment_settings" />
 </navigation>
