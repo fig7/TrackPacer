@@ -1,9 +1,9 @@
 package com.fig7.trackpacer.manager
 
-import com.fig7.trackpacer.tpVersion
 import java.io.File
 import java.io.IOException
 
+const val storageVersion = "1.3"
 class StorageManager(filesDir: File) {
     private val dataDir: File
 
@@ -17,10 +17,12 @@ class StorageManager(filesDir: File) {
     }
 
     fun initDistances(defaultDistances: Array<String>) {
-        if (dataDir.exists()) {
+        if(dataDir.exists()) {
             readVersion()
+
             readData()
-            if (currentVersion != tpVersion) {
+
+            if(currentVersion != storageVersion) {
               updateData(defaultDistances)
             }
         } else {
@@ -30,7 +32,7 @@ class StorageManager(filesDir: File) {
 
     private fun readVersion() {
         val versionFile = File(dataDir, "version.dat")
-        if (!versionFile.exists()) {
+        if(!versionFile.exists()) {
             // Version before version file existed
             currentVersion = "1.2"
             return
@@ -41,21 +43,19 @@ class StorageManager(filesDir: File) {
 
     private fun writeVersion() {
         val versionFile = File(dataDir, "version.dat")
-        versionFile.writeText(tpVersion)
+        versionFile.writeText(storageVersion)
     }
 
     private fun initData(defaultDistances: Array<String>) {
         if(!dataDir.mkdir()) throw IOException()
 
         distanceArray = Array(defaultDistances.size) { defaultDistances[it].split("+")[0] }
-        for ((i, runDistance) in distanceArray.withIndex()) {
+        for((i, runDistance) in distanceArray.withIndex()) {
             timeMap[runDistance] = defaultDistances[i].split("+")[1].trim().split(",").toTypedArray()
         }
 
-        val versionFile = File(dataDir, "version.dat")
-        versionFile.writeText("1.3")
-
         writeData()
+        writeVersion()
     }
 
     private fun readData() {

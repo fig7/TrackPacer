@@ -43,7 +43,8 @@ class HistoryFragment: Fragment () {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentHistoryBinding.inflate(inflater, container, false)
         val historyView = binding!!
-        val historyList = historyView.historyList
+
+        val historyList    = historyView.historyList
         val historyManager = historyModel.historyManager
 
         historyList.setContent {

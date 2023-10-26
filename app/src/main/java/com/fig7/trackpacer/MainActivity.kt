@@ -7,9 +7,11 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.fig7.trackpacer.dialog.StorageErrorDialog
 import com.fig7.trackpacer.data.HistoryModel
+import com.fig7.trackpacer.data.SettingsModel
 import com.fig7.trackpacer.data.StorageModel
 import com.fig7.trackpacer.databinding.ActivityMainBinding
 import com.fig7.trackpacer.dialog.HistoryErrorDialog
+import com.fig7.trackpacer.dialog.SettingsErrorDialog
 import com.fig7.trackpacer.enums.EditResult
 import com.fig7.trackpacer.ui.run.RunViewModel
 
@@ -84,10 +86,10 @@ import com.fig7.trackpacer.ui.run.RunViewModel
 // Or just done?
 
 const val tpVersion = "1.3"
-
 class MainActivity: AppCompatActivity() {
-    private val storageModel: StorageModel by viewModels()
-    private val historyModel: HistoryModel by viewModels()
+    private val storageModel:  StorageModel  by viewModels()
+    private val historyModel:  HistoryModel  by viewModels()
+    private val settingsModel: SettingsModel by viewModels()
 
     private val runViewModel: RunViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
@@ -103,6 +105,11 @@ class MainActivity: AppCompatActivity() {
         if(!historyModel.historyDataOK) {
             val dialog = HistoryErrorDialog.newDialog("initializing", true)
             dialog.show(supportFragmentManager, "HISTORY_ERROR_DIALOG")
+        }
+
+        if(!settingsModel.settingsDataOK) {
+            val dialog = SettingsErrorDialog.newDialog("initializing", true)
+            dialog.show(supportFragmentManager, "SETTINGS_ERROR_DIALOG")
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
