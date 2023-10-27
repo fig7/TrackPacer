@@ -14,7 +14,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
         val state  = extras.getString("state") ?: return
 
         if (state == "RINGING") {
-            context.sendBroadcast(Intent("TrackPacer.PAUSE_PACING"))
+            context.sendBroadcast(Intent("TrackPacer.CALL_PAUSE_PACING"))
         }
     }
 }

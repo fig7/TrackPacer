@@ -100,6 +100,12 @@ private const val GoStartOffset = 5000L
 @Suppress("ConstPropertyName")
 private const val GoClipOffset  = 2000L
 
+@Suppress("ConstPropertyName")
+private const val PowerStartOffset = 4000L
+
+@Suppress("ConstPropertyName")
+private const val PowerClipOffset  = 1000L
+
 class WaypointService : Service(), OnAudioFocusChangeListener {
     private val wsBinder = LocalBinder()
 
@@ -138,19 +144,27 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
     }
 
     fun beginPacing(runDist: String, runLane: Int, runTime: Double): Boolean {
+        prevTime = 0.0
         clipIndexList = clipMap[runDist]!!
         waypointCalculator.initRun(runDist, runTime, runLane)
 
         val res = audioManager.requestAudioFocus(focusRequest)
-        return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
-            prevTime = 0.0
-            startRealtime = SystemClock.elapsedRealtime() + GoStartOffset
-            handler.postDelayed(startRunnable, GoClipOffset)
-            true
-        } else {
+        if (res != AUDIOFOCUS_REQUEST_GRANTED) {
             stopSelf()
-            false
+            return false
         }
+
+        return true
+    }
+
+    fun delayStart() {
+        startRealtime = SystemClock.elapsedRealtime() + GoStartOffset
+        handler.postDelayed(startRunnable, GoClipOffset)
+    }
+
+    fun powerStart() {
+        startRealtime = SystemClock.elapsedRealtime() + PowerStartOffset
+        handler.postDelayed(startRunnable, PowerClipOffset)
     }
 
     fun resumePacing(runDist: String, runTime: Double, runLane: Int, resumeTime: Long): Boolean {

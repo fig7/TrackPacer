@@ -93,7 +93,7 @@ class HistoryManager(filesDir: File) {
             json.put("earlyLate",  resultData.earlyLateStr)
 
             json.put("runNotes", resultData.runNotes)
-        } catch (e: JSONException) {
+        } catch (_: Exception) {
             return false
         }
 
@@ -108,7 +108,7 @@ class HistoryManager(filesDir: File) {
             val writer = BufferedWriter(FileWriter(historyFile))
             writer.write(json.toString())
             writer.close()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return false
         }
 

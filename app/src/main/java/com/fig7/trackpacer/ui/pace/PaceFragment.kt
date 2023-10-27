@@ -172,6 +172,17 @@ class PaceFragment: Fragment() {
                     pacingModel.resetWaypointProgress()
                 }
 
+                PacingStatus.PacingWait -> {
+                    setButton.visibility = View.VISIBLE
+                    setButton.isEnabled = false; setButton.isClickable = false
+
+                    goButton.visibility = View.GONE
+                    goButton.isEnabled = false; goButton.isClickable = false
+
+                    stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
+                    stopButton.isEnabled = true; stopButton.isClickable = true
+                }
+
                 PacingStatus.PacingStart -> {
                     setButton.visibility = View.VISIBLE
                     setButton.isEnabled = false; setButton.isClickable = false

@@ -37,7 +37,7 @@ class ResultModel: ViewModel() {
 
             val timeDiffRes = if (timeDiff  < 60000L) R.string.completion_seconds_early else R.string.completion_early
             resultData.earlyLateStr = resources.getString(timeDiffRes, timeToString(resources, timeDiff))
-        } else if (timeDiff > 0L) {
+        } else if (timeDiff > 2000L) {
             val timeDiffRes = if (timeDiff  < 60000L) R.string.completion_seconds_late else R.string.completion_late
             resultData.earlyLateStr = resources.getString(timeDiffRes, timeToString(resources, timeDiff))
         } else {

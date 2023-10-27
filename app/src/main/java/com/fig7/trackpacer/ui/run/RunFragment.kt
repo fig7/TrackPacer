@@ -22,6 +22,7 @@ import com.fig7.trackpacer.dialog.InfoDialog
 import com.fig7.trackpacer.MainActivity
 import com.fig7.trackpacer.PacingActivity
 import com.fig7.trackpacer.R
+import com.fig7.trackpacer.data.SettingsModel
 import com.fig7.trackpacer.data.StorageModel
 import com.fig7.trackpacer.databinding.FragmentRunBinding
 import com.fig7.trackpacer.waypoint.distanceFor
@@ -154,7 +155,8 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var afm: FragmentManager
     private var binding: FragmentRunBinding? = null
 
-    private val storageModel: StorageModel by activityViewModels()
+    private val storageModel:  StorageModel by activityViewModels()
+    private val settingsModel: SettingsModel by activityViewModels()
     private val runViewModel:  RunViewModel  by activityViewModels()
     private var initializingSpinners = 0
 
@@ -303,6 +305,15 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
             val runTime = runTimeFromSpinner()
             bundle.putDouble("RunTime", runTime)
+
+            val startDelay = settingsModel.settingsManager.startDelay
+            bundle.putString("startDelay", startDelay)
+
+            val powerStart = settingsModel.settingsManager.powerStart
+            bundle.putBoolean("PowerStart", powerStart)
+
+            val alternateStart = settingsModel.settingsManager.alternateStart
+            bundle.putBoolean("AlternateStart", alternateStart)
 
             val intent = Intent(requireContext(), PacingActivity::class.java)
             intent.putExtras(bundle)
