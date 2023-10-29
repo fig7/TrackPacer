@@ -336,7 +336,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
 
         val delaySetting = runView.runDelaySetting
-        delaySetting.setText(R.string.start_delay)
+        delaySetting.text = String.format("%.2f", settingsModel.settingsManager.settingsData.startDelay.toDouble())
     }
 
     override fun onDestroyView() {

@@ -14,8 +14,9 @@ class SettingsManager(filesDir: File) {
     private lateinit var currentVersion: String
 
     lateinit var settingsData: SettingsData
+
     val startDelay: String
-        get() = settingsData.startDelay.value
+        get() = settingsData.startDelay
 
     val powerStart: Boolean
         get() = settingsData.powerStart.value
@@ -40,6 +41,18 @@ class SettingsManager(filesDir: File) {
         } else {
             initData(defaultSettings)
         }
+    }
+
+    fun setStartDelay(startDelay: String): Boolean {
+        try {
+            val newSettingsData = settingsData.copy(startDelay = startDelay)
+            writeData(newSettingsData)
+        } catch(_: Exception) {
+            return false
+        }
+
+        settingsData.startDelay = startDelay
+        return true
     }
 
     fun setPowerStart(powerStart: Boolean): Boolean {
@@ -80,7 +93,7 @@ class SettingsManager(filesDir: File) {
 
     private fun settingsFromDefaults(defaultSettings: Array<String>) {
         settingsData = SettingsData()
-        settingsData.startDelay.value     = (defaultSettings[0])
+        settingsData.startDelay           = defaultSettings[0]
         settingsData.powerStart.value     = (defaultSettings[1] == "true")
         settingsData.alternateStart.value = (defaultSettings[2] == "true")
     }
@@ -101,7 +114,7 @@ class SettingsManager(filesDir: File) {
         val keys: Iterator<String> = json.keys()
         for (key in keys) {
             when (key) {
-                "startDelay"     -> settingsData.startDelay.value     = json.getString(key)
+                "startDelay"     -> settingsData.startDelay           = json.getString(key)
                 "powerStart"     -> settingsData.powerStart.value     = json.getString(key).toBoolean()
                 "alternateStart" -> settingsData.alternateStart.value = json.getString(key).toBoolean()
             }
@@ -112,7 +125,7 @@ class SettingsManager(filesDir: File) {
         val json = JSONObject()
 
         // 1.0
-        json.put("startDelay",     newSettingsData.startDelay.value)
+        json.put("startDelay",     newSettingsData.startDelay)
         json.put("powerStart",     newSettingsData.powerStart.value.toString())
         json.put("alternateStart", newSettingsData.alternateStart.value.toString())
 
