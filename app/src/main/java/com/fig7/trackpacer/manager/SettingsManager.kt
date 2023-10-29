@@ -21,6 +21,9 @@ class SettingsManager(filesDir: File) {
     val powerStart: Boolean
         get() = settingsData.powerStart.value
 
+    val quickStart: Boolean
+        get() = settingsData.quickStart.value
+
     val alternateStart: Boolean
         get() = settingsData.alternateStart.value
 
@@ -67,6 +70,18 @@ class SettingsManager(filesDir: File) {
         return true
     }
 
+    fun setQuickStart(quickStart: Boolean): Boolean {
+        try {
+            val newSettingsData = settingsData.copy(quickStart = mutableStateOf(quickStart))
+            writeData(newSettingsData)
+        } catch(_: Exception) {
+            return false
+        }
+
+        settingsData.quickStart.value = quickStart
+        return true
+    }
+
     fun setAlternateStart(alternateStart: Boolean): Boolean {
         try {
             val newSettingsData = settingsData.copy(alternateStart = mutableStateOf(alternateStart))
@@ -95,7 +110,8 @@ class SettingsManager(filesDir: File) {
         settingsData = SettingsData()
         settingsData.startDelay           = defaultSettings[0]
         settingsData.powerStart.value     = (defaultSettings[1] == "true")
-        settingsData.alternateStart.value = (defaultSettings[2] == "true")
+        settingsData.quickStart.value     = (defaultSettings[2] == "true")
+        settingsData.alternateStart.value = (defaultSettings[3] == "true")
     }
 
     private fun initData(defaultSettings: Array<String>) {
@@ -116,6 +132,7 @@ class SettingsManager(filesDir: File) {
             when (key) {
                 "startDelay"     -> settingsData.startDelay           = json.getString(key)
                 "powerStart"     -> settingsData.powerStart.value     = json.getString(key).toBoolean()
+                "quickStart"     -> settingsData.quickStart.value     = json.getString(key).toBoolean()
                 "alternateStart" -> settingsData.alternateStart.value = json.getString(key).toBoolean()
             }
         }
@@ -127,6 +144,7 @@ class SettingsManager(filesDir: File) {
         // 1.0
         json.put("startDelay",     newSettingsData.startDelay)
         json.put("powerStart",     newSettingsData.powerStart.value.toString())
+        json.put("quickStart",     newSettingsData.quickStart.value.toString())
         json.put("alternateStart", newSettingsData.alternateStart.value.toString())
 
         val settingsFile = File(settingsDir, "settings.dat")

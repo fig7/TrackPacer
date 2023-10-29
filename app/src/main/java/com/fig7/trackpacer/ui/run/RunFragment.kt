@@ -307,10 +307,13 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
             bundle.putDouble("RunTime", runTime)
 
             val startDelay = settingsModel.settingsManager.startDelay
-            bundle.putString("startDelay", startDelay)
+            bundle.putString("StartDelay", startDelay)
 
             val powerStart = settingsModel.settingsManager.powerStart
             bundle.putBoolean("PowerStart", powerStart)
+
+            val quickStart = settingsModel.settingsManager.quickStart
+            bundle.putBoolean("QuickStart", quickStart)
 
             val alternateStart = settingsModel.settingsManager.alternateStart
             bundle.putBoolean("AlternateStart", alternateStart)
@@ -336,7 +339,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
 
         val delaySetting = runView.runDelaySetting
-        delaySetting.text = String.format("%.2f", settingsModel.settingsManager.settingsData.startDelay.toDouble())
+        delaySetting.text = settingsModel.settingsManager.settingsData.startDelay
     }
 
     override fun onDestroyView() {

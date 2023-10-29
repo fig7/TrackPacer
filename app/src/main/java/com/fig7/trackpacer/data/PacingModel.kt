@@ -20,8 +20,9 @@ class PacingModel: ViewModel() {
     var totalTimeStr = ""
     var totalPaceStr = ""
 
-    var startDelay = -5.0
+    var startDelay = ""
     var powerStart = false
+    var quickStart = false
     var alternateStart = false
 
     private val mutablePacingStatus = MutableLiveData<PacingStatus>()

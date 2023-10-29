@@ -17,14 +17,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -49,40 +50,42 @@ import com.fig7.trackpacer.databinding.FragmentSettingsBinding
 import com.fig7.trackpacer.dialog.InfoDialog
 
 private enum class Validity {
-    Valid, Invalid, Uncertain
+    // Definitely valid
+    Valid,
+
+    // Definitely not valid
+    Invalid,
+
+    // Can be made valid
+    Uncertain
 }
 
 private fun startDelayValid(startDelay: String): Validity {
     val startSplit = startDelay.split(".")
     val splitCount = startSplit.count()
+    if(splitCount > 2) { return Validity.Invalid }                                     // Only one separator is allowed
 
-    if(splitCount == 1) {
-        val startSecs = startSplit[0]
-        if(startSecs.isEmpty()) { return Validity.Uncertain }
-        if(startSecs.length > 2) { return Validity.Invalid }
+    val startSecs  = startSplit[0]
+    val startSecsI = startSecs.toIntOrNull()
+    if(startSecs.isEmpty())                              { return Validity.Uncertain } // Empty string can be made valid
+    if(startSecsI == null)                               { return Validity.Invalid }   // Simply invalid
+    if((startSecs[0] == '0') && (startSecs.length > 1))  { return Validity.Invalid }   // Don't allow leading zeros
 
-        val startSecsI = startSecs.toIntOrNull() ?: return Validity.Invalid
-        if((startSecsI < 1) || (startSecsI > 30)) return Validity.Invalid
-
-        return Validity.Valid
-    } else if(splitCount != 2) { return Validity.Invalid }
-
-    val startSecs = startSplit[0]
-    if(startSecs.isEmpty()) { return Validity.Uncertain }
-    if(startSecs.length > 2) { return Validity.Invalid }
-
-    val startSecsI = startSecs.toIntOrNull() ?: return Validity.Invalid
-    if((startSecsI < 1) || (startSecsI > 30)) return Validity.Invalid
+    if((startSecsI < 5) || (startSecsI > 30)) {                                        // Only 5 <= secs <= 30 is always valid
+        if(startSecs.length >= 2)                        { return Validity.Invalid }   // > 30 is invalid
+        if(startSecsI > 3)                               { return Validity.Invalid }   // 3 < secs < 5 is invalid
+        if(splitCount == 1)                              { return Validity.Uncertain } // Otherwise incomplete, or need to check dp
+    } else if(splitCount == 1)                           { return Validity.Valid }     // Valid if no dp yet
 
     val startHths = startSplit[1]
-    if(startHths.isEmpty()) { return Validity.Uncertain }
-    if(startHths.length > 2) { return Validity.Invalid }
+    if(startHths.isEmpty())                              { return Validity.Uncertain } // Empty hundredths can be made valid
+    if(startHths.length > 2)                             { return Validity.Invalid }   // Only allow up to hundredths, not thousandths
 
-    val startHthsI = startHths.toIntOrNull() ?: return Validity.Invalid
-    if(startHthsI < 0) return Validity.Invalid
+    val startHthsI = startHths.toIntOrNull() ?: return Validity.Invalid                // Simply invalid
+    if(startHthsI < 0) { return Validity.Invalid }                                     // Hundredths cannot be <0
 
-    if((startSecsI == 30) && (startHthsI != 0)) return Validity.Invalid
-    return Validity.Valid
+    val startDelayI = 100*startSecsI + startHthsI                                      // Finally, check value to determine validity
+    return if(startDelayI > 3000) Validity.Invalid else if(startDelayI <= 300) Validity.Uncertain else if(startDelayI < 500) Validity.Invalid else Validity.Valid
 }
 
 class SettingsFragment: Fragment() {
@@ -129,6 +132,13 @@ class SettingsFragment: Fragment() {
         }
     }
 
+    private fun setQuickStart(newQuickStart: Boolean) {
+        val settingsManager = settingsModel.settingsManager
+        if(!settingsManager.setQuickStart(newQuickStart)) {
+            handleSettingsError()
+        }
+    }
+
     private fun setAlternateStart(newAlternateStart: Boolean) {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setAlternateStart(newAlternateStart)) {
@@ -169,10 +179,10 @@ class SettingsFragment: Fragment() {
                             Column {
                                 Text(text = "Start delay", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                                 Text(text = "Seconds to delay the start by", fontSize = 14.sp, textAlign = TextAlign.Center)
-                                Text(text = "(Enter a value between 1.00 and 30.00)", fontSize = 14.sp, textAlign = TextAlign.Center)
+                                Text(text = "(between 5.00 and 30.00)", fontSize = 14.sp, textAlign = TextAlign.Center)
                             }
 
-                            var startDelay by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue(text = settingsData.startDelay)) }
+                            var startDelay by remember { mutableStateOf(TextFieldValue(text = settingsData.startDelay)) }
                             var startDelayFocus by remember { mutableStateOf(false) }
                             OutlinedTextField(value = startDelay,
                                 onValueChange = {
@@ -186,8 +196,9 @@ class SettingsFragment: Fragment() {
                                         focusManager.clearFocus()
                                     }
                                 }),
+                                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                                 modifier = Modifier
-                                    .width(72.dp)
+                                    .width(80.dp).align(Alignment.CenterVertically)
                                     .onFocusChanged {
                                         if (it.isFocused) {
                                             startDelayFocus = true
@@ -217,12 +228,34 @@ class SettingsFragment: Fragment() {
                                 )
 
                                 Text(
-                                    text = "Use the power button to start and pause", fontSize = 14.sp, textAlign = TextAlign.Center,
+                                    text = "Power button to start and pause", fontSize = 14.sp, textAlign = TextAlign.Center,
                                     modifier = Modifier
                                 )
                             }
 
                             Switch(checked = settingsData.powerStart.value, onCheckedChange = { focusManager.clearFocus(); setPowerStart(it) })
+                        }
+
+                        Divider(color = Color.Black)
+                    }
+
+                    item {
+                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
+                            .padding(horizontal = 1.dp, vertical = 16.dp)
+                            .fillMaxWidth()) {
+
+                            Column {
+                                Text(
+                                    text = "Quick start", fontSize = 16.sp, fontWeight = FontWeight.Bold
+                                )
+
+                                Text(
+                                    text = "Start is not delayed, just \"Go!\"", fontSize = 14.sp, textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                )
+                            }
+
+                            Switch(checked = settingsData.quickStart.value, onCheckedChange = { focusManager.clearFocus(); setQuickStart(it) })
                         }
 
                         Divider(color = Color.Black)

@@ -76,7 +76,7 @@ class PacingActivity: AppCompatActivity() {
                         val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
                         registerReceiver(screenReceiver, screenAction, receiverFlags)
                     } else {
-                        waypointService.delayStart()
+                        waypointService.delayStart((pacingModel.startDelay.toDouble() * 1000.0).toLong(), pacingModel.quickStart)
 
                         pacingModel.setPacingStatus(PacingStatus.PacingStart)
                         handler.postDelayed(pacingRunnable, 100)
@@ -138,8 +138,9 @@ class PacingActivity: AppCompatActivity() {
         pacingModel.runLane = initData.getInt("RunLane")
         pacingModel.runTime = initData.getDouble("RunTime")
 
-        pacingModel.startDelay     = initData.getDouble("StartDelay")
+        pacingModel.startDelay     = initData.getString("StartDelay")!!
         pacingModel.powerStart     = initData.getBoolean("PowerStart")
+        pacingModel.quickStart     = initData.getBoolean("QuickStart")
         pacingModel.alternateStart = initData.getBoolean("AlternateStart")
 
         pacingModel.totalDist = distanceFor(pacingModel.runDist, pacingModel.runLane)
@@ -387,7 +388,7 @@ class PacingActivity: AppCompatActivity() {
 
     fun handleIncomingIntent(begin: Boolean, silent: Boolean) {
         if (begin) {
-            waypointService.powerStart()
+            waypointService.powerStart(pacingModel.quickStart)
 
             pacingModel.setPacingStatus(PacingStatus.PacingStart)
             handler.postDelayed(pacingRunnable, 100)

@@ -3,6 +3,7 @@
   <string-array name="settings_array">
     <item>5.00</item>  // Start delay
     <item>false</item> // Power start
+    <item>false</item> // Quick start
     <item>false</item> // Alternate start
   </string-array>
 </resources>

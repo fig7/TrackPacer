@@ -109,7 +109,7 @@ class PaceFragment: Fragment() {
         setButton.setOnClickListener {
             val resultBundle = Bundle()
             when (pacingModel.pacingStatus.value) {
-                PacingStatus.NotPacing -> afm.setFragmentResult("BEGIN_PACING", resultBundle)
+                PacingStatus.NotPacing -> { pacingModel.setElapsedTime(0L); afm.setFragmentResult("BEGIN_PACING", resultBundle) }
                 else -> throw IllegalStateException()
             }
         }
@@ -181,6 +181,8 @@ class PaceFragment: Fragment() {
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
                     stopButton.isEnabled = true; stopButton.isClickable = true
+
+                    pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.power_small))
                 }
 
                 PacingStatus.PacingStart -> {
@@ -308,7 +310,7 @@ class PaceFragment: Fragment() {
         phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
 
         val delaySetting = paceView.paceDelaySetting
-        delaySetting.setText(R.string.start_delay)
+        delaySetting.text = pacingModel.startDelay
 
         when(pacingModel.pacingStatus.value) {
             PacingStatus.NotPacing    -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.stop_small))

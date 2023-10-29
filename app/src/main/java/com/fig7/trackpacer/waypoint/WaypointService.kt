@@ -95,10 +95,10 @@ val clipMap = mapOf(
 
 
 @Suppress("ConstPropertyName")
-private const val GoStartOffset = 5000L
+private const val Go1ClipDuration  = 400L
 
 @Suppress("ConstPropertyName")
-private const val GoClipOffset  = 2000L
+private const val Go4ClipDuration  = 3000L
 
 @Suppress("ConstPropertyName")
 private const val PowerStartOffset = 4000L
@@ -133,6 +133,8 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
     }
 
     private lateinit var mpStart: MediaPlayer
+    private lateinit var mpStart1: MediaPlayer
+    private lateinit var mpStart2: MediaPlayer
     private lateinit var mpResume: MediaPlayer
     private lateinit var mpWaypoint: Array<MediaPlayer>
 
@@ -157,14 +159,28 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         return true
     }
 
-    fun delayStart() {
-        startRealtime = SystemClock.elapsedRealtime() + GoStartOffset
-        handler.postDelayed(startRunnable, GoClipOffset)
+    fun delayStart(startDelay: Long, quickStart: Boolean) {
+        mpStart = if(quickStart) mpStart2 else mpStart1
+
+        if(quickStart) {
+            startRealtime = SystemClock.elapsedRealtime() + Go1ClipDuration
+            handler.post(startRunnable)
+        } else {
+            startRealtime = SystemClock.elapsedRealtime() + startDelay
+            handler.postDelayed(startRunnable, startDelay - Go4ClipDuration)
+        }
     }
 
-    fun powerStart() {
-        startRealtime = SystemClock.elapsedRealtime() + PowerStartOffset
-        handler.postDelayed(startRunnable, PowerClipOffset)
+    fun powerStart(quickStart: Boolean) {
+        mpStart = if(quickStart) mpStart2 else mpStart1
+
+        if(quickStart) {
+            startRealtime = SystemClock.elapsedRealtime() + Go1ClipDuration
+            handler.post(startRunnable)
+        } else {
+            startRealtime = SystemClock.elapsedRealtime() + PowerStartOffset
+            handler.postDelayed(startRunnable, PowerClipOffset)
+        }
     }
 
     fun resumePacing(runDist: String, runTime: Double, runLane: Int, resumeTime: Long): Boolean {
@@ -235,7 +251,8 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
 
         startForeground(1, notification)
 
-        mpStart   = MediaPlayer.create(this, R.raw.threetwoone)
+        mpStart1   = MediaPlayer.create(this, R.raw.threetwoone)
+        mpStart2   = MediaPlayer.create(this, R.raw.go)
         mpResume  = MediaPlayer.create(this, R.raw.resumed)
         mpWaypoint = Array(clipList.size) { i -> MediaPlayer.create(this, clipList[i]) }
 
@@ -251,7 +268,11 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
             build()
         }
 
-        mpStart.setOnCompletionListener {
+        mpStart1.setOnCompletionListener {
+            audioManager.abandonAudioFocusRequest(focusRequest)
+        }
+
+        mpStart2.setOnCompletionListener {
             audioManager.abandonAudioFocusRequest(focusRequest)
         }
 
@@ -267,7 +288,8 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         handler.removeCallbacks(startRunnable)
         handler.removeCallbacks(waypointRunnable)
 
-        mpStart.release()
+        mpStart1.release()
+        mpStart2.release()
         mpResume.release()
         for (mp in mpWaypoint) mp.release()
 
