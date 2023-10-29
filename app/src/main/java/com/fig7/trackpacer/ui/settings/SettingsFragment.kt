@@ -46,6 +46,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.SettingsModel
+import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.FragmentSettingsBinding
 import com.fig7.trackpacer.dialog.InfoDialog
 
@@ -90,7 +91,9 @@ private fun startDelayValid(startDelay: String): Validity {
 
 class SettingsFragment: Fragment() {
     private var binding: FragmentSettingsBinding? = null
+
     private val settingsModel: SettingsModel by activityViewModels()
+    private val statusModel:   StatusModel   by activityViewModels()
 
     class StartDelayTransformation : VisualTransformation {
         override fun filter(text: AnnotatedString): TransformedText {
@@ -119,13 +122,15 @@ class SettingsFragment: Fragment() {
             return false
         }
 
+        statusModel.startDelay = startDelay
+        val powerStart = statusModel.powerStart
+        val quickStart = statusModel.quickStart
+        startDelay     = statusModel.startDelay
+
         val settingsView = binding!!
         val delaySetting = settingsView.settingsDelaySetting
 
-        val powerStart = settingsManager.powerStart
-        val quickStart = settingsManager.quickStart
-
-        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else settingsManager.settingsData.startDelay
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else startDelay
         delaySetting.text = delayText
         return true
     }
@@ -137,13 +142,20 @@ class SettingsFragment: Fragment() {
             return false
         }
 
+        statusModel.powerStart = newPowerStart
+        val powerStart = statusModel.powerStart
+        val quickStart = statusModel.quickStart
+        val startDelay = statusModel.startDelay
+
         val settingsView = binding!!
+        val pacingIcon   = settingsView.settingsPacingStatus
         val delaySetting = settingsView.settingsDelaySetting
 
-        val powerStart = settingsManager.powerStart
-        val quickStart = settingsManager.quickStart
+        val context = requireContext()
+        val pacingIconId = if(powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+        pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, pacingIconId))
 
-        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else settingsManager.settingsData.startDelay
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else startDelay
         delaySetting.text = delayText
         return true
     }
@@ -155,13 +167,15 @@ class SettingsFragment: Fragment() {
             return false
         }
 
+        statusModel.quickStart = newQuickStart
+        val powerStart = statusModel.powerStart
+        val quickStart = statusModel.quickStart
+        val startDelay = statusModel.startDelay
+
         val settingsView = binding!!
         val delaySetting = settingsView.settingsDelaySetting
 
-        val powerStart = settingsManager.powerStart
-        val quickStart = settingsManager.quickStart
-
-        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else settingsManager.settingsData.startDelay
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else startDelay
         delaySetting.text = delayText
         return true
     }
@@ -323,18 +337,23 @@ class SettingsFragment: Fragment() {
         super.onResume()
 
         val settingsView = binding!!
+        val pacingIcon   = settingsView.settingsPacingStatus
         val phoneIcon    = settingsView.settingsPhoneStatus
         val delaySetting = settingsView.settingsDelaySetting
 
+        val powerStart = statusModel.powerStart
+        val quickStart = statusModel.quickStart
+        val startDelay = statusModel.startDelay
+
         val context = requireContext()
+        val pacingIconId = if(powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+        pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, pacingIconId))
+
         val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
+        val phoneIconId = if(phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20
+        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, phoneIconId))
 
-        val settingsManager = settingsModel.settingsManager
-        val powerStart = settingsManager.powerStart
-        val quickStart = settingsManager.quickStart
-
-        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else settingsManager.settingsData.startDelay
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else startDelay
         delaySetting.text = delayText
     }
 

@@ -23,6 +23,7 @@ import com.fig7.trackpacer.MainActivity
 import com.fig7.trackpacer.PacingActivity
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.SettingsModel
+import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.data.StorageModel
 import com.fig7.trackpacer.databinding.FragmentRunBinding
 import com.fig7.trackpacer.waypoint.distanceFor
@@ -156,8 +157,11 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     private var binding: FragmentRunBinding? = null
 
     private val storageModel:  StorageModel by activityViewModels()
+    private val runViewModel: RunViewModel  by activityViewModels()
+
     private val settingsModel: SettingsModel by activityViewModels()
-    private val runViewModel:  RunViewModel  by activityViewModels()
+    private val statusModel:   StatusModel   by activityViewModels()
+
     private var initializingSpinners = 0
 
     private lateinit var spinnerDist: Spinner
@@ -306,13 +310,13 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
             val runTime = runTimeFromSpinner()
             bundle.putDouble("RunTime", runTime)
 
-            val startDelay = settingsModel.settingsManager.startDelay
+            val startDelay = statusModel.startDelay
             bundle.putString("StartDelay", startDelay)
 
-            val powerStart = settingsModel.settingsManager.powerStart
+            val powerStart = statusModel.powerStart
             bundle.putBoolean("PowerStart", powerStart)
 
-            val quickStart = settingsModel.settingsManager.quickStart
+            val quickStart = statusModel.quickStart
             bundle.putBoolean("QuickStart", quickStart)
 
             val alternateStart = settingsModel.settingsManager.alternateStart
@@ -332,14 +336,24 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         super.onResume()
 
         val runView = binding!!
-        val context = requireContext()
-
-        val phoneIcon = runView.runPhoneStatus
-        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
-
+        val pacingIcon   = runView.runPacingStatus
+        val phoneIcon    = runView.runPhoneStatus
         val delaySetting = runView.runDelaySetting
-        delaySetting.text = settingsModel.settingsManager.settingsData.startDelay
+
+        val powerStart = statusModel.powerStart
+        val quickStart = statusModel.quickStart
+        val startDelay = statusModel.startDelay
+
+        val context = requireContext()
+        val pacingIconId = if(powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+        pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, pacingIconId))
+
+        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        val phoneIconId = if(phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20
+        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, phoneIconId))
+
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else startDelay
+        delaySetting.text = delayText
     }
 
     override fun onDestroyView() {

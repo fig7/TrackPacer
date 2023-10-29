@@ -32,12 +32,15 @@ import com.fig7.trackpacer.PastActivity
 import com.fig7.trackpacer.data.HistoryModel
 import com.fig7.trackpacer.databinding.FragmentHistoryBinding
 import com.fig7.trackpacer.data.ResultData
+import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.dialog.DeleteDialog
 import java.text.DateFormat
 
 class HistoryFragment: Fragment () {
     private var binding: FragmentHistoryBinding? = null
+
     private val historyModel: HistoryModel by activityViewModels()
+    private val statusModel:  StatusModel  by activityViewModels()
 
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -59,7 +62,7 @@ class HistoryFragment: Fragment () {
                         val shortRunDate = df.format(resultData.runDate)
 
                         Row(modifier = Modifier
-                            .combinedClickable(onClick = { launchHistoryActivity(resultData) }, onLongClick = { deleteHistory(resultIndex) })
+                            .combinedClickable(onClick = { launchPastActivity(resultData) }, onLongClick = { deleteHistory(resultIndex) })
                             .padding(horizontal = 1.dp, vertical = 16.dp)) {
 
                             Text(text = resultData.runDist, fontSize = 16.sp,
@@ -94,8 +97,12 @@ class HistoryFragment: Fragment () {
         return historyView.root
     }
 
-    private fun launchHistoryActivity(resultData: ResultData) {
+    private fun launchPastActivity(resultData: ResultData) {
         val resultBundle = Bundle()
+
+        resultBundle.putString( "StartDelay", statusModel.startDelay)
+        resultBundle.putBoolean("PowerStart", statusModel.powerStart)
+        resultBundle.putBoolean("QuickStart", statusModel.quickStart)
         resultBundle.putParcelable("resultParcel", resultData)
 
         val intent = Intent(requireContext(), PastActivity::class.java)
@@ -124,14 +131,24 @@ class HistoryFragment: Fragment () {
         super.onResume()
 
         val historyView = binding!!
-        val context = requireContext()
-
-        val phoneIcon = historyView.historyPhoneStatus
-        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
-
+        val pacingIcon   = historyView.historyPacingStatus
+        val phoneIcon    = historyView.historyPhoneStatus
         val delaySetting = historyView.historyDelaySetting
-        delaySetting.setText(R.string.start_delay)
+
+        val powerStart = statusModel.powerStart
+        val quickStart = statusModel.quickStart
+        val startDelay = statusModel.startDelay
+
+        val context = requireContext()
+        val pacingIconId = if(powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+        pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, pacingIconId))
+
+        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        val phoneIconId = if(phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20
+        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, phoneIconId))
+
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else startDelay
+        delaySetting.text = delayText
     }
 
     override fun onDestroyView() {

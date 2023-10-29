@@ -8,6 +8,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.fig7.trackpacer.dialog.StorageErrorDialog
 import com.fig7.trackpacer.data.HistoryModel
 import com.fig7.trackpacer.data.SettingsModel
+import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.data.StorageModel
 import com.fig7.trackpacer.databinding.ActivityMainBinding
 import com.fig7.trackpacer.dialog.HistoryErrorDialog
@@ -92,6 +93,8 @@ class MainActivity: AppCompatActivity() {
     private val settingsModel: SettingsModel by viewModels()
 
     private val runViewModel: RunViewModel by viewModels()
+    private val statusModel: StatusModel by viewModels()
+
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,6 +114,11 @@ class MainActivity: AppCompatActivity() {
             val dialog = SettingsErrorDialog.newDialog("initializing", true)
             dialog.show(supportFragmentManager, "SETTINGS_ERROR_DIALOG")
         }
+
+        val settingsManager = settingsModel.settingsManager
+        statusModel.startDelay     = settingsManager.startDelay
+        statusModel.powerStart     = settingsManager.powerStart
+        statusModel.quickStart     = settingsManager.quickStart
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

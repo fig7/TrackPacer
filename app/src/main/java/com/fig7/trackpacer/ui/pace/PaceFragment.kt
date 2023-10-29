@@ -20,6 +20,7 @@ import com.fig7.trackpacer.PacingActivity
 import com.fig7.trackpacer.enums.PacingStatus
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.PacingModel
+import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.FragmentPaceBinding
 import com.fig7.trackpacer.util.timeToFullString
 import com.fig7.trackpacer.util.timeToString
@@ -30,6 +31,7 @@ class PaceFragment: Fragment() {
 
     private lateinit var afm: FragmentManager
     private val pacingModel: PacingModel by activityViewModels()
+    private val statusModel: StatusModel by activityViewModels()
 
     private lateinit var distRun: TextView
     private lateinit var nextUpLabel: TextView
@@ -145,8 +147,8 @@ class PaceFragment: Fragment() {
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
                     stopButton.isEnabled = false; stopButton.isClickable = false
 
-                    val pacingIconId = if(pacingModel.powerStart) R.drawable.power_stop_small else R.drawable.stop_small
-                    pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), pacingIconId))
+                    val pacingIconId = if(statusModel.powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+                    pacingIcon.setImageDrawable(AppCompatResources.getDrawable(ourContext, pacingIconId))
                 }
 
                 PacingStatus.CheckPermissionStart -> {
@@ -303,28 +305,32 @@ class PaceFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        val paceView = binding!!
-        val context = requireContext()
-
-        val phoneIcon = paceView.pacePhoneStatus
-        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-
-        val phoneIconId = if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20
-        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, phoneIconId))
-
+        val paceView     = binding!!
+        val phoneIcon    = paceView.pacePhoneStatus
         val delaySetting = paceView.paceDelaySetting
-        delaySetting.text = pacingModel.startDelay
 
+        val powerStart = statusModel.powerStart
+        val quickStart = statusModel.quickStart
+        val startDelay = statusModel.startDelay
+
+        val context = requireContext()
         when(pacingModel.pacingStatus.value) {
             PacingStatus.NotPacing    -> {
-                val pacingIconId = if(pacingModel.powerStart) R.drawable.power_stop_small else R.drawable.stop_small
-                pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), pacingIconId))
+                val pacingIconId = if(powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+                pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, pacingIconId))
             }
 
-            PacingStatus.Pacing       -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.play_small))
-            PacingStatus.PacingPaused -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.pause_small))
+            PacingStatus.Pacing       -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.play_small))
+            PacingStatus.PacingPaused -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.pause_small))
             else -> { }
         }
+
+        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        val phoneIconId = if(phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20
+        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, phoneIconId))
+
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else startDelay
+        delaySetting.text = delayText
     }
 
     override fun onDestroyView() {

@@ -25,6 +25,7 @@ import com.fig7.trackpacer.dialog.InfoDialog
 import com.fig7.trackpacer.dialog.RequestDialog
 import com.fig7.trackpacer.data.PacingModel
 import com.fig7.trackpacer.data.ResultModel
+import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.ActivityPaceBinding
 import com.fig7.trackpacer.enums.PacingStatus
 import com.fig7.trackpacer.receiver.ActivityReceiver
@@ -37,6 +38,7 @@ import com.fig7.trackpacer.waypoint.timeFor
 
 class PacingActivity: AppCompatActivity() {
     private val pacingModel: PacingModel by viewModels()
+    private val statusModel: StatusModel by viewModels()
     private val resultModel: ResultModel by viewModels()
 
     private lateinit var binding: ActivityPaceBinding
@@ -66,7 +68,7 @@ class PacingActivity: AppCompatActivity() {
             val pacingStatus = pacingModel.pacingStatus.value
             if (pacingStatus == PacingStatus.ServiceStart) {
                 if (waypointService.beginPacing(runDist, runLane, runTime)) {
-                    if (pacingModel.powerStart) {
+                    if (statusModel.powerStart) {
                         pacingModel.setPacingStatus(PacingStatus.PacingWait)
                         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -76,7 +78,7 @@ class PacingActivity: AppCompatActivity() {
                         val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
                         registerReceiver(screenReceiver, screenAction, receiverFlags)
                     } else {
-                        waypointService.delayStart((pacingModel.startDelay.toDouble() * 1000.0).toLong(), pacingModel.quickStart)
+                        waypointService.delayStart((statusModel.startDelay.toDouble() * 1000.0).toLong(), statusModel.quickStart)
 
                         pacingModel.setPacingStatus(PacingStatus.PacingStart)
                         handler.postDelayed(pacingRunnable, 100)
@@ -137,11 +139,11 @@ class PacingActivity: AppCompatActivity() {
         pacingModel.runProf = initData.getString("RunProf")!!
         pacingModel.runLane = initData.getInt("RunLane")
         pacingModel.runTime = initData.getDouble("RunTime")
-
-        pacingModel.startDelay     = initData.getString("StartDelay")!!
-        pacingModel.powerStart     = initData.getBoolean("PowerStart")
-        pacingModel.quickStart     = initData.getBoolean("QuickStart")
         pacingModel.alternateStart = initData.getBoolean("AlternateStart")
+
+        statusModel.startDelay     = initData.getString("StartDelay")!!
+        statusModel.powerStart     = initData.getBoolean("PowerStart")
+        statusModel.quickStart     = initData.getBoolean("QuickStart")
 
         pacingModel.totalDist = distanceFor(pacingModel.runDist, pacingModel.runLane)
         pacingModel.totalDistStr =
@@ -167,6 +169,9 @@ class PacingActivity: AppCompatActivity() {
             pacingModel.setPacingStatus(PacingStatus.NotPacing)
 
             val resultBundle = Bundle()
+            resultBundle.putString("StartDelay", statusModel.startDelay)
+            resultBundle.putBoolean("PowerStart", statusModel.powerStart)
+            resultBundle.putBoolean("QuickStart", statusModel.quickStart)
             resultBundle.putParcelable("resultParcel", resultModel.resultData)
 
             val intent = Intent(this, CompletionActivity::class.java)
@@ -277,7 +282,7 @@ class PacingActivity: AppCompatActivity() {
     }
 
     private fun stopService() {
-        if(pacingModel.powerStart) {
+        if(statusModel.powerStart) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             unregisterReceiver(screenReceiver)
         }
@@ -388,7 +393,7 @@ class PacingActivity: AppCompatActivity() {
 
     fun handleIncomingIntent(begin: Boolean, silent: Boolean) {
         if (begin) {
-            waypointService.powerStart(pacingModel.quickStart)
+            waypointService.powerStart(statusModel.quickStart)
 
             pacingModel.setPacingStatus(PacingStatus.PacingStart)
             handler.postDelayed(pacingRunnable, 100)

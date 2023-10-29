@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.ResultModel
+import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.FragmentPastBinding
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -20,7 +21,9 @@ import java.util.Locale
 
 class PastFragment: Fragment() {
     private var binding: FragmentPastBinding? = null
+
     private val resultModel: ResultModel by activityViewModels()
+    private val statusModel: StatusModel by activityViewModels()
 
     private lateinit var pastDate: TextView
     private lateinit var pastDistLabel: TextView
@@ -64,15 +67,25 @@ class PastFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        val pastView = binding!!
-        val context = requireContext()
-
-        val phoneIcon = pastView.pastPhoneStatus
-        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
-
+        val pastView     = binding!!
+        val pacingIcon   = pastView.pastPacingStatus
+        val phoneIcon    = pastView.pastPhoneStatus
         val delaySetting = pastView.pastDelaySetting
-        delaySetting.setText(R.string.start_delay)
+
+        val powerStart = statusModel.powerStart
+        val quickStart = statusModel.quickStart
+        val startDelay = statusModel.startDelay
+
+        val context = requireContext()
+        val pacingIconId = if(powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+        pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, pacingIconId))
+
+        val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+        val phoneIconId = if(phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20
+        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, phoneIconId))
+
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else startDelay
+        delaySetting.text = delayText
     }
 
     override fun onDestroyView() {

@@ -9,14 +9,16 @@ import com.fig7.trackpacer.dialog.InfoDialog
 import com.fig7.trackpacer.data.HistoryModel
 import com.fig7.trackpacer.data.ResultData
 import com.fig7.trackpacer.data.ResultModel
+import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.ActivityCompletionBinding
 
 
 class CompletionActivity: AppCompatActivity() {
     private lateinit var binding: ActivityCompletionBinding
 
-    private val resultModel: ResultModel by viewModels()
+    private val resultModel:  ResultModel  by viewModels()
     private val historyModel: HistoryModel by viewModels()
+    private val statusModel:  StatusModel  by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +28,10 @@ class CompletionActivity: AppCompatActivity() {
         setContentView(binding.root)
 
         val initData = intent.extras!!
+        statusModel.startDelay = initData.getString("StartDelay")!!
+        statusModel.powerStart = initData.getBoolean("PowerStart")
+        statusModel.quickStart = initData.getBoolean("QuickStart")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             resultModel.resultData = initData.getParcelable("resultParcel", ResultData::class.java)!!
         } else {
