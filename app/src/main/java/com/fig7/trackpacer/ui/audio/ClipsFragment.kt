@@ -24,7 +24,7 @@ class ClipsFragment: Fragment() {
 
         val previewText = ("The audio page allows you to record different prompts or replace my voice with text-to-speech. "
                 + "You could also make the audio prompts tell you how far you have run, or how far you have to go, or both.\n\n"
-                + "Would you like to have a clip that tells you to sprint near the end? Or would you like to hear some motivational words as you run? You can.\n\n"
+                + "Would you like to have a clip that tells you to sprint near the end? Would you like to hear some motivational words as you run? You can.\n\n"
                 + "Clips and Audio will only be available in the pro version of TrackPacer, which is coming soon...")
 
         clipsPreview = clipsView.clipsPreview

@@ -145,7 +145,8 @@ class PaceFragment: Fragment() {
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop2))
                     stopButton.isEnabled = false; stopButton.isClickable = false
 
-                    pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.stop_small))
+                    val pacingIconId = if(pacingModel.powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+                    pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), pacingIconId))
                 }
 
                 PacingStatus.CheckPermissionStart -> {
@@ -307,13 +308,19 @@ class PaceFragment: Fragment() {
 
         val phoneIcon = paceView.pacePhoneStatus
         val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
+
+        val phoneIconId = if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20
+        phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, phoneIconId))
 
         val delaySetting = paceView.paceDelaySetting
         delaySetting.text = pacingModel.startDelay
 
         when(pacingModel.pacingStatus.value) {
-            PacingStatus.NotPacing    -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.stop_small))
+            PacingStatus.NotPacing    -> {
+                val pacingIconId = if(pacingModel.powerStart) R.drawable.power_stop_small else R.drawable.stop_small
+                pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), pacingIconId))
+            }
+
             PacingStatus.Pacing       -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.play_small))
             PacingStatus.PacingPaused -> pacingIcon.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.pause_small))
             else -> { }

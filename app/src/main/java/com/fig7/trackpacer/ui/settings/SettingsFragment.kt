@@ -116,34 +116,64 @@ class SettingsFragment: Fragment() {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setStartDelay(startDelay)) {
             handleSettingsError()
+            return false
         }
 
         val settingsView = binding!!
         val delaySetting = settingsView.settingsDelaySetting
-        delaySetting.text = settingsModel.settingsManager.settingsData.startDelay
 
+        val powerStart = settingsManager.powerStart
+        val quickStart = settingsManager.quickStart
+
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else settingsManager.settingsData.startDelay
+        delaySetting.text = delayText
         return true
     }
 
-    private fun setPowerStart(newPowerStart: Boolean) {
+    private fun setPowerStart(newPowerStart: Boolean): Boolean {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setPowerStart(newPowerStart)) {
             handleSettingsError()
+            return false
         }
+
+        val settingsView = binding!!
+        val delaySetting = settingsView.settingsDelaySetting
+
+        val powerStart = settingsManager.powerStart
+        val quickStart = settingsManager.quickStart
+
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else settingsManager.settingsData.startDelay
+        delaySetting.text = delayText
+        return true
     }
 
-    private fun setQuickStart(newQuickStart: Boolean) {
+    private fun setQuickStart(newQuickStart: Boolean): Boolean {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setQuickStart(newQuickStart)) {
             handleSettingsError()
+            return false
         }
+
+        val settingsView = binding!!
+        val delaySetting = settingsView.settingsDelaySetting
+
+        val powerStart = settingsManager.powerStart
+        val quickStart = settingsManager.quickStart
+
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else settingsManager.settingsData.startDelay
+        delaySetting.text = delayText
+        return true
     }
 
-    private fun setAlternateStart(newAlternateStart: Boolean) {
+    private fun setAlternateStart(newAlternateStart: Boolean): Boolean {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setAlternateStart(newAlternateStart)) {
             handleSettingsError()
+            return false
         }
+
+        return true
     }
 
     private fun handleSettingsError() {
@@ -293,14 +323,19 @@ class SettingsFragment: Fragment() {
         super.onResume()
 
         val settingsView = binding!!
-        val context = requireContext()
+        val phoneIcon    = settingsView.settingsPhoneStatus
+        val delaySetting = settingsView.settingsDelaySetting
 
-        val phoneIcon = settingsView.settingsPhoneStatus
+        val context = requireContext()
         val phonePermission = (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
         phoneIcon.setImageDrawable(AppCompatResources.getDrawable(context, if (phonePermission) R.drawable.baseline_phone_20 else R.drawable.baseline_phone_locked_20))
 
-        val delaySetting = settingsView.settingsDelaySetting
-        delaySetting.text = String.format("%.2f", settingsModel.settingsManager.settingsData.startDelay.toDouble())
+        val settingsManager = settingsModel.settingsManager
+        val powerStart = settingsManager.powerStart
+        val quickStart = settingsManager.quickStart
+
+        val delayText = if(quickStart) "QCK" else if (powerStart) "PWR" else settingsManager.settingsData.startDelay
+        delaySetting.text = delayText
     }
 
     override fun onDestroyView() {
