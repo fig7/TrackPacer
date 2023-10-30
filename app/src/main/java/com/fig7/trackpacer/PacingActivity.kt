@@ -65,9 +65,11 @@ class PacingActivity: AppCompatActivity() {
             val runDist = pacingModel.runDist
             val runLane = pacingModel.runLane
             val runTime = pacingModel.runTime
+            val alternateStart = pacingModel.alternateStart
+
             val pacingStatus = pacingModel.pacingStatus.value
             if(pacingStatus == PacingStatus.ServiceStart) {
-                if(waypointService.beginPacing(runDist, runLane, runTime)) {
+                if(waypointService.beginPacing(runDist, runLane, runTime, alternateStart)) {
                     if(statusModel.powerStart) {
                         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -86,12 +88,14 @@ class PacingActivity: AppCompatActivity() {
                     }
                 }
             } else if(pacingStatus == PacingStatus.ServiceResume) {
-                if(waypointService.resumePacing(runDist, runTime, runLane, pacingModel.pausedTime)) {
-                    val screenAction = IntentFilter(Intent.ACTION_SCREEN_OFF)
-                    screenAction.addAction(Intent.ACTION_SCREEN_ON)
+                if(waypointService.resumePacing(runDist, runTime, runLane, alternateStart, pacingModel.pausedTime)) {
+                    if(statusModel.powerStart) {
+                        val screenAction = IntentFilter(Intent.ACTION_SCREEN_OFF)
+                        screenAction.addAction(Intent.ACTION_SCREEN_ON)
 
-                    val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
-                    registerReceiver(screenReceiver, screenAction, receiverFlags)
+                        val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
+                        registerReceiver(screenReceiver, screenAction, receiverFlags)
+                    }
 
                     pacingModel.setPacingStatus(PacingStatus.PacingResume)
                     handler.postDelayed(pacingRunnable, 100)
