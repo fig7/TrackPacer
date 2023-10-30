@@ -29,10 +29,10 @@ class PastActivity: AppCompatActivity() {
         statusModel.quickStart = initData.getBoolean("QuickStart")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            resultModel.resultData = initData.getParcelable("resultParcel", ResultData::class.java)!!
+            resultModel.resultData = initData.getParcelable("ResultParcel", ResultData::class.java)!!
         } else {
             @Suppress("DEPRECATION")
-            resultModel.resultData = initData.getParcelable("resultParcel")!!
+            resultModel.resultData = initData.getParcelable("ResultParcel")!!
         }
     }
 }

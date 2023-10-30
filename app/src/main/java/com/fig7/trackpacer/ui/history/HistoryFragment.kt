@@ -99,17 +99,15 @@ class HistoryFragment: Fragment () {
 
     private fun launchPastActivity(resultData: ResultData) {
         val resultBundle = Bundle()
-
         resultBundle.putString( "StartDelay", statusModel.startDelay)
         resultBundle.putBoolean("PowerStart", statusModel.powerStart)
         resultBundle.putBoolean("QuickStart", statusModel.quickStart)
-        resultBundle.putParcelable("resultParcel", resultData)
+        resultBundle.putParcelable("ResultParcel", resultData)
 
         val intent = Intent(requireContext(), PastActivity::class.java)
         intent.putExtras(resultBundle)
 
         startActivity(intent)
-
     }
 
     private fun deleteHistory(resultIndex: Int) {

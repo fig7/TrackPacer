@@ -137,9 +137,21 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         fun getService(): WaypointService = this@WaypointService
     }
 
+    private fun clipKeyFromArgs(runDist: String, alternateStart: Boolean): String {
+        var clipKey = runDist
+        if(alternateStart && (runDist in listOf("1000m", "3000m", "5000m"))) {
+            clipKey += "_a"
+        }
+
+        return clipKey
+    }
+
     fun beginPacing(runDist: String, runLane: Int, runTime: Double, alternateStart: Boolean): Boolean {
         prevTime = 0.0
-        clipIndexList = clipMap[if(alternateStart) runDist + "_a" else runDist]!!
+
+        val clipKey   = clipKeyFromArgs(runDist, alternateStart)
+        clipIndexList = clipMap[clipKey]!!
+
         waypointCalculator.initRun(runDist, runTime, runLane)
 
         val res = audioManager.requestAudioFocus(focusRequest)
@@ -176,7 +188,9 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
     }
 
     fun resumePacing(runDist: String, runTime: Double, runLane: Int, alternateStart: Boolean, resumeTime: Long): Boolean {
-        clipIndexList = clipMap[if(alternateStart) runDist + "_a" else runDist]!!
+        val clipKey = clipKeyFromArgs(runDist, alternateStart)
+        clipIndexList = clipMap[clipKey]!!
+
         prevTime = waypointCalculator.initResume(runDist, runTime, runLane, resumeTime.toDouble())
 
         val res = audioManager.requestAudioFocus(focusRequest)
