@@ -56,6 +56,15 @@ val rtMap = mapOf(
     "rt_1000m_l7"  to arrayOf(R.string.laps_1000, R.string.fl_200m, R.string.ll_3, R.drawable.rt_1000_l7),
     "rt_1000m_l8"  to arrayOf(R.string.laps_1000, R.string.fl_200m, R.string.ll_3, R.drawable.rt_1000_l8),
 
+    "rt_1000m_l1_a"  to arrayOf(R.string.laps_1000, R.string.ll_200m, R.string.ll_3, R.drawable.rt_1000_l1_a),
+    "rt_1000m_l2_a"  to arrayOf(R.string.laps_1000, R.string.ll_200m, R.string.ll_3, R.drawable.rt_1000_l2_a),
+    "rt_1000m_l3_a"  to arrayOf(R.string.laps_1000, R.string.ll_200m, R.string.ll_3, R.drawable.rt_1000_l3_a),
+    "rt_1000m_l4_a"  to arrayOf(R.string.laps_1000, R.string.ll_200m, R.string.ll_3, R.drawable.rt_1000_l4_a),
+    "rt_1000m_l5_a"  to arrayOf(R.string.laps_1000, R.string.ll_200m, R.string.ll_3, R.drawable.rt_1000_l5_a),
+    "rt_1000m_l6_a"  to arrayOf(R.string.laps_1000, R.string.ll_200m, R.string.ll_3, R.drawable.rt_1000_l6_a),
+    "rt_1000m_l7_a"  to arrayOf(R.string.laps_1000, R.string.ll_200m, R.string.ll_3, R.drawable.rt_1000_l7_a),
+    "rt_1000m_l8_a"  to arrayOf(R.string.laps_1000, R.string.ll_200m, R.string.ll_3, R.drawable.rt_1000_l8_a),
+
     "rt_1200m_l1"  to arrayOf(R.string.laps_1200, R.string.ll_3, R.string.empty, R.drawable.rt_400_l1),
     "rt_1200m_l2"  to arrayOf(R.string.laps_1200, R.string.ll_3, R.string.empty, R.drawable.rt_400_l2),
     "rt_1200m_l3"  to arrayOf(R.string.laps_1200, R.string.ll_3, R.string.empty, R.drawable.rt_400_l3),
@@ -92,6 +101,15 @@ val rtMap = mapOf(
     "rt_3000m_l7"  to arrayOf(R.string.laps_3000, R.string.fl_200m, R.string.ll_8, R.drawable.rt_1000_l7),
     "rt_3000m_l8"  to arrayOf(R.string.laps_3000, R.string.fl_200m, R.string.ll_8, R.drawable.rt_1000_l8),
 
+    "rt_3000m_l1_a"  to arrayOf(R.string.laps_3000, R.string.ll_200m, R.string.ll_8, R.drawable.rt_1000_l1_a),
+    "rt_3000m_l2_a"  to arrayOf(R.string.laps_3000, R.string.ll_200m, R.string.ll_8, R.drawable.rt_1000_l2_a),
+    "rt_3000m_l3_a"  to arrayOf(R.string.laps_3000, R.string.ll_200m, R.string.ll_8, R.drawable.rt_1000_l3_a),
+    "rt_3000m_l4_a"  to arrayOf(R.string.laps_3000, R.string.ll_200m, R.string.ll_8, R.drawable.rt_1000_l4_a),
+    "rt_3000m_l5_a"  to arrayOf(R.string.laps_3000, R.string.ll_200m, R.string.ll_8, R.drawable.rt_1000_l5_a),
+    "rt_3000m_l6_a"  to arrayOf(R.string.laps_3000, R.string.ll_200m, R.string.ll_8, R.drawable.rt_1000_l6_a),
+    "rt_3000m_l7_a"  to arrayOf(R.string.laps_3000, R.string.ll_200m, R.string.ll_8, R.drawable.rt_1000_l7_a),
+    "rt_3000m_l8_a"  to arrayOf(R.string.laps_3000, R.string.ll_200m, R.string.ll_8, R.drawable.rt_1000_l8_a),
+
     "rt_4000m_l1"  to arrayOf(R.string.laps_4000, R.string.ll_10, R.string.empty, R.drawable.rt_400_l1),
     "rt_4000m_l2"  to arrayOf(R.string.laps_4000, R.string.ll_10, R.string.empty, R.drawable.rt_400_l2),
     "rt_4000m_l3"  to arrayOf(R.string.laps_4000, R.string.ll_10, R.string.empty, R.drawable.rt_400_l3),
@@ -109,6 +127,15 @@ val rtMap = mapOf(
     "rt_5000m_l6"  to arrayOf(R.string.laps_5000, R.string.fl_200m, R.string.ll_13, R.drawable.rt_1000_l6),
     "rt_5000m_l7"  to arrayOf(R.string.laps_5000, R.string.fl_200m, R.string.ll_13, R.drawable.rt_1000_l7),
     "rt_5000m_l8"  to arrayOf(R.string.laps_5000, R.string.fl_200m, R.string.ll_13, R.drawable.rt_1000_l8),
+
+    "rt_5000m_l1_a"  to arrayOf(R.string.laps_5000, R.string.ll_200m, R.string.ll_13, R.drawable.rt_1000_l1_a),
+    "rt_5000m_l2_a"  to arrayOf(R.string.laps_5000, R.string.ll_200m, R.string.ll_13, R.drawable.rt_1000_l2_a),
+    "rt_5000m_l3_a"  to arrayOf(R.string.laps_5000, R.string.ll_200m, R.string.ll_13, R.drawable.rt_1000_l3_a),
+    "rt_5000m_l4_a"  to arrayOf(R.string.laps_5000, R.string.ll_200m, R.string.ll_13, R.drawable.rt_1000_l4_a),
+    "rt_5000m_l5_a"  to arrayOf(R.string.laps_5000, R.string.ll_200m, R.string.ll_13, R.drawable.rt_1000_l5_a),
+    "rt_5000m_l6_a"  to arrayOf(R.string.laps_5000, R.string.ll_200m, R.string.ll_13, R.drawable.rt_1000_l6_a),
+    "rt_5000m_l7_a"  to arrayOf(R.string.laps_5000, R.string.ll_200m, R.string.ll_13, R.drawable.rt_1000_l7_a),
+    "rt_5000m_l8_a"  to arrayOf(R.string.laps_5000, R.string.ll_200m, R.string.ll_13, R.drawable.rt_1000_l8_a),
 
     "rt_10000m_l1" to arrayOf(R.string.laps_10000, R.string.ll_25, R.string.empty, R.drawable.rt_400_l1),
     "rt_10000m_l2" to arrayOf(R.string.laps_10000, R.string.ll_25, R.string.empty, R.drawable.rt_400_l2),
@@ -128,26 +155,35 @@ val rtMap = mapOf(
     "rt_1 mile_l7" to arrayOf(R.string.laps_mile, R.string.fl_mile, R.string.ll_4, R.drawable.rt_mile_l7),
     "rt_1 mile_l8" to arrayOf(R.string.laps_mile, R.string.fl_mile, R.string.ll_4, R.drawable.rt_mile_l8))
 
+private fun rtKeyFromArgs(runDist: String, runLane: Int, alternateStart: Boolean = false): String {
+    var rtKey = "rt_" + runDist + "_l" + runLane.toString()
+    if(alternateStart && (runDist in listOf("1000m", "3000m", "5000m"))) {
+        rtKey += "_a"
+    }
+
+    return rtKey
+}
+
 private fun rtLaps(runDist: String, runLane: Int): Int {
-    val rtKey   = "rt_" + runDist + "_l" + runLane.toString()
+    val rtKey = rtKeyFromArgs(runDist, runLane)
     val rtArray = rtMap[rtKey]!!
     return rtArray[0]
 }
 
-private fun rtDesc1(runDist: String, runLane: Int): Int {
-    val rtKey   = "rt_" + runDist + "_l" + runLane.toString()
+private fun rtDesc1(runDist: String, runLane: Int, alternateStart: Boolean): Int {
+    val rtKey = rtKeyFromArgs(runDist, runLane, alternateStart)
     val rtArray = rtMap[rtKey]!!
     return rtArray[1]
 }
 
-private fun rtDesc2(runDist: String, runLane: Int): Int {
-    val rtKey  = "rt_" + runDist + "_l" + runLane.toString()
+private fun rtDesc2(runDist: String, runLane: Int, alternateStart: Boolean): Int {
+    val rtKey = rtKeyFromArgs(runDist, runLane, alternateStart)
     val rtArray = rtMap[rtKey]!!
     return rtArray[2]
 }
 
-private fun rtOverlay(runDist: String, runLane: Int): Int {
-    val rtKey  = "rt_" + runDist + "_l" + runLane.toString()
+private fun rtOverlay(runDist: String, runLane: Int, alternateStart: Boolean): Int {
+    val rtKey = rtKeyFromArgs(runDist, runLane, alternateStart)
     val rtArray = rtMap[rtKey]!!
     return rtArray[3]
 }
@@ -193,7 +229,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     private fun updateTrackOverlay() {
         val runDist = spinnerDist.selectedItem.toString()
         val runLane = spinnerLane.selectedItem.toString().toInt()
-        val runView = binding!!
+        val alternateStart = settingsModel.settingsManager.alternateStart
 
         val totalDist = distanceFor(runDist, runLane)
         val totalDistStr =
@@ -203,6 +239,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
                 if (runLane == 1) String.format("%dm", totalDist.toInt()) else String.format("%.2fm", totalDist)
             }
 
+        val runView = binding!!
         val labelSF = runView.labelStartFinish
         labelSF.text = getString(R.string.label_start, totalDistStr)
 
@@ -210,13 +247,13 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         lapCounter.text = getString(rtLaps(runDist, runLane))
 
         val lapDesc1 = runView.labelLapDesc1
-        lapDesc1.text = getString(rtDesc1(runDist, runLane))
+        lapDesc1.text = getString(rtDesc1(runDist, runLane, alternateStart))
 
         val lastDesc2 = runView.labelLapDesc2
-        lastDesc2.text = getString(rtDesc2(runDist, runLane))
+        lastDesc2.text = getString(rtDesc2(runDist, runLane, alternateStart))
 
         val trackOverlay = runView.runningTrackOverlay
-        trackOverlay.setImageDrawable(ContextCompat.getDrawable(requireContext(), rtOverlay(runDist, runLane)))
+        trackOverlay.setImageDrawable(ContextCompat.getDrawable(requireContext(), rtOverlay(runDist, runLane, alternateStart)))
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

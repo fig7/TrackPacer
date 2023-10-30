@@ -66,10 +66,9 @@ class PacingActivity: AppCompatActivity() {
             val runLane = pacingModel.runLane
             val runTime = pacingModel.runTime
             val pacingStatus = pacingModel.pacingStatus.value
-            if (pacingStatus == PacingStatus.ServiceStart) {
-                if (waypointService.beginPacing(runDist, runLane, runTime)) {
-                    if (statusModel.powerStart) {
-                        pacingModel.setPacingStatus(PacingStatus.PacingWait)
+            if(pacingStatus == PacingStatus.ServiceStart) {
+                if(waypointService.beginPacing(runDist, runLane, runTime)) {
+                    if(statusModel.powerStart) {
                         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
                         val screenAction = IntentFilter(Intent.ACTION_SCREEN_OFF)
@@ -77,6 +76,8 @@ class PacingActivity: AppCompatActivity() {
 
                         val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
                         registerReceiver(screenReceiver, screenAction, receiverFlags)
+
+                        pacingModel.setPacingStatus(PacingStatus.PacingWait)
                     } else {
                         waypointService.delayStart((statusModel.startDelay.toDouble() * 1000.0).toLong(), statusModel.quickStart)
 
@@ -84,8 +85,14 @@ class PacingActivity: AppCompatActivity() {
                         handler.postDelayed(pacingRunnable, 100)
                     }
                 }
-            } else if (pacingStatus == PacingStatus.ServiceResume) {
-                if (waypointService.resumePacing(runDist, runTime, runLane, pacingModel.pausedTime)) {
+            } else if(pacingStatus == PacingStatus.ServiceResume) {
+                if(waypointService.resumePacing(runDist, runTime, runLane, pacingModel.pausedTime)) {
+                    val screenAction = IntentFilter(Intent.ACTION_SCREEN_OFF)
+                    screenAction.addAction(Intent.ACTION_SCREEN_ON)
+
+                    val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
+                    registerReceiver(screenReceiver, screenAction, receiverFlags)
+
                     pacingModel.setPacingStatus(PacingStatus.PacingResume)
                     handler.postDelayed(pacingRunnable, 100)
                 }
@@ -392,17 +399,20 @@ class PacingActivity: AppCompatActivity() {
     }
 
     fun handleIncomingIntent(begin: Boolean, silent: Boolean) {
-        if (begin) {
+        val pacingStatus = pacingModel.pacingStatus.value
+        if(begin) {
+            if(pacingStatus != PacingStatus.PacingWait) { return }
+
             waypointService.powerStart(statusModel.quickStart)
 
             pacingModel.setPacingStatus(PacingStatus.PacingStart)
             handler.postDelayed(pacingRunnable, 100)
         } else {
-            when (pacingModel.pacingStatus.value) {
-                PacingStatus.NotPacing -> return
+            when(pacingStatus) {
+                PacingStatus.NotPacing    -> return
                 PacingStatus.PacingPaused -> return
-                PacingStatus.Pacing -> pausePacing(silent)
-                else -> stopPacing(silent)
+                PacingStatus.Pacing       -> pausePacing(silent)
+                else                      -> stopPacing(silent)
             }
         }
     }
