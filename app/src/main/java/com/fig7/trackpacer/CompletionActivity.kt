@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.BundleCompat
 import com.fig7.trackpacer.dialog.InfoDialog
 import com.fig7.trackpacer.data.HistoryModel
 import com.fig7.trackpacer.data.ResultData
@@ -33,7 +34,8 @@ class CompletionActivity: AppCompatActivity() {
         statusModel.quickStart = initData.getBoolean("QuickStart")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            resultModel.resultData = initData.getParcelable("resultParcel", ResultData::class.java)!!
+            initData.classLoader   = ResultData::class.java.classLoader
+            resultModel.resultData = BundleCompat.getParcelable(initData,"resultParcel", ResultData::class.java)!!
         } else {
             @Suppress("DEPRECATION")
             resultModel.resultData = initData.getParcelable("resultParcel")!!
