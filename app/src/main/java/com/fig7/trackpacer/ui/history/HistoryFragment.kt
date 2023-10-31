@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +34,7 @@ import com.fig7.trackpacer.databinding.FragmentHistoryBinding
 import com.fig7.trackpacer.data.ResultData
 import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.dialog.DeleteDialog
+import com.fig7.trackpacer.ui.theme.TPTheme
 import java.text.DateFormat
 
 class HistoryFragment: Fragment () {
@@ -51,44 +52,47 @@ class HistoryFragment: Fragment () {
         val historyManager = historyModel.historyManager
 
         historyList.setContent {
-            Column (modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp)) {
-                Divider(color = Color.Black)
+            TPTheme {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp)) {
 
-                LazyColumn {
-                    itemsIndexed(historyManager.historyList) { resultIndex, resultData ->
-                        val df = DateFormat.getDateInstance(DateFormat.SHORT)
-                        val shortRunDate = df.format(resultData.runDate)
+                    Divider(color = MaterialTheme.colors.onBackground)
 
-                        Row(modifier = Modifier
-                            .combinedClickable(onClick = { launchPastActivity(resultData) }, onLongClick = { deleteHistory(resultIndex) })
-                            .padding(horizontal = 1.dp, vertical = 16.dp)) {
+                    LazyColumn {
+                        itemsIndexed(historyManager.historyList) { resultIndex, resultData ->
+                            val df = DateFormat.getDateInstance(DateFormat.SHORT)
+                            val shortRunDate = df.format(resultData.runDate)
 
-                            Text(text = resultData.runDist, fontSize = 16.sp,
-                                 modifier = Modifier
-                                     .weight(0.25F, true)
-                                     .align(Alignment.CenterVertically))
+                            Row(modifier = Modifier
+                                .combinedClickable(onClick = { launchPastActivity(resultData) }, onLongClick = { deleteHistory(resultIndex) })
+                                .padding(horizontal = 1.dp, vertical = 16.dp)) {
 
-                            Text(text = shortRunDate, fontSize = 14.sp, textAlign = TextAlign.Center,
-                                 modifier = Modifier
-                                     .weight(0.25F, true)
-                                     .align(Alignment.CenterVertically))
+                                Text(text = resultData.runDist, fontSize = 16.sp, color = MaterialTheme.colors.onBackground,
+                                    modifier = Modifier
+                                    .weight(0.25F, true)
+                                    .align(Alignment.CenterVertically))
 
-                            Text(text = resultData.actualTimeStr, fontSize = 14.sp, textAlign = TextAlign.Center,
-                                 modifier = Modifier
-                                     .weight(0.25F, true)
-                                     .align(Alignment.CenterVertically))
+                                Text(text = shortRunDate, fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .weight(0.25F, true)
+                                        .align(Alignment.CenterVertically))
 
-                            Text(text = resultData.actualPaceStr + "/km", fontSize = 14.sp, textAlign = TextAlign.Center,
-                                 modifier = Modifier
-                                     .weight(0.25F, true)
-                                     .align(Alignment.CenterVertically))
+                                Text(text = resultData.actualTimeStr, fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .weight(0.25F, true)
+                                        .align(Alignment.CenterVertically))
 
-                            Text(text = " > ", fontSize = 14.sp)
+                                Text(text = resultData.actualPaceStr + "/km", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .weight(0.25F, true)
+                                        .align(Alignment.CenterVertically))
+
+                                Text(text = " > ", fontSize = 14.sp, color = MaterialTheme.colors.onBackground)
+                            }
+
+                            Divider(color = MaterialTheme.colors.onBackground)
                         }
-
-                        Divider(color = Color.Black)
                     }
                 }
             }
