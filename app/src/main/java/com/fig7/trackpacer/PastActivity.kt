@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.BundleCompat
 import com.fig7.trackpacer.data.ResultData
 import com.fig7.trackpacer.data.ResultModel
 import com.fig7.trackpacer.data.StatusModel
@@ -29,6 +30,7 @@ class PastActivity: AppCompatActivity() {
         statusModel.quickStart = initData.getBoolean("QuickStart")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            initData.classLoader   = ResultData::class.java.classLoader
             resultModel.resultData = initData.getParcelable("ResultParcel", ResultData::class.java)!!
         } else {
             @Suppress("DEPRECATION")

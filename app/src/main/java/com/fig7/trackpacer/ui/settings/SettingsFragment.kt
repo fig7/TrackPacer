@@ -18,9 +18,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +51,7 @@ import com.fig7.trackpacer.data.SettingsModel
 import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.FragmentSettingsBinding
 import com.fig7.trackpacer.dialog.InfoDialog
+import com.fig7.trackpacer.ui.theme.TPTheme
 
 private enum class Validity {
     // Definitely valid
@@ -208,124 +211,119 @@ class SettingsFragment: Fragment() {
 
         settingsList.setContent {
             val focusManager = LocalFocusManager.current
+            TPTheme {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp)) {
 
-            Column (modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp)) {
+                    Divider(color = MaterialTheme.colors.onBackground)
 
-                Divider(color = Color.Black)
-
-                LazyColumn {
-                    item {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
-                            .padding(horizontal = 1.dp, vertical = 16.dp)
-                            .fillMaxWidth()) {
-
-                            Column {
-                                Text(text = "Start delay", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "Seconds to delay the start by", fontSize = 14.sp, textAlign = TextAlign.Center)
-                                Text(text = "(between 5.00 and 30.00)", fontSize = 14.sp, textAlign = TextAlign.Center)
-                            }
-
-                            var startDelay by remember { mutableStateOf(TextFieldValue(text = settingsData.startDelay)) }
-                            var startDelayFocus by remember { mutableStateOf(false) }
-                            OutlinedTextField(value = startDelay,
-                                onValueChange = {
-                                    if(startDelayValid(it.text) != Validity.Invalid) { startDelay = it }
-                                },
-
-                                visualTransformation = StartDelayTransformation(), singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                keyboardActions = KeyboardActions(onDone = {
-                                    if (startDelayValid(startDelay.text) == Validity.Valid) {
-                                        focusManager.clearFocus()
-                                    }
-                                }),
-                                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                    LazyColumn {
+                        item {
+                            Row(horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
-                                    .width(80.dp).align(Alignment.CenterVertically)
-                                    .onFocusChanged {
-                                        if (it.isFocused) {
-                                            startDelayFocus = true
-                                        } else if (startDelayFocus) {
-                                            startDelayFocus = false
-                                            if (startDelayValid(startDelay.text) == Validity.Valid) {
-                                                setStartDelay(startDelay.text)
-                                            }
+                                    .padding(horizontal = 1.dp, vertical = 16.dp)
+                                    .fillMaxWidth()) {
 
-                                            startDelay = startDelay.copy(text = settingsData.startDelay)
+                                Column {
+                                    Text(text = "Start delay", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
+                                    Text(text = "Seconds to delay the start by", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center)
+                                    Text(text = "(between 5.00 and 30.00)", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center)
+                                }
+
+                                var startDelay by remember { mutableStateOf(TextFieldValue(text = settingsData.startDelay)) }
+                                var startDelayFocus by remember { mutableStateOf(false) }
+                                OutlinedTextField(value = startDelay,
+                                    onValueChange = {
+                                        if(startDelayValid(it.text) != Validity.Invalid) {
+                                            startDelay = it
                                         }
-                                    }
-                            )
-                        }
+                                    },
 
-                        Divider(color = Color.Black)
-                    }
+                                    visualTransformation = StartDelayTransformation(),
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                    keyboardActions = KeyboardActions(onDone = {
+                                        if(startDelayValid(startDelay.text) == Validity.Valid) {
+                                            focusManager.clearFocus()
+                                        }
+                                    }),
 
-                    item {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
-                            .padding(horizontal = 1.dp, vertical = 16.dp)
-                            .fillMaxWidth()) {
-
-                            Column {
-                                Text(
-                                    text = "Power start", fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                )
-
-                                Text(
-                                    text = "Power button to start and pause", fontSize = 14.sp, textAlign = TextAlign.Center,
+                                    colors = TextFieldDefaults.outlinedTextFieldColors(textColor = MaterialTheme.colors.onBackground),
+                                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                                     modifier = Modifier
-                                )
+                                        .width(80.dp)
+                                        .align(Alignment.CenterVertically)
+                                        .onFocusChanged {
+                                            if(it.isFocused) {
+                                                startDelayFocus = true
+                                            } else if(startDelayFocus) {
+                                                startDelayFocus = false
+                                                if(startDelayValid(startDelay.text) == Validity.Valid) {
+                                                    setStartDelay(startDelay.text)
+                                                }
+
+                                                startDelay = startDelay.copy(text = settingsData.startDelay)
+                                            }
+                                        })
                             }
 
-                            Switch(checked = settingsData.powerStart.value, onCheckedChange = { focusManager.clearFocus(); setPowerStart(it) })
+                            Divider(color = MaterialTheme.colors.onBackground)
                         }
 
-                        Divider(color = Color.Black)
-                    }
+                        item {
+                            Row(horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .padding(horizontal = 1.dp, vertical = 16.dp)
+                                    .fillMaxWidth()) {
 
-                    item {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
-                            .padding(horizontal = 1.dp, vertical = 16.dp)
-                            .fillMaxWidth()) {
+                                Column {
+                                    Text(text = "Power start", fontSize = 16.sp, color = MaterialTheme.colors.onBackground, fontWeight = FontWeight.Bold)
+                                    Text(text = "Power button to start and pause", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center)
+                                }
 
-                            Column {
-                                Text(
-                                    text = "Quick start", fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                )
-
-                                Text(
-                                    text = "Start is not delayed, just \"Go!\"", fontSize = 14.sp, textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                )
+                                Switch(checked = settingsData.powerStart.value,
+                                    onCheckedChange = { focusManager.clearFocus(); setPowerStart(it) })
                             }
 
-                            Switch(checked = settingsData.quickStart.value, onCheckedChange = { focusManager.clearFocus(); setQuickStart(it) })
+                            Divider(color = MaterialTheme.colors.onBackground)
                         }
 
-                        Divider(color = Color.Black)
-                    }
+                        item {
+                            Row(horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .padding(horizontal = 1.dp, vertical = 16.dp)
+                                    .fillMaxWidth()) {
 
-                    item {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
-                            .padding(horizontal = 1.dp, vertical = 16.dp)
-                            .fillMaxWidth()) {
+                                Column {
+                                    Text(text = "Quick start", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
+                                    Text(text = "Start is not delayed, just \"Go!\"", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center,)
+                                }
 
-                            Column {
-                                Text(
-                                    text = "Alternate start", fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                )
-
-                                Text(
-                                    text = "Swap start and finish for 1, 3, and 5km", fontSize = 14.sp, textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                )
+                                Switch(checked = settingsData.quickStart.value,
+                                    onCheckedChange = { focusManager.clearFocus(); setQuickStart(it) })
                             }
 
-                            Switch(checked = settingsData.alternateStart.value, onCheckedChange = { focusManager.clearFocus(); setAlternateStart(it) })
+                            Divider(color = MaterialTheme.colors.onBackground)
                         }
 
-                        Divider(color = Color.Black)
+                        item {
+                            Row(horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .padding(horizontal = 1.dp, vertical = 16.dp)
+                                    .fillMaxWidth()) {
+
+                                Column {
+                                    Text(text = "Alternate start", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
+                                    Text(text = "Swap start and finish for 1, 3, and 5km", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center)
+                                }
+
+                                Switch(checked = settingsData.alternateStart.value,
+                                    onCheckedChange = { focusManager.clearFocus(); setAlternateStart(it) })
+                            }
+
+                            Divider(color = MaterialTheme.colors.onBackground)
+                        }
                     }
                 }
             }
