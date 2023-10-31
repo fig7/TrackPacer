@@ -4,7 +4,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.BundleCompat
 import com.fig7.trackpacer.data.ResultData
 import com.fig7.trackpacer.data.ResultModel
 import com.fig7.trackpacer.data.StatusModel
