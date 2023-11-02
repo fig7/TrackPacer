@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
@@ -29,9 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -220,8 +225,10 @@ class SettingsFragment: Fragment() {
 
                     LazyColumn {
                         item {
+                            val focusRequester = FocusRequester()
                             Row(horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
+                                    .clickable { focusRequester.requestFocus() }
                                     .padding(horizontal = 1.dp, vertical = 16.dp)
                                     .fillMaxWidth()) {
 
@@ -254,6 +261,7 @@ class SettingsFragment: Fragment() {
                                     modifier = Modifier
                                         .width(80.dp)
                                         .align(Alignment.CenterVertically)
+                                        .focusRequester(focusRequester)
                                         .onFocusChanged {
                                             if(it.isFocused) {
                                                 startDelayFocus = true
@@ -274,16 +282,18 @@ class SettingsFragment: Fragment() {
                         item {
                             Row(horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
-                                    .padding(horizontal = 1.dp, vertical = 16.dp)
-                                    .fillMaxWidth()) {
+                                    .fillMaxWidth()
+                                    .toggleable(role = Role.Switch,
+                                        value = settingsData.powerStart.value,
+                                        onValueChange = { focusManager.clearFocus(); setPowerStart(it) })
+                                    .padding(horizontal = 1.dp, vertical = 16.dp)) {
 
                                 Column {
                                     Text(text = "Power start", fontSize = 16.sp, color = MaterialTheme.colors.onBackground, fontWeight = FontWeight.Bold)
                                     Text(text = "Power button to start and pause", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center)
                                 }
 
-                                Switch(checked = settingsData.powerStart.value,
-                                    onCheckedChange = { focusManager.clearFocus(); setPowerStart(it) })
+                                Switch(checked = settingsData.powerStart.value, onCheckedChange = null)
                             }
 
                             Divider(color = MaterialTheme.colors.onBackground)
@@ -292,16 +302,18 @@ class SettingsFragment: Fragment() {
                         item {
                             Row(horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
-                                    .padding(horizontal = 1.dp, vertical = 16.dp)
-                                    .fillMaxWidth()) {
+                                    .fillMaxWidth()
+                                    .toggleable(role = Role.Switch,
+                                        value = settingsData.quickStart.value,
+                                        onValueChange = { focusManager.clearFocus(); setQuickStart(it) })
+                                    .padding(horizontal = 1.dp, vertical = 16.dp)) {
 
                                 Column {
                                     Text(text = "Quick start", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
-                                    Text(text = "Start is not delayed, just \"Go!\"", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center,)
+                                    Text(text = "Start is not delayed, just \"Go!\"", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center)
                                 }
 
-                                Switch(checked = settingsData.quickStart.value,
-                                    onCheckedChange = { focusManager.clearFocus(); setQuickStart(it) })
+                                Switch(checked = settingsData.quickStart.value, onCheckedChange = null)
                             }
 
                             Divider(color = MaterialTheme.colors.onBackground)
@@ -310,16 +322,18 @@ class SettingsFragment: Fragment() {
                         item {
                             Row(horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
-                                    .padding(horizontal = 1.dp, vertical = 16.dp)
-                                    .fillMaxWidth()) {
+                                    .fillMaxWidth()
+                                    .toggleable(role = Role.Switch,
+                                        value = settingsData.alternateStart.value,
+                                        onValueChange = { focusManager.clearFocus(); setAlternateStart(it) })
+                                    .padding(horizontal = 1.dp, vertical = 16.dp)) {
 
                                 Column {
                                     Text(text = "Alternate start", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
                                     Text(text = "Swap start and finish for 1, 3, and 5km", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center)
                                 }
 
-                                Switch(checked = settingsData.alternateStart.value,
-                                    onCheckedChange = { focusManager.clearFocus(); setAlternateStart(it) })
+                                Switch(checked = settingsData.alternateStart.value, onCheckedChange = null)
                             }
 
                             Divider(color = MaterialTheme.colors.onBackground)
