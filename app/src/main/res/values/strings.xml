@@ -40,10 +40,10 @@
   <string name="delete_time">Delete</string>
   <string name="add_time">Add %1$s</string>
   <string name="set_time">Set to %1$s</string>
-  <string name="start_delay">5.00</string>
 
   <string name="content_pacing_status">Pacing status</string>
   <string name="content_phone_status">Incoming call detection</string>
+  <string name="content_start_delay">Start delay</string>
   <string name="content_edit_time">Edit time</string>
 
   <!-- Pro version <string name="content_edit_profile">Edit profile</string> -->

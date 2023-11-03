@@ -50,7 +50,9 @@
       android:layout_gravity="center"
 
       android:textColor="?android:textColorPrimary"
-      android:textSize="18sp"/>
+      android:textSize="18sp"
+
+      android:contentDescription="@string/content_start_delay"/>
 
     <Space
       android:layout_width="4dp"
