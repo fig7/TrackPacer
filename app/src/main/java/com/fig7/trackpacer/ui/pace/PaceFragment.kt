@@ -110,7 +110,7 @@ class PaceFragment: Fragment() {
         setButton = paceView.buttonSet
         setButton.setOnClickListener {
             val resultBundle = Bundle()
-            when (pacingModel.pacingStatus.value) {
+            when (statusModel.pacingStatus.value) {
                 PacingStatus.NotPacing -> { pacingModel.setElapsedTime(0L); afm.setFragmentResult("BEGIN_PACING", resultBundle) }
                 else -> throw IllegalStateException()
             }
@@ -119,7 +119,7 @@ class PaceFragment: Fragment() {
         goButton = paceView.buttonGo
         goButton.setOnClickListener {
             val resultBundle = Bundle()
-            when (pacingModel.pacingStatus.value) {
+            when (statusModel.pacingStatus.value) {
                 PacingStatus.NotPacing    -> afm.setFragmentResult("BEGIN_PACING",  resultBundle)
                 PacingStatus.PacingPaused -> afm.setFragmentResult("RESUME_PACING", resultBundle)
                 PacingStatus.Pacing       -> afm.setFragmentResult("PAUSE_PACING",  resultBundle)
@@ -133,7 +133,7 @@ class PaceFragment: Fragment() {
         }
 
         pacingIcon = paceView.pacePacingStatus
-        pacingModel.pacingStatus.observe(viewLifecycleOwner) { pacingStatus: PacingStatus ->
+        statusModel.pacingStatus.observe(viewLifecycleOwner) { pacingStatus: PacingStatus ->
             val ourContext = context ?: return@observe
 
             when(pacingStatus) {
@@ -314,7 +314,7 @@ class PaceFragment: Fragment() {
         val startDelay = statusModel.startDelay
 
         val context = requireContext()
-        when(pacingModel.pacingStatus.value) {
+        when(statusModel.pacingStatus.value) {
             PacingStatus.NotPacing    -> {
                 val pacingIconId = if(powerStart) R.drawable.power_stop_small else R.drawable.stop_small
                 pacingIcon.setImageDrawable(AppCompatResources.getDrawable(context, pacingIconId))

@@ -3,7 +3,6 @@ package com.fig7.trackpacer.data
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.fig7.trackpacer.enums.PacingStatus
 
 class PacingModel: ViewModel() {
     var runDist = ""
@@ -21,9 +20,6 @@ class PacingModel: ViewModel() {
     var totalTimeStr = ""
     var totalPaceStr = ""
 
-    private val mutablePacingStatus = MutableLiveData<PacingStatus>()
-    val pacingStatus: LiveData<PacingStatus> get() = mutablePacingStatus
-
     private val mutableElapsedTime = MutableLiveData<Long>()
     val elapsedTime: LiveData<Long> get() = mutableElapsedTime
     val elapsedTimeL: Long get() = mutableElapsedTime.value!!
@@ -39,17 +35,6 @@ class PacingModel: ViewModel() {
 
     private val mutableDistRun = MutableLiveData<Double>()
     val distRun: LiveData<Double> get() = mutableDistRun
-
-    private val mutableServiceReady = MutableLiveData<Boolean>()
-    val serviceReady: LiveData<Boolean> get() = mutableServiceReady
-
-    init {
-        setPacingStatus(PacingStatus.NotPacing)
-    }
-
-    fun setPacingStatus(pacingStatus: PacingStatus) {
-        mutablePacingStatus.value = pacingStatus
-    }
 
     fun setElapsedTime(elapsedTime: Long) {
         mutableElapsedTime.value = elapsedTime
@@ -69,9 +54,5 @@ class PacingModel: ViewModel() {
         mutableWaypointName.value      = ""
         mutableWaypointProgress.value  = 0.0
         mutableTimeRemaining.value     = null
-    }
-
-    fun setServiceReady(serviceReady: Boolean) {
-        mutableServiceReady.value = serviceReady
     }
 }
