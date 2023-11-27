@@ -198,6 +198,16 @@ class SettingsFragment: Fragment() {
         return true
     }
 
+    private fun setFlightMode(newFlightMode: Boolean): Boolean {
+        val settingsManager = settingsModel.settingsManager
+        if(!settingsManager.setFlightMode(newFlightMode)) {
+            handleSettingsError()
+            return false
+        }
+
+        return true
+    }
+
     private fun handleSettingsError() {
         val dialog = InfoDialog.newDialog("Error saving settings",
             "An error occurred while saving the settings data." +
@@ -334,6 +344,26 @@ class SettingsFragment: Fragment() {
                                 }
 
                                 Switch(checked = settingsData.alternateStart.value, onCheckedChange = null)
+                            }
+
+                            Divider(color = MaterialTheme.colors.onBackground)
+                        }
+
+                        item {
+                            Row(horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .toggleable(role = Role.Switch,
+                                        value = settingsData.flightMode.value,
+                                        onValueChange = { focusManager.clearFocus(); setFlightMode(it) })
+                                    .padding(horizontal = 1.dp, vertical = 16.dp)) {
+
+                                Column {
+                                    Text(text = "Flight mode", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
+                                    Text(text = "Show a reminder for flight mode", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center)
+                                }
+
+                                Switch(checked = settingsData.flightMode.value, onCheckedChange = null)
                             }
 
                             Divider(color = MaterialTheme.colors.onBackground)

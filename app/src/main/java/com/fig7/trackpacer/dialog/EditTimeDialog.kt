@@ -16,7 +16,6 @@ class EditTimeDialog: DialogFragment() {
     private lateinit var dialogTime: String
     private lateinit var dialogTimeArray: Array<String>
     private lateinit var dialogTag: String
-    private var dialogResult = Bundle()
 
     private lateinit var deleteButton: Button
     private lateinit var addButton: Button
@@ -74,14 +73,18 @@ class EditTimeDialog: DialogFragment() {
     }
 
     private fun cancelEdit() {
+        val dialogResult = Bundle()
         dialogResult.putInt("EditResult", EditResult.Cancel.ordinal)
+
         parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
         dismiss()
     }
 
     private fun deleteEdit() {
+        val dialogResult = Bundle()
         dialogResult.putString("EditTime", dialogTime)
         dialogResult.putInt("EditResult", EditResult.Delete.ordinal)
+
         parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
         dismiss()
     }
@@ -89,8 +92,10 @@ class EditTimeDialog: DialogFragment() {
     private fun addEdit() {
         val runTimeStr = stringFromRunTime(mins, secs, hths)
 
+        val dialogResult = Bundle()
         dialogResult.putString("EditTime", runTimeStr)
         dialogResult.putInt("EditResult", EditResult.Add.ordinal)
+
         parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
         dismiss()
     }
@@ -98,17 +103,21 @@ class EditTimeDialog: DialogFragment() {
     private fun setEdit() {
         val runTimeStr = stringFromRunTime(mins, secs, hths)
 
+        val dialogResult = Bundle()
         dialogResult.putString("OrigTime", dialogTime)
         dialogResult.putString("EditTime", runTimeStr)
         dialogResult.putInt("EditResult", EditResult.Set.ordinal)
+
         parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
         dismiss()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        dialogTime      = arguments?.getString("time").toString()
-        dialogTimeArray = arguments?.getStringArray("times") as Array<String>
-        dialogTag       = arguments?.getString("tag").toString()
+        val args = requireArguments()
+
+        dialogTime      = args.getString("time").toString()
+        dialogTimeArray = args.getStringArray("times") as Array<String>
+        dialogTag       = args.getString("tag").toString()
 
         val v: View = inflater.inflate(R.layout.edit_time, container, false)
         val titleLabel = v.findViewById<TextView>(R.id.edit_time_title)

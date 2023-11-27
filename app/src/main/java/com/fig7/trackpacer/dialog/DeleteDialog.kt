@@ -10,7 +10,6 @@ class DeleteDialog: DialogFragment() {
     private lateinit var dialogTitle: String
     private lateinit var dialogMessage: String
     private lateinit var dialogTag: String
-    private var dialogResult = Bundle()
 
     companion object {
         fun newDialog(title: String, message: String, tag: String): DeleteDialog {
@@ -27,7 +26,9 @@ class DeleteDialog: DialogFragment() {
     }
 
     private fun setResult(resultVal: Boolean) {
+        val dialogResult = Bundle()
         dialogResult.putBoolean("DeleteResult", resultVal)
+
         parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
     }
 
@@ -39,7 +40,7 @@ class DeleteDialog: DialogFragment() {
         val builder = AlertDialog.Builder(activity)
         builder.setTitle(dialogTitle)
         builder.setMessage(dialogMessage)
-        builder.setPositiveButton(R.string.request_delete) { _, _ -> setResult(true)}
+        builder.setPositiveButton(R.string.request_delete) { _, _ -> setResult(true) }
         builder.setNegativeButton(R.string.request_cancel) { _, _ -> setResult(false) }
         return builder.create()
     }

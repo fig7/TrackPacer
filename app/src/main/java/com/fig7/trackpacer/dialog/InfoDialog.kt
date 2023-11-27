@@ -24,8 +24,10 @@ class InfoDialog: DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        dialogTitle = arguments?.getString("title").toString()
-        dialogMessage = arguments?.getString("message").toString()
+        val args = requireArguments()
+
+        dialogTitle   = args.getString("title").toString()
+        dialogMessage = args.getString("message").toString()
 
         val builder = AlertDialog.Builder(activity)
         builder.setTitle(dialogTitle)

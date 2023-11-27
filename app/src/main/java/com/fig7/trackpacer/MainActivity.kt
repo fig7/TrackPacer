@@ -1,20 +1,26 @@
 package com.fig7.trackpacer
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.fig7.trackpacer.dialog.StorageErrorDialog
 import com.fig7.trackpacer.data.HistoryModel
 import com.fig7.trackpacer.data.SettingsModel
 import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.data.StorageModel
 import com.fig7.trackpacer.databinding.ActivityMainBinding
 import com.fig7.trackpacer.dialog.HistoryErrorDialog
+import com.fig7.trackpacer.dialog.InfoDialog
+import com.fig7.trackpacer.dialog.FMRDialog
 import com.fig7.trackpacer.dialog.SettingsErrorDialog
+import com.fig7.trackpacer.dialog.StorageErrorDialog
 import com.fig7.trackpacer.enums.EditResult
 import com.fig7.trackpacer.ui.run.RunViewModel
+
 
 // * Please update for new states
 // States
@@ -88,14 +94,14 @@ import com.fig7.trackpacer.ui.run.RunViewModel
 
 const val tpVersion = "1.3"
 class MainActivity: AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+
     private val storageModel:  StorageModel  by viewModels()
     private val historyModel:  HistoryModel  by viewModels()
     private val settingsModel: SettingsModel by viewModels()
 
     private val runViewModel: RunViewModel by viewModels()
     private val statusModel: StatusModel by viewModels()
-
-    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -154,6 +160,10 @@ class MainActivity: AppCompatActivity() {
                 dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
             }
         }
+
+        supportFragmentManager.setFragmentResultListener("DISPLAY_FM_REMINDER", this) { _: String, _: Bundle ->
+            displayFlightModeReminder()
+        }
     }
 
     override fun onStart() {
@@ -164,5 +174,43 @@ class MainActivity: AppCompatActivity() {
             val dialog = HistoryErrorDialog.newDialog("loading", true)
             dialog.show(supportFragmentManager, "HISTORY_ERROR_DIALOG")
         }
+    }
+
+    private fun displayFlightModeReminder() {
+        val flightMode = Settings.Global.getInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0)
+        if(flightMode == 1) {
+            runViewModel.continueToSet()
+            return
+        }
+
+        val dialog = FMRDialog.newDialog("Flight mode is disabled",
+            "Do you want to run without it?\nOr go to network settings and turn it on?",
+            "Run anyway", "Go to settings", "FLIGHT_MODE_REMINDER")
+
+        supportFragmentManager.setFragmentResultListener("FLIGHT_MODE_REMINDER", this) { _: String, bundle: Bundle ->
+            val resultVal = bundle.getBoolean("FMRResult")
+            if(resultVal) {
+                // Continue
+                val disableReminder = bundle.getBoolean("FMRDisable")
+                if(disableReminder) {
+                    settingsModel.settingsManager.setFlightMode(false)
+                }
+
+                runViewModel.continueToSet()
+                return@setFragmentResultListener
+            }
+
+            // Go to settings
+            val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS)
+
+            try {
+                startActivity(intent)
+            } catch (_: ActivityNotFoundException) {
+                val errorDialog = InfoDialog.newDialog("Settings error", "Network settings could not be opened")
+                errorDialog.show(supportFragmentManager, "FLIGHT_MODE_ERROR")
+            }
+        }
+
+        dialog.show(supportFragmentManager, "FLIGHT_MODE_REMINDER")
     }
 }

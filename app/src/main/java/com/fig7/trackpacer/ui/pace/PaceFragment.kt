@@ -49,8 +49,8 @@ class PaceFragment: Fragment() {
         binding = FragmentPaceBinding.inflate(inflater, container, false)
         val paceView = binding!!
 
-        val mainActivity = activity as PacingActivity
-        afm = mainActivity.supportFragmentManager
+        val pacingActivity = activity as PacingActivity
+        afm = pacingActivity.supportFragmentManager
 
         val timerView = paceView.timeView
         timerView.text = timeToFullString(resources, 0L)

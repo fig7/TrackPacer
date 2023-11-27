@@ -10,7 +10,6 @@ class RequestDialog: DialogFragment() {
     private lateinit var dialogTitle: String
     private lateinit var dialogMessage: String
     private lateinit var dialogTag: String
-    private var dialogResult = Bundle()
 
     companion object {
         fun newDialog(title: String, message: String, tag: String): RequestDialog {
@@ -27,20 +26,24 @@ class RequestDialog: DialogFragment() {
     }
 
     private fun setResult(resultVal: Boolean) {
+        val dialogResult = Bundle()
         dialogResult.putBoolean("RequestResult", resultVal)
+
         parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        dialogTitle   = arguments?.getString("title").toString()
-        dialogMessage = arguments?.getString("message").toString()
-        dialogTag     = arguments?.getString("tag").toString()
+        val args = requireArguments()
+
+        dialogTitle   = args.getString("title").toString()
+        dialogMessage = args.getString("message").toString()
+        dialogTag     = args.getString("tag").toString()
 
         val builder = AlertDialog.Builder(activity)
         builder.setTitle(dialogTitle)
         builder.setMessage(dialogMessage)
-        builder.setPositiveButton(R.string.request_continue) { _, _ -> setResult(true)}
-        builder.setNegativeButton(R.string.request_cancel) { _, _ -> setResult(false) }
+        builder.setPositiveButton(R.string.request_continue) { _, _ -> setResult(true) }
+        builder.setNegativeButton(R.string.request_cancel)   { _, _ -> setResult(false) }
         return builder.create()
     }
 }

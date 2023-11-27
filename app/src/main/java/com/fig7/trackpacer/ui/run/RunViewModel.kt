@@ -8,6 +8,9 @@ import androidx.lifecycle.ViewModel
 class RunViewModel(private val state: SavedStateHandle): ViewModel() {
     var newTimeIndex = 0
 
+    private val mutableLaunchSet = MutableLiveData<Boolean>()
+    val launchSet: LiveData<Boolean> get() = mutableLaunchSet
+
     private val mutableSelectedDist = MutableLiveData<Int>(state["dist"])
     val selectedDist: LiveData<Int> get() = mutableSelectedDist
 
@@ -16,6 +19,14 @@ class RunViewModel(private val state: SavedStateHandle): ViewModel() {
 
     private val mutableSelectedTime = MutableLiveData<Int>(state["time"])
     val selectedTime: LiveData<Int> get() = mutableSelectedTime
+
+    fun continueToSet() {
+        mutableLaunchSet.value = true
+    }
+
+    fun resetLaunchSet() {
+        mutableLaunchSet.value = false
+    }
 
     fun selectDist(distIndex: Int) {
         if(mutableSelectedDist.value != distIndex) {

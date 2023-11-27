@@ -27,6 +27,9 @@ class SettingsManager(filesDir: File) {
     val alternateStart: Boolean
         get() = settingsData.alternateStart.value
 
+    val flightModeReminder: Boolean
+        get() = settingsData.flightMode.value
+
     init {
         settingsDir = File(filesDir, "Settings")
     }
@@ -94,6 +97,18 @@ class SettingsManager(filesDir: File) {
         return true
     }
 
+    fun setFlightMode(flightMode: Boolean): Boolean {
+        try {
+            val newSettingsData = settingsData.copy(flightMode = mutableStateOf(flightMode))
+            writeData(newSettingsData)
+        } catch(_: Exception) {
+            return false
+        }
+
+        settingsData.flightMode.value = flightMode
+        return true
+    }
+
     private fun readVersion() {
         val versionFile = File(settingsDir, "version.dat")
         if (!versionFile.exists()) { throw IOException() }
@@ -112,6 +127,7 @@ class SettingsManager(filesDir: File) {
         settingsData.powerStart.value     = (defaultSettings[1] == "true")
         settingsData.quickStart.value     = (defaultSettings[2] == "true")
         settingsData.alternateStart.value = (defaultSettings[3] == "true")
+        settingsData.flightMode.value     = (defaultSettings[4] == "true")
     }
 
     private fun initData(defaultSettings: Array<String>) {
@@ -134,6 +150,7 @@ class SettingsManager(filesDir: File) {
                 "powerStart"     -> settingsData.powerStart.value     = json.getString(key).toBoolean()
                 "quickStart"     -> settingsData.quickStart.value     = json.getString(key).toBoolean()
                 "alternateStart" -> settingsData.alternateStart.value = json.getString(key).toBoolean()
+                "flightMode"     -> settingsData.flightMode.value     = json.getString(key).toBoolean()
             }
         }
     }
@@ -146,6 +163,7 @@ class SettingsManager(filesDir: File) {
         json.put("powerStart",     newSettingsData.powerStart.value.toString())
         json.put("quickStart",     newSettingsData.quickStart.value.toString())
         json.put("alternateStart", newSettingsData.alternateStart.value.toString())
+        json.put("flightMode",     newSettingsData.flightMode.value.toString())
 
         val settingsFile = File(settingsDir, "settings.dat")
         val writer = BufferedWriter(FileWriter(settingsFile))

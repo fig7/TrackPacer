@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.fig7.trackpacer.PacingActivity
 
-class ActivityReceiver : BroadcastReceiver() {
+class PacingReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if ((context == null) || (intent == null)) { return }
 
@@ -15,6 +15,5 @@ class ActivityReceiver : BroadcastReceiver() {
             "TrackPacer.POWER_PAUSE_PACING" -> activity.handleIncomingIntent(begin = false, silent = false)
             "TrackPacer.POWER_BEGIN_PACING" -> activity.handleIncomingIntent(begin = true,  silent = false)
         }
-
     }
 }

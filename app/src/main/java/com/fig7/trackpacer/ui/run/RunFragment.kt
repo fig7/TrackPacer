@@ -193,7 +193,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     private var binding: FragmentRunBinding? = null
 
     private val storageModel:  StorageModel by activityViewModels()
-    private val runViewModel: RunViewModel  by activityViewModels()
+    private val runViewModel:  RunViewModel by activityViewModels()
 
     private val settingsModel: SettingsModel by activityViewModels()
     private val statusModel:   StatusModel   by activityViewModels()
@@ -254,6 +254,42 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
         val trackOverlay = runView.runningTrackOverlay
         trackOverlay.setImageDrawable(ContextCompat.getDrawable(requireContext(), rtOverlay(runDist, runLane, alternateStart)))
+    }
+
+    private fun launchSet()
+    {
+        val bundle = Bundle()
+        val runDist = spinnerDist.selectedItem.toString()
+        bundle.putString("RunDist", runDist)
+
+        val runLane = spinnerLane.selectedItem.toString().toInt()
+        bundle.putInt("RunLane", runLane)
+
+        val runProf = spinnerProfile.selectedItem.toString()
+        bundle.putString("RunProf", runProf)
+
+        val runLaps = rtLaps(runDist, runLane)
+        bundle.putString("RunLaps", getString(runLaps))
+
+        val runTime = runTimeFromSpinner()
+        bundle.putDouble("RunTime", runTime)
+
+        val startDelay = statusModel.startDelay
+        bundle.putString("StartDelay", startDelay)
+
+        val powerStart = statusModel.powerStart
+        bundle.putBoolean("PowerStart", powerStart)
+
+        val quickStart = statusModel.quickStart
+        bundle.putBoolean("QuickStart", quickStart)
+
+        val alternateStart = settingsModel.settingsManager.alternateStart
+        bundle.putBoolean("AlternateStart", alternateStart)
+
+        val intent = Intent(requireContext(), PacingActivity::class.java)
+        intent.putExtras(bundle)
+
+        startActivity(intent)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -331,38 +367,21 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
 
         val oymButton = runView.buttonOym
         oymButton.setOnClickListener {
-            val bundle = Bundle()
-            val runDist = spinnerDist.selectedItem.toString()
-            bundle.putString("RunDist", runDist)
+            val settingsManager = settingsModel.settingsManager
+            if(settingsManager.flightModeReminder) {
+                afm.setFragmentResult("DISPLAY_FM_REMINDER", Bundle())
+                return@setOnClickListener
+            }
 
-            val runLane = spinnerLane.selectedItem.toString().toInt()
-            bundle.putInt("RunLane", runLane)
+            launchSet()
+        }
 
-            val runProf = spinnerProfile.selectedItem.toString()
-            bundle.putString("RunProf", runProf)
-
-            val runLaps = rtLaps(runDist, runLane)
-            bundle.putString("RunLaps", getString(runLaps))
-
-            val runTime = runTimeFromSpinner()
-            bundle.putDouble("RunTime", runTime)
-
-            val startDelay = statusModel.startDelay
-            bundle.putString("StartDelay", startDelay)
-
-            val powerStart = statusModel.powerStart
-            bundle.putBoolean("PowerStart", powerStart)
-
-            val quickStart = statusModel.quickStart
-            bundle.putBoolean("QuickStart", quickStart)
-
-            val alternateStart = settingsModel.settingsManager.alternateStart
-            bundle.putBoolean("AlternateStart", alternateStart)
-
-            val intent = Intent(requireContext(), PacingActivity::class.java)
-            intent.putExtras(bundle)
-
-            startActivity(intent)
+        runViewModel.launchSet.observe(viewLifecycleOwner) {
+            val launchSet = runViewModel.launchSet.value
+            if(launchSet == true) {
+                launchSet()
+                runViewModel.resetLaunchSet()
+            }
         }
 
         updateTrackOverlay()

@@ -24,8 +24,10 @@ class HistoryErrorDialog: DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val action      = arguments?.getString("action").toString()
-        val actionFatal = arguments?.getBoolean("fatality")
+        val args = requireArguments()
+
+        val action      = args.getString("action").toString()
+        val actionFatal = args.getBoolean("fatality")
 
         val title   = "Loading error"
         val message = "An error occurred while $action pacing history. Please try the operation again. If that doesn't work, re-install the application."
@@ -33,7 +35,7 @@ class HistoryErrorDialog: DialogFragment() {
         return AlertDialog.Builder(requireContext())
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(getString(R.string.ok)) { _, _ -> if (actionFatal == true) exitProcess(-1) }
+            .setPositiveButton(getString(R.string.ok)) { _, _ -> if (actionFatal) exitProcess(-1) }
             .create()
     }
 }

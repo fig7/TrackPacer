@@ -28,7 +28,7 @@ import com.fig7.trackpacer.data.ResultModel
 import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.ActivityPaceBinding
 import com.fig7.trackpacer.enums.PacingStatus
-import com.fig7.trackpacer.receiver.ActivityReceiver
+import com.fig7.trackpacer.receiver.PacingReceiver
 import com.fig7.trackpacer.receiver.ScreenReceiver
 import com.fig7.trackpacer.util.timeToAlmostFullString
 import com.fig7.trackpacer.util.timeToString
@@ -53,7 +53,7 @@ class PacingActivity: AppCompatActivity() {
     private val pacingRunnable = Runnable { handleTimeUpdate() }
 
     private var screenReceiver    = ScreenReceiver()
-    private var broadcastReceiver = ActivityReceiver()
+    private var broadcastReceiver = PacingReceiver()
 
     private lateinit var serviceIntent: Intent
     private val serviceConnection = object : ServiceConnection {

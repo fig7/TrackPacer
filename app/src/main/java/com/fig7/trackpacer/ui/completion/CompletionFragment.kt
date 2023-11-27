@@ -41,8 +41,8 @@ class CompletionFragment: Fragment() {
         binding = FragmentCompletionBinding.inflate(inflater, container, false)
         val completionView = binding!!
 
-        val mainActivity = activity as CompletionActivity
-        afm = mainActivity.supportFragmentManager
+        val completionActivity = activity as CompletionActivity
+        afm = completionActivity.supportFragmentManager
 
         val resultData = resultModel.resultData
         val netDate = Date(resultData.runDate)
