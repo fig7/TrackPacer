@@ -146,62 +146,64 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         return clipKey
     }
 
-    fun beginPacing(runDist: String, runLane: Int, runTime: Double, alternateStart: Boolean): Boolean {
-        prevTime = 0.0
-
+    fun beginPacing(runDist: String, runLane: Int, runTime: Double, alternateStart: Boolean) {
         val clipKey   = clipKeyFromArgs(runDist, alternateStart)
         clipIndexList = clipMap[clipKey]!!
+        prevTime      = 0.0
 
         waypointCalculator.initRun(runDist, runTime, runLane)
+    }
+
+    fun delayStart(startDelay: Long, quickStart: Boolean): Boolean {
+        mpStart = if(quickStart) mpStart2 else mpStart1
+        val res = audioManager.requestAudioFocus(focusRequest)
+        if(res == AUDIOFOCUS_REQUEST_GRANTED) {
+            if(quickStart) {
+                startRealtime = SystemClock.elapsedRealtime() + Go1ClipDuration
+                handler.post(startRunnable)
+            } else {
+                startRealtime = SystemClock.elapsedRealtime() + startDelay
+                handler.postDelayed(startRunnable, startDelay - Go4ClipDuration)
+            }
+
+            return true
+        }
+
+        return false
+    }
+
+    fun powerStart(quickStart: Boolean): Boolean {
+        mpStart = if(quickStart) mpStart2 else mpStart1
 
         val res = audioManager.requestAudioFocus(focusRequest)
-        if (res != AUDIOFOCUS_REQUEST_GRANTED) {
-            stopSelf()
-            return false
+        if(res == AUDIOFOCUS_REQUEST_GRANTED) {
+            if(quickStart) {
+                startRealtime = SystemClock.elapsedRealtime() + Go1ClipDuration
+                handler.post(startRunnable)
+            } else {
+                startRealtime = SystemClock.elapsedRealtime() + PowerStartOffset
+                handler.postDelayed(startRunnable, PowerClipOffset)
+            }
+
+            return true
         }
 
-        return true
-    }
-
-    fun delayStart(startDelay: Long, quickStart: Boolean) {
-        mpStart = if(quickStart) mpStart2 else mpStart1
-
-        if(quickStart) {
-            startRealtime = SystemClock.elapsedRealtime() + Go1ClipDuration
-            handler.post(startRunnable)
-        } else {
-            startRealtime = SystemClock.elapsedRealtime() + startDelay
-            handler.postDelayed(startRunnable, startDelay - Go4ClipDuration)
-        }
-    }
-
-    fun powerStart(quickStart: Boolean) {
-        mpStart = if(quickStart) mpStart2 else mpStart1
-
-        if(quickStart) {
-            startRealtime = SystemClock.elapsedRealtime() + Go1ClipDuration
-            handler.post(startRunnable)
-        } else {
-            startRealtime = SystemClock.elapsedRealtime() + PowerStartOffset
-            handler.postDelayed(startRunnable, PowerClipOffset)
-        }
+        return false
     }
 
     fun resumePacing(runDist: String, runTime: Double, runLane: Int, alternateStart: Boolean, resumeTime: Long): Boolean {
-        val clipKey = clipKeyFromArgs(runDist, alternateStart)
+        val clipKey   = clipKeyFromArgs(runDist, alternateStart)
         clipIndexList = clipMap[clipKey]!!
-
-        prevTime = waypointCalculator.initResume(runDist, runTime, runLane, resumeTime.toDouble())
+        prevTime      = waypointCalculator.initResume(runDist, runTime, runLane, resumeTime.toDouble())
 
         val res = audioManager.requestAudioFocus(focusRequest)
-        return if (res == AUDIOFOCUS_REQUEST_GRANTED) {
+        if(res == AUDIOFOCUS_REQUEST_GRANTED) {
             startRealtime = SystemClock.elapsedRealtime() - resumeTime
             resumeRunnable.run()
-            true
-        } else {
-            stopSelf()
-            false
+            return true
         }
+
+        return false
     }
 
     private fun beginRun() {

@@ -40,7 +40,7 @@ import com.fig7.trackpacer.ui.run.RunViewModel
 // Ship!
 // How about "Wait for screen lock before starting (i.e. start the service, but wait for screen off). Then auto-stop on screen unlock. Yeah.
 
-// Error handling on start / convert to jetpack / code review / ship!
+// Error handling on start (Audio focus failure) / convert to jetpack / code review / ship!
 // Clip recording / replacement / Tabs
 // Auto enable flight mode. Auto Lock Screen. Auto unlock screen?
 // Auto stop using voice recognition, GPS (!?) or detect power button press?
