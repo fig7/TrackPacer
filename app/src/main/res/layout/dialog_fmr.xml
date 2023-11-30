@@ -2,48 +2,117 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:paddingTop="?android:dialogPreferredPadding"
-  android:paddingHorizontal="?android:dialogPreferredPadding">
+  android:layout_height="match_parent">
 
-  <TextView
-    android:id = "@+id/fmr_message"
+  <ImageButton
+    android:id="@+id/fmr_cancel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
 
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+
+    android:background="@null"
+    android:contentDescription="@string/content_fmr_cancel"
+    android:src="@drawable/baseline_close_48"/>
+
+  <LinearLayout
     app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="parent"
 
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
 
-    android:textColor="?android:textColorPrimary"
-    android:textSize="16sp"/>
-
-  <LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingTop="24dp"
-
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/fmr_message">
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
 
     <TextView
+      android:id="@+id/fmr_title"
+      android:layout_width="wrap_content"
+      android:layout_height="56dp"
+
+      android:textColor="?android:textColorPrimary"
+      android:textSize="32sp"
+
+      android:maxLines="1"
+      android:autoSizeTextType="uniform"
+
+      android:text="@string/fmr_title"/>
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="3dp"/>
+
+    <TextView
+      android:id="@+id/fmr_message"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
 
       android:textColor="?android:textColorPrimary"
       android:textSize="16sp"
 
-      android:text="Disable flight mode reminder"/>
+      android:text="@string/fmr_message"
+      android:lineSpacingExtra="4dp"/>
 
-    <Space
-      android:layout_width="12dp"
-      android:layout_height="wrap_content"/>
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:paddingTop="24dp"
+      android:paddingBottom="3dp"
+      android:gravity="end"
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
-      android:id="@+id/fmr_switch"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/fmr_message">
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:textColor="?android:textColorPrimary"
+        android:textSize="16sp"
+
+        android:text="@string/fmr_disable"/>
+
+      <Space
+        android:layout_width="12dp"
+        android:layout_height="wrap_content"/>
+
+      <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/fmr_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"/>
-  </LinearLayout>
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:gravity="end"
+
+      android:paddingStart="2dp"
+      android:paddingEnd="2dp">
+
+      <Button
+        android:id="@+id/fmr_negative"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="@string/fmr_settings"/>
+
+      <Space
+        android:layout_width="20dp"
+        android:layout_height="match_parent"/>
+
+      <Button
+        android:id="@+id/fmr_positive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="@string/fmr_run"/>
+      </LinearLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

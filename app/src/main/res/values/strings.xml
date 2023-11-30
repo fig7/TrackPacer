@@ -35,11 +35,20 @@
 
   <string name="edit_time_all">%1$s:%2$s.%3$s</string>
   <string name="edit_time_title">Edit %1$s</string>
+  <string name="edit_hundredths">Hundredths</string>
+  <string name="edit_seconds">Seconds</string>
+  <string name="edit_minutes">Minutes</string>
   <string name="time_sep">:</string>
   <string name="hths_sep">.</string>
   <string name="delete_time">Delete</string>
   <string name="add_time">Add %1$s</string>
   <string name="set_time">Set to %1$s</string>
+
+  <string name="fmr_title">"Flight mode?"</string>
+  <string name="fmr_message">"Do you want to run without it?\nOr use network settings to turn it on?"</string>
+  <string name="fmr_disable">"Disable reminder"</string>
+  <string name="fmr_settings">Go to settings</string>
+  <string name="fmr_run">Run</string>
 
   <string name="content_pacing_status">Pacing status</string>
   <string name="content_phone_status">Incoming call detection</string>
@@ -59,6 +68,8 @@
   <string name="content_time_add">Add time</string>
   <string name="content_time_set">Set time</string>
   <string name="content_close">Close (without saving)</string>
+
+  <string name="content_fmr_cancel">Cancel run</string>
 
   <string name="start_and_finish">Start to finish</string>
   <string name="start_and_finish2">Start to finish markers</string>

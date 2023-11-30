@@ -1,67 +1,81 @@
 package com.fig7.trackpacer.dialog
 
-import android.app.AlertDialog
-import android.app.Dialog
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageButton
 import androidx.fragment.app.DialogFragment
 import com.fig7.trackpacer.R
+import com.fig7.trackpacer.enums.FMRResult
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class FMRDialog: DialogFragment() {
-    private lateinit var dialogTitle: String
-    private lateinit var dialogMessage: String
-    private lateinit var dialogPositive: String
-    private lateinit var dialogNegative: String
     private lateinit var dialogTag: String
 
     private lateinit var dialogSwitch: SwitchMaterial
 
+    private lateinit var positiveButton: Button
+    private lateinit var negativeButton: Button
+
     companion object {
-        fun newDialog(title: String, message: String, positive: String, negative: String, tag: String): FMRDialog {
+        fun newDialog(tag: String): FMRDialog {
             val f = FMRDialog()
             f.isCancelable = false
 
             val args = Bundle()
-            args.putString("title",    title)
-            args.putString("message",  message)
-            args.putString("positive", positive)
-            args.putString("negative", negative)
-            args.putString("tag",      tag)
+            args.putString("tag", tag)
             f.arguments = args
+
             return f
         }
     }
 
-    private fun setResult(resultVal: Boolean, disableReminder: Boolean) {
+    private fun cancelFMR() {
         val dialogResult = Bundle()
-        dialogResult.putBoolean("FMRResult",  resultVal)
-        dialogResult.putBoolean("FMRDisable", disableReminder)
+        dialogResult.putInt("FMRResult", FMRResult.Cancel.ordinal)
 
         parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
+        dismiss()
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    private fun negativeFMR() {
+        val dialogResult = Bundle()
+        dialogResult.putInt("FMRResult",  FMRResult.Settings.ordinal)
+        dialogResult.putBoolean("FMRDisable", dialogSwitch.isChecked)
+
+        parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
+        dismiss()
+    }
+
+    private fun positiveFMR() {
+        val dialogResult = Bundle()
+        dialogResult.putInt("FMRResult", FMRResult.Run.ordinal)
+        dialogResult.putBoolean("FMRDisable", dialogSwitch.isChecked)
+
+        parentFragmentManager.setFragmentResult(dialogTag, dialogResult)
+        dismiss()
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val args = requireArguments()
 
-        dialogTitle    = args.getString("title").toString()
-        dialogMessage  = args.getString("message").toString()
-        dialogPositive = args.getString("positive").toString()
-        dialogNegative = args.getString("negative").toString()
-        dialogTag      = args.getString("tag").toString()
+        dialogTag = args.getString("tag").toString()
 
-        val builder = AlertDialog.Builder(activity)
-        val dialogView: View = layoutInflater.inflate(R.layout.dialog_fmr, null, false)
-        val dialogText: TextView = dialogView.findViewById(R.id.fmr_message)
+        val v: View = inflater.inflate(R.layout.dialog_fmr, container, false)
 
-        dialogText.text = dialogMessage
-        dialogSwitch = dialogView.findViewById(R.id.fmr_switch)
+        val cancelButton = v.findViewById<ImageButton>(R.id.fmr_cancel)
+        cancelButton.setOnClickListener { cancelFMR() }
 
-        builder.setTitle(dialogTitle)
-        builder.setView(dialogView)
-        builder.setPositiveButton(dialogPositive) { _, _ -> setResult(true, dialogSwitch.isChecked) }
-        builder.setNegativeButton(dialogNegative) { _, _ -> setResult(false, dialogSwitch.isChecked) }
-        return builder.create()
+        dialogSwitch = v.findViewById(R.id.fmr_switch)
+
+        negativeButton = v.findViewById(R.id.fmr_negative)
+        negativeButton.setOnClickListener { negativeFMR() }
+
+        positiveButton = v.findViewById(R.id.fmr_positive)
+        positiveButton.setOnClickListener { positiveFMR() }
+
+        return v
     }
 }

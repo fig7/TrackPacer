@@ -5,6 +5,6 @@
     <item>false</item> // Power start
     <item>false</item> // Quick start
     <item>false</item> // Alternate start
-    <item>false</item> // Flight mode
+    <item>true</item>  // Flight mode
   </string-array>
 </resources>

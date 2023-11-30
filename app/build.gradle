@@ -15,8 +15,8 @@ android {
         //noinspection EditedTargetSdkVersion
         targetSdk 34
 
-        versionCode 23
-        versionName "1.6 (23)"
+        versionCode 25
+        versionName "1.7 (25)"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

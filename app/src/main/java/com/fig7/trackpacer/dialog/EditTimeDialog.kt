@@ -119,11 +119,11 @@ class EditTimeDialog: DialogFragment() {
         dialogTimeArray = args.getStringArray("times") as Array<String>
         dialogTag       = args.getString("tag").toString()
 
-        val v: View = inflater.inflate(R.layout.edit_time, container, false)
+        val v: View = inflater.inflate(R.layout.dialog_edit_time, container, false)
         val titleLabel = v.findViewById<TextView>(R.id.edit_time_title)
         titleLabel.text = getString(R.string.edit_time_title, dialogTime)
 
-        val cancelButton = v.findViewById<ImageButton>(R.id.cancel_button)
+        val cancelButton = v.findViewById<ImageButton>(R.id.edit_time_cancel)
         cancelButton.setOnClickListener { cancelEdit() }
 
         val runTime = runTimeFromString(dialogTime)

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <ImageButton
+    android:id="@+id/edit_time_cancel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+
+    android:background="@null"
+    android:contentDescription="@string/content_edit_cancel"
+    android:src="@drawable/baseline_close_48"/>
+
+  <LinearLayout
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
+
+    <TextView
+      android:id="@+id/edit_time_title"
+      android:layout_width="wrap_content"
+      android:layout_height="48dp"
+
+      android:textColor="?android:textColorPrimary"
+      android:textSize="32sp"
+
+      android:maxLines="1"
+      android:autoSizeTextType="uniform"/>
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="3dp"/>
+
+    <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:layout_gravity="center"
+
+      style="@style/picker_style">
+
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+
+          android:textColor="@color/gray"
+          android:text="@string/edit_minutes"/>
+
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal">
+
+          <NumberPicker
+            android:id="@+id/min_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:contentDescription="@string/content_edit_mins"
+            android:theme="@style/picker_text"/>
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+
+            android:paddingHorizontal="2dp"
+
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:text= "@string/time_sep"/>
+        </LinearLayout>
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+
+          android:textColor="@color/gray"
+          android:text="@string/edit_seconds"/>
+
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal">
+
+          <NumberPicker
+            android:id="@+id/sec_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:contentDescription="@string/content_edit_secs"
+            android:theme="@style/picker_text"/>
+
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center"
+
+              android:paddingHorizontal="2dp"
+
+              android:textColor="@color/black"
+              android:textSize="24sp"
+              android:text="@string/hths_sep"/>
+        </LinearLayout>
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+
+          android:textColor="@color/gray"
+          android:text="@string/edit_hundredths"/>
+
+        <NumberPicker
+          android:id="@+id/hths_picker"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+
+          android:contentDescription="@string/content_edit_hths"
+          android:theme="@style/picker_text"/>
+      </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+
+      android:paddingStart="2dp"
+      android:paddingEnd="2dp">
+
+      <Button
+        android:id="@+id/edit_time_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="@string/delete_time"/>
+
+      <Space
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+      <Button
+        android:id="@+id/edit_time_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+
+        android:contentDescription="@string/content_time_add"/>
+
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Space
+          android:layout_width="20dp"
+          android:layout_height="match_parent"/>
+
+        <Button
+          android:id="@+id/edit_time_set"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+
+          android:contentDescription="@string/content_time_set"/>
+        </LinearLayout>
+      </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

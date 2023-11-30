@@ -19,6 +19,7 @@ import com.fig7.trackpacer.dialog.FMRDialog
 import com.fig7.trackpacer.dialog.SettingsErrorDialog
 import com.fig7.trackpacer.dialog.StorageErrorDialog
 import com.fig7.trackpacer.enums.EditResult
+import com.fig7.trackpacer.enums.FMRResult
 import com.fig7.trackpacer.ui.run.RunViewModel
 
 
@@ -183,13 +184,13 @@ class MainActivity: AppCompatActivity() {
             return
         }
 
-        val dialog = FMRDialog.newDialog("Flight mode is disabled",
-            "Do you want to run without it?\nOr go to network settings and turn it on?",
-            "Run anyway", "Go to settings", "FLIGHT_MODE_REMINDER")
+        val dialog = FMRDialog.newDialog("FLIGHT_MODE_REMINDER")
 
         supportFragmentManager.setFragmentResultListener("FLIGHT_MODE_REMINDER", this) { _: String, bundle: Bundle ->
-            val resultVal = bundle.getBoolean("FMRResult")
-            if(resultVal) {
+            val resultVal = FMRResult.values()[bundle.getInt("FMRResult")]
+            if(resultVal == FMRResult.Cancel) { return@setFragmentResultListener }
+
+            if(resultVal == FMRResult.Run) {
                 // Continue
                 val disableReminder = bundle.getBoolean("FMRDisable")
                 if(disableReminder) {
