@@ -6,13 +6,16 @@ import android.content.Intent
 
 class ScreenReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        if ((context == null) || intent == null) { return }
+        if((context == null) || intent == null) { return }
 
-        val intentAction = intent.action
-        if (intentAction == Intent.ACTION_SCREEN_OFF) {
-            context.sendBroadcast(Intent("TrackPacer.POWER_BEGIN_PACING"))
-        } else if (intentAction == Intent.ACTION_SCREEN_ON) {
-            context.sendBroadcast(Intent("TrackPacer.POWER_PAUSE_PACING"))
+        val tpAction = when(intent.action) {
+            Intent.ACTION_SCREEN_OFF -> "TrackPacer.POWER_BEGIN_PACING"
+            Intent.ACTION_SCREEN_ON  -> "TrackPacer.POWER_PAUSE_PACING"
+            else                     -> return
         }
+
+        val tpIntent = Intent(tpAction)
+        tpIntent.setPackage(context.packageName)
+        context.sendBroadcast(tpIntent)
     }
 }

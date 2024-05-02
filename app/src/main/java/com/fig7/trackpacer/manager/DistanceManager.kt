@@ -3,9 +3,9 @@ package com.fig7.trackpacer.manager
 import java.io.File
 import java.io.IOException
 
-const val storageVersion = "1.3"
-class StorageManager(filesDir: File) {
-    private val dataDir: File
+private const val distanceVersion = "1.3"
+class DistanceManager(filesDir: File) {
+    private val distanceDir: File
 
     lateinit var distanceArray: Array<String>
     var timeMap = mutableMapOf<String, Array<String>>()
@@ -13,16 +13,15 @@ class StorageManager(filesDir: File) {
     private lateinit var currentVersion: String
 
     init {
-        dataDir = File(filesDir, "Data")
+        distanceDir = File(filesDir, "Data")
     }
 
     fun initDistances(defaultDistances: Array<String>) {
-        if(dataDir.exists()) {
+        if(distanceDir.exists()) {
             readVersion()
-
             readData()
 
-            if(currentVersion != storageVersion) {
+            if(currentVersion != distanceVersion) {
               updateData(defaultDistances)
             }
         } else {
@@ -31,7 +30,7 @@ class StorageManager(filesDir: File) {
     }
 
     private fun readVersion() {
-        val versionFile = File(dataDir, "version.dat")
+        val versionFile = File(distanceDir, "version.dat")
         if(!versionFile.exists()) {
             // Version before version file existed
             currentVersion = "1.2"
@@ -42,12 +41,12 @@ class StorageManager(filesDir: File) {
     }
 
     private fun writeVersion() {
-        val versionFile = File(dataDir, "version.dat")
-        versionFile.writeText(storageVersion)
+        val versionFile = File(distanceDir, "version.dat")
+        versionFile.writeText(distanceVersion)
     }
 
     private fun initData(defaultDistances: Array<String>) {
-        if(!dataDir.mkdir()) throw IOException()
+        if(!distanceDir.mkdir()) throw IOException()
 
         distanceArray = Array(defaultDistances.size) { defaultDistances[it].split("+")[0] }
         for((i, runDistance) in distanceArray.withIndex()) {
@@ -59,10 +58,10 @@ class StorageManager(filesDir: File) {
     }
 
     private fun readData() {
-        val folderList = dataDir.list() ?: throw IOException()
+        val folderList = distanceDir.list() ?: throw IOException()
         val distanceFilter = { distance: String -> distance.startsWith("Distance") }
 
-        val folderArray = folderList.filter(distanceFilter) .toTypedArray()
+        val folderArray = folderList.filter(distanceFilter).toTypedArray()
         folderArray.sort()
         distanceArray = Array(folderArray.size) { "" }
 
@@ -70,7 +69,7 @@ class StorageManager(filesDir: File) {
             val runDistance  = distance.substring(13)
             distanceArray[i] = runDistance
 
-            val distanceDir = File(dataDir, distance)
+            val distanceDir = File(distanceDir, distance)
             val timesFile = File(distanceDir, "times.dat")
             val timesStr  = timesFile.readText()
             timeMap[runDistance] = timesStr.split(",").toTypedArray()
@@ -79,12 +78,10 @@ class StorageManager(filesDir: File) {
 
     private fun writeData(distance: String) {
         val i = distanceArray.indexOf(distance)
-        if (i == -1) {
-            throw IllegalArgumentException()
-        }
+        if (i == -1) { throw IllegalArgumentException() }
 
         val prefix = String.format("Distance_%03d_", i)
-        val distanceDir = File(dataDir, prefix + distance)
+        val distanceDir = File(distanceDir, prefix + distance)
         if (!distanceDir.exists() && !distanceDir.mkdir()) throw IOException()
 
         val timesFile = File(distanceDir, "times.dat")
@@ -95,7 +92,7 @@ class StorageManager(filesDir: File) {
     private fun writeData() {
         for ((i, distance) in distanceArray.withIndex()) {
             val prefix = String.format("Distance_%03d_", i)
-            val distanceDir = File(dataDir, prefix + distance)
+            val distanceDir = File(distanceDir, prefix + distance)
             if (!distanceDir.exists() && !distanceDir.mkdir()) throw IOException()
 
             val timesFile = File(distanceDir, "times.dat")
@@ -109,36 +106,36 @@ class StorageManager(filesDir: File) {
             "1.2" -> {
                 // 1.2 -> 1.3
                 // Rename Distance_002_1200m ....
-                var oldDistanceDir = File(dataDir, "Distance_002_1200m")
-                var newDistanceDir = File(dataDir, "Distance_003_1200m")
+                var oldDistanceDir = File(distanceDir, "Distance_002_1200m")
+                var newDistanceDir = File(distanceDir, "Distance_003_1200m")
                 if(!oldDistanceDir.renameTo(newDistanceDir)) throw IOException()
 
-                oldDistanceDir = File(dataDir, "Distance_003_1500m")
-                newDistanceDir = File(dataDir, "Distance_004_1500m")
+                oldDistanceDir = File(distanceDir, "Distance_003_1500m")
+                newDistanceDir = File(distanceDir, "Distance_004_1500m")
                 if(!oldDistanceDir.renameTo(newDistanceDir)) throw IOException()
 
-                oldDistanceDir = File(dataDir, "Distance_004_2000m")
-                newDistanceDir = File(dataDir, "Distance_005_2000m")
+                oldDistanceDir = File(distanceDir, "Distance_004_2000m")
+                newDistanceDir = File(distanceDir, "Distance_005_2000m")
                 if(!oldDistanceDir.renameTo(newDistanceDir)) throw IOException()
 
-                oldDistanceDir = File(dataDir, "Distance_005_3000m")
-                newDistanceDir = File(dataDir, "Distance_006_3000m")
+                oldDistanceDir = File(distanceDir, "Distance_005_3000m")
+                newDistanceDir = File(distanceDir, "Distance_006_3000m")
                 if(!oldDistanceDir.renameTo(newDistanceDir)) throw IOException()
 
-                oldDistanceDir = File(dataDir, "Distance_006_4000m")
-                newDistanceDir = File(dataDir, "Distance_007_4000m")
+                oldDistanceDir = File(distanceDir, "Distance_006_4000m")
+                newDistanceDir = File(distanceDir, "Distance_007_4000m")
                 if(!oldDistanceDir.renameTo(newDistanceDir)) throw IOException()
 
-                oldDistanceDir = File(dataDir, "Distance_007_5000m")
-                newDistanceDir = File(dataDir, "Distance_008_5000m")
+                oldDistanceDir = File(distanceDir, "Distance_007_5000m")
+                newDistanceDir = File(distanceDir, "Distance_008_5000m")
                 if(!oldDistanceDir.renameTo(newDistanceDir)) throw IOException()
 
-                oldDistanceDir = File(dataDir, "Distance_008_10000m")
-                newDistanceDir = File(dataDir, "Distance_009_10000m")
+                oldDistanceDir = File(distanceDir, "Distance_008_10000m")
+                newDistanceDir = File(distanceDir, "Distance_009_10000m")
                 if(!oldDistanceDir.renameTo(newDistanceDir)) throw IOException()
 
-                oldDistanceDir = File(dataDir, "Distance_009_1 mile")
-                newDistanceDir = File(dataDir, "Distance_010_1 mile")
+                oldDistanceDir = File(distanceDir, "Distance_009_1 mile")
+                newDistanceDir = File(distanceDir, "Distance_010_1 mile")
                 if(!oldDistanceDir.renameTo(newDistanceDir)) throw IOException()
 
                 // Update distance array
@@ -146,7 +143,7 @@ class StorageManager(filesDir: File) {
                 timeMap["1000m"] = defaultDistances[2].split("+")[1].trim().split(",").toTypedArray()
 
                 // Write out Distance_002_1000m
-                val distanceDir = File(dataDir, "Distance_002_1000m")
+                val distanceDir = File(distanceDir, "Distance_002_1000m")
                 if (!distanceDir.exists() && !distanceDir.mkdir()) throw IOException()
 
                 val timesFile = File(distanceDir, "times.dat")

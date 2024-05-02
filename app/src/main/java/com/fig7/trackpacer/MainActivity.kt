@@ -8,16 +8,18 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.fig7.trackpacer.data.ClipsModel
 import com.fig7.trackpacer.data.HistoryModel
 import com.fig7.trackpacer.data.SettingsModel
 import com.fig7.trackpacer.data.StatusModel
-import com.fig7.trackpacer.data.StorageModel
+import com.fig7.trackpacer.data.DistanceModel
 import com.fig7.trackpacer.databinding.ActivityMainBinding
+import com.fig7.trackpacer.dialog.ClipsErrorDialog
 import com.fig7.trackpacer.dialog.HistoryErrorDialog
 import com.fig7.trackpacer.dialog.InfoDialog
 import com.fig7.trackpacer.dialog.FMRDialog
 import com.fig7.trackpacer.dialog.SettingsErrorDialog
-import com.fig7.trackpacer.dialog.StorageErrorDialog
+import com.fig7.trackpacer.dialog.DistanceErrorDialog
 import com.fig7.trackpacer.enums.EditResult
 import com.fig7.trackpacer.enums.FMRResult
 import com.fig7.trackpacer.ui.run.RunViewModel
@@ -42,6 +44,7 @@ import com.fig7.trackpacer.ui.run.RunViewModel
 // How about "Wait for screen lock before starting (i.e. start the service, but wait for screen off). Then auto-stop on screen unlock. Yeah.
 
 // Error handling on start (Audio focus failure) / convert to jetpack / code review / ship!
+// Just switch to Compose dialogs, please!
 // Clip recording / replacement / Tabs
 // Auto enable flight mode. Auto Lock Screen. Auto unlock screen?
 // Auto stop using voice recognition, GPS (!?) or detect power button press?
@@ -97,19 +100,25 @@ const val tpVersion = "1.3"
 class MainActivity: AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    private val storageModel:  StorageModel  by viewModels()
-    private val historyModel:  HistoryModel  by viewModels()
-    private val settingsModel: SettingsModel by viewModels()
+    private val distanceModel: DistanceModel  by viewModels()
+    private val clipsModel:    ClipsModel     by viewModels()
+    private val historyModel:  HistoryModel   by viewModels()
+    private val settingsModel: SettingsModel  by viewModels()
 
     private val runViewModel: RunViewModel by viewModels()
-    private val statusModel: StatusModel by viewModels()
+    private val statusModel:  StatusModel  by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if(!storageModel.storageDataOK) {
-            val dialog = StorageErrorDialog.newDialog("initializing", true)
-            dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
+        if(!distanceModel.distanceDataOK) {
+            val dialog = DistanceErrorDialog.newDialog("initializing", true)
+            dialog.show(supportFragmentManager, "DISTANCE_ERROR_DIALOG")
+        }
+
+        if(!clipsModel.clipsDataOK) {
+            val dialog = ClipsErrorDialog.newDialog("initializing", true)
+            dialog.show(supportFragmentManager, "CLIPS_ERROR_DIALOG")
         }
 
         if(!historyModel.historyDataOK) {
@@ -136,9 +145,9 @@ class MainActivity: AppCompatActivity() {
 
         supportFragmentManager.setFragmentResultListener("EDIT_TIME", this) { _: String, bundle: Bundle ->
             try {
-                val storageManager = storageModel.storageManager
+                val storageManager = distanceModel.distanceManager
                 val runDist = bundle.getString("EditDist")!!
-                when (EditResult.values()[bundle.getInt("EditResult")]) {
+                when (EditResult.entries[bundle.getInt("EditResult")]) {
                     EditResult.Delete -> {
                         val newTimeIndex = storageManager.deleteTime(runDist, bundle.getString("EditTime"))
                         runViewModel.resetDist(newTimeIndex)
@@ -157,8 +166,8 @@ class MainActivity: AppCompatActivity() {
                     EditResult.Cancel -> {}
                 }
             } catch (_: Exception) {
-                val dialog = StorageErrorDialog.newDialog("updating", false)
-                dialog.show(supportFragmentManager, "DATA_ERROR_DIALOG")
+                val dialog = DistanceErrorDialog.newDialog("updating", false)
+                dialog.show(supportFragmentManager, "DISTANCE_ERROR_DIALOG")
             }
         }
 
@@ -187,7 +196,7 @@ class MainActivity: AppCompatActivity() {
         val dialog = FMRDialog.newDialog("FLIGHT_MODE_REMINDER")
 
         supportFragmentManager.setFragmentResultListener("FLIGHT_MODE_REMINDER", this) { _: String, bundle: Bundle ->
-            val resultVal = FMRResult.values()[bundle.getInt("FMRResult")]
+            val resultVal = FMRResult.entries[bundle.getInt("FMRResult")]
             if(resultVal == FMRResult.Cancel) { return@setFragmentResultListener }
 
             if(resultVal == FMRResult.Run) {

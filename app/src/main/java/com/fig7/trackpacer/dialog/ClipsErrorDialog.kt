@@ -7,11 +7,11 @@ import androidx.fragment.app.DialogFragment
 import com.fig7.trackpacer.R
 import kotlin.system.exitProcess
 
-class StorageErrorDialog: DialogFragment() {
+class ClipsErrorDialog: DialogFragment() {
 
     companion object {
-        fun newDialog(action: String, actionFatal: Boolean): StorageErrorDialog {
-            val f = StorageErrorDialog()
+        fun newDialog(action: String, actionFatal: Boolean): ClipsErrorDialog {
+            val f = ClipsErrorDialog()
             f.isCancelable = false
 
             val args = Bundle()
@@ -30,7 +30,7 @@ class StorageErrorDialog: DialogFragment() {
         val actionFatal = args.getBoolean("fatality")
 
         val title   = "Loading error"
-        val message = "An error occurred while $action distances and times. Please try the operation again. If that doesn't work, re-install the application."
+        val message = "An error occurred while $action the clip library. Please try the operation again. If that doesn't work, re-install the application."
 
         return AlertDialog.Builder(requireContext())
             .setTitle(title)

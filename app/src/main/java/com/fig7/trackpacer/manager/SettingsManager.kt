@@ -8,7 +8,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 
-const val settingsVersion = "1.0"
+private const val settingsVersion = "1.0"
 class SettingsManager(filesDir: File) {
     private val settingsDir: File
     private lateinit var currentVersion: String
@@ -35,17 +35,17 @@ class SettingsManager(filesDir: File) {
     }
 
     fun initSettings(defaultSettings: Array<String>) {
+        settingsFromDefaults(defaultSettings)
+
         if (settingsDir.exists()) {
             readVersion()
-
-            settingsFromDefaults(defaultSettings)
             readData()
 
             if(currentVersion != settingsVersion) {
                 updateData()
             }
         } else {
-            initData(defaultSettings)
+            initData()
         }
     }
 
@@ -131,10 +131,9 @@ class SettingsManager(filesDir: File) {
         settingsData.flightMode.value     = (defaultSettings[4] == "true")
     }
 
-    private fun initData(defaultSettings: Array<String>) {
+    private fun initData() {
         if(!settingsDir.mkdir()) throw IOException()
 
-        settingsFromDefaults(defaultSettings)
         writeData()
         writeVersion()
     }

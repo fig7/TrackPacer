@@ -24,7 +24,7 @@ import com.fig7.trackpacer.PacingActivity
 import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.SettingsModel
 import com.fig7.trackpacer.data.StatusModel
-import com.fig7.trackpacer.data.StorageModel
+import com.fig7.trackpacer.data.DistanceModel
 import com.fig7.trackpacer.databinding.FragmentRunBinding
 import com.fig7.trackpacer.waypoint.distanceFor
 
@@ -192,7 +192,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var afm: FragmentManager
     private var binding: FragmentRunBinding? = null
 
-    private val storageModel:  StorageModel by activityViewModels()
+    private val distanceModel:  DistanceModel by activityViewModels()
     private val runViewModel:  RunViewModel by activityViewModels()
 
     private val settingsModel: SettingsModel by activityViewModels()
@@ -215,7 +215,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     private fun updateTimeSpinner() {
-        val dataManager = storageModel.storageManager
+        val dataManager = distanceModel.distanceManager
         val runDist = spinnerDist.selectedItem.toString()
 
         val spinnerTimeAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, dataManager.timeMap[runDist]!!)
@@ -299,7 +299,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         afm = mainActivity.supportFragmentManager
 
         val fragmentContext = requireContext()
-        val dataManager     = storageModel.storageManager
+        val dataManager     = distanceModel.distanceManager
         val runView         = binding!!
 
         initializingSpinners = 3

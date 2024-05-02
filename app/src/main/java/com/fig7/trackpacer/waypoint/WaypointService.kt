@@ -15,7 +15,7 @@ import com.fig7.trackpacer.MainActivity
 import com.fig7.trackpacer.R
 import kotlin.math.min
 
-val clipList = arrayOf(
+private val clipList = arrayOf(
     R.raw.fifty,
     R.raw.onehundred,
     R.raw.onehundredandfifty,
@@ -50,14 +50,14 @@ val clipList = arrayOf(
     R.raw.finish
 )
 
-var clipNames = arrayOf(
+private val clipNames = arrayOf(
     "50m",    "100m",   "150m",   "200m",   "250m",   "300m",   "350m",
     "Lap 2",  "Lap 3",  "Lap 4",  "Lap 5",  "Lap 6",  "Lap 7",  "Lap 8",  "Lap 9",
     "Lap 10", "Lap 11", "Lap 12", "Lap 13", "Lap 14", "Lap 15", "Lap 16", "Lap 17",
     "Lap 18", "Lap 19", "Lap 20", "Lap 21", "Lap 22", "Lap 23", "Lap 24", "Lap 25", "Finish line")
 
-val fL = clipList.size - 1
-val clipMap = mapOf(
+private val fL = clipList.size - 1
+private val clipMap = mapOf(
     "400m"    to arrayOf(0, 1, 2, 3, 4, 5 ,6, fL),
     "800m"    to arrayOf(0, 1, 2, 3, 4, 5 ,6,  7, 0, 1, 2, 3, 4, 5, 6, fL),
     "1000m"   to arrayOf(            0, 1, 2,  7, 0, 1, 2, 3, 4, 5, 6,  8, 0, 1, 2, 3, 4, 5, 6, fL),
@@ -86,16 +86,9 @@ val clipMap = mapOf(
                          0, 1, 2, 3, 4, 5, 6, 27, 0, 1, 2, 3, 4, 5, 6, 28, 0, 1, 2, 3, 4, 5, 6, 29, 0, 1, 2, 3, 4, 5, 6, 30, 0, 1, 2, 3, 4, 5, 6, fL),
     "1 mile"  to arrayOf(0, 1, 2, 3, 4, 5 ,6,  7, 0, 1, 2, 3, 4, 5, 6,  8, 0, 1, 2, 3, 4, 5, 6,  9, 0, 1, 2, 3, 4, 5, 6, fL))
 
-@Suppress("ConstPropertyName")
 private const val Go1ClipDuration  = 400L
-
-@Suppress("ConstPropertyName")
 private const val Go4ClipDuration  = 3000L
-
-@Suppress("ConstPropertyName")
 private const val PowerStartOffset = 4000L
-
-@Suppress("ConstPropertyName")
 private const val PowerClipOffset  = 1000L
 
 class WaypointService : Service(), OnAudioFocusChangeListener {
