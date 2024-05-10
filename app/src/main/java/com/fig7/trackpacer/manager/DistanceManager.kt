@@ -5,16 +5,12 @@ import java.io.IOException
 
 private const val distanceVersion = "1.3"
 class DistanceManager(filesDir: File) {
-    private val distanceDir: File
+    private val distanceDir: File = File(filesDir, "Data")
 
     lateinit var distanceArray: Array<String>
     var timeMap = mutableMapOf<String, Array<String>>()
 
     private lateinit var currentVersion: String
-
-    init {
-        distanceDir = File(filesDir, "Data")
-    }
 
     fun initDistances(defaultDistances: Array<String>) {
         if(distanceDir.exists()) {

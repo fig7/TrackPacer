@@ -59,14 +59,10 @@ private val defaultClipMap = linkedMapOf(
                                    Pair("Pacing complete",  Pair(R.raw.complete, ""))))
 
 class ClipsManager(filesDir: File) {
-    private val clipDir: File
+    private val clipDir: File = File(filesDir, "Clips")
     private lateinit var currentVersion: String
 
     private val clipMap = linkedMapOf<String, SnapshotStateList<File>>()
-
-    init {
-        clipDir = File(filesDir, "Clips")
-    }
 
     fun initClips(resources: Resources) {
         if(clipDir.exists()) {

@@ -14,13 +14,9 @@ import java.nio.file.attribute.FileTime
 import java.util.UUID
 
 class HistoryManager(filesDir: File) {
-    private val historyDir: File
+    private val historyDir: File = File(filesDir, "History")
     private var historyModified: FileTime? = null
     val historyList = mutableStateListOf<ResultData>()
-
-    init {
-        historyDir = File(filesDir, "History")
-    }
 
     fun initHistory() {
         if (!historyDir.exists() && !historyDir.mkdir()) throw IOException()

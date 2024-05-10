@@ -10,7 +10,7 @@ import java.io.IOException
 
 private const val settingsVersion = "1.0"
 class SettingsManager(filesDir: File) {
-    private val settingsDir: File
+    private val settingsDir: File = File(filesDir, "Settings")
     private lateinit var currentVersion: String
 
     lateinit var settingsData: SettingsData
@@ -29,10 +29,6 @@ class SettingsManager(filesDir: File) {
 
     val flightModeReminder: Boolean
         get() = settingsData.flightMode.value
-
-    init {
-        settingsDir = File(filesDir, "Settings")
-    }
 
     fun initSettings(defaultSettings: Array<String>) {
         settingsFromDefaults(defaultSettings)

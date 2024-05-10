@@ -100,7 +100,7 @@ class PacingActivity: AppCompatActivity() {
                     registerReceiver(screenReceiver, screenAction, receiverFlags)
                 }
 
-                if(waypointService.resumePacing(runDist, runTime, runLane, alternateStart, pacingModel.pausedTime)) {
+                if(waypointService.resumePacing(runDist, runTime, runLane, alternateStart, pacingModel.elapsedTimeL)) {
                     handler.postDelayed(pacingRunnable, 100)
                 } else {
                     stopPacing(true)
@@ -307,9 +307,22 @@ class PacingActivity: AppCompatActivity() {
     }
 
     private fun pausePacing(silent: Boolean) {
-        pacingModel.pausedTime = waypointService.elapsedTime()
+        // Record the pacing progress
+        val elapsedTime = waypointService.elapsedTime()
+        pacingModel.setElapsedTime(elapsedTime)
+
+        val distRun = waypointService.distOnPace(elapsedTime)
+        pacingModel.setDistRun(distRun)
+
+        val name          = waypointService.waypointName()
+        val progress      = waypointService.waypointProgress(elapsedTime)
+        val remainingTime = waypointService.timeRemaining(elapsedTime)
+        pacingModel.setWaypointProgress(name, progress, remainingTime)
+
+        // Stop the service
         stopService()
 
+        // Update the status
         if(silent) {
             statusModel.setPacingStatus(PacingStatus.PacingPaused)
         } else {

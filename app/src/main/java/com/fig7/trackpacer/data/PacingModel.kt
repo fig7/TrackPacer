@@ -12,8 +12,6 @@ class PacingModel: ViewModel() {
     var runTime = -1.0
     var alternateStart = false
 
-    var pausedTime = -1L
-
     var totalDist = -1.0
 
     var totalDistStr = ""
