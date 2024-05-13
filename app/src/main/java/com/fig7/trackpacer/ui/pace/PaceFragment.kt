@@ -64,11 +64,11 @@ class PaceFragment: Fragment() {
         val runDistView = paceView.pacingDist
         runDistView.text = getString(R.string.pace_dist, pacingModel.totalDistStr, pacingModel.runLaps)
 
-        val runProfView = paceView.pacingProf
-        runProfView.text = pacingModel.runProf
-
         val runTimeView = paceView.pacingTime
         runTimeView.text = getString(R.string.pace_pace, pacingModel.totalTimeStr, pacingModel.totalPaceStr)
+
+        val runProfView = paceView.pacingProf
+        runProfView.text = pacingModel.runProf
 
         distRun = paceView.distRun
         distRun.text = ""

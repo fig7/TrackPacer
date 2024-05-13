@@ -3,6 +3,7 @@ package com.fig7.trackpacer.data
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.fig7.trackpacer.util.Int64
 
 class PacingModel: ViewModel() {
     var runDist = ""
@@ -19,8 +20,8 @@ class PacingModel: ViewModel() {
     var totalPaceStr = ""
 
     private val mutableElapsedTime = MutableLiveData<Long>()
-    val elapsedTime: LiveData<Long> get() = mutableElapsedTime
-    val elapsedTimeL: Long get() = mutableElapsedTime.value!!
+    val elapsedTime: LiveData<Int64> get() = mutableElapsedTime
+    val elapsedTimeL: Int64 get() = mutableElapsedTime.value!!
 
     private var mutableWaypointName = MutableLiveData<String>()
     val waypointName: LiveData<String> get() = mutableWaypointName
