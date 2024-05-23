@@ -53,6 +53,7 @@ import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.FragmentClipsBinding
 import com.fig7.trackpacer.manager.ClipsManager
 import com.fig7.trackpacer.ui.theme.TPTheme
+import com.fig7.trackpacer.util.Bool
 import org.json.JSONObject
 import java.io.File
 import java.util.Locale
@@ -77,7 +78,7 @@ class ClipsFragment: Fragment() {
     }
 
     @Composable
-    private fun CatItem(text: String, selected: Boolean, clickable: () -> Unit) {
+    private fun CatItem(text: String, selected: Bool, clickable: () -> Unit) {
         if(selected) {
             Card(modifier = Modifier
                 .height(36.dp)
@@ -96,7 +97,7 @@ class ClipsFragment: Fragment() {
     }
 
     @Composable
-    private fun ClipItem(clipFile: File, selected: Boolean, clickable: () -> Unit) {
+    private fun ClipItem(clipFile: File, selected: Bool, clickable: () -> Unit) {
         val fileName = clipFile.name
         val fileBase = fileName.substringBeforeLast('.', "")
         val fileExt  = fileName.substringAfterLast('.', "")

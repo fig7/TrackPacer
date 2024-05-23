@@ -5,7 +5,7 @@ import com.fig7.trackpacer.R
 import java.util.Locale
 import kotlin.math.abs
 
-fun timeToString(resources: Resources, timeInMS: Long): String {
+fun timeToString(resources: Resources, timeInMS: Int64): String {
     var timeLeft = abs(timeInMS)
     val sgnStr   = if(timeInMS < 0) "-" else ""
 
@@ -46,7 +46,7 @@ fun timeToString(resources: Resources, timeInMS: Long): String {
     }
 }
 
-fun timeToMinuteString(resources: Resources, timeInMS: Long): String {
+fun timeToMinuteString(resources: Resources, timeInMS: Int64): String {
     var timeLeft = abs(timeInMS)
     val sgnStr   = if(timeInMS < 0) "-" else ""
 
@@ -81,7 +81,7 @@ fun timeToMinuteString(resources: Resources, timeInMS: Long): String {
     }
 }
 
-fun timeToAlmostFullString(resources: Resources, timeInMS: Long): String {
+fun timeToAlmostFullString(resources: Resources, timeInMS: Int64): String {
     var timeLeft = abs(timeInMS)
     val sgnStr   = if(timeInMS < 0) "-" else ""
 

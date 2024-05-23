@@ -2,6 +2,7 @@ package com.fig7.trackpacer.manager
 
 import androidx.compose.runtime.mutableStateOf
 import com.fig7.trackpacer.data.SettingsData
+import com.fig7.trackpacer.util.Bool
 import org.json.JSONObject
 import java.io.BufferedWriter
 import java.io.File
@@ -18,16 +19,16 @@ class SettingsManager(filesDir: File) {
     val startDelay: String
         get() = settingsData.startDelay
 
-    val powerStart: Boolean
+    val powerStart: Bool
         get() = settingsData.powerStart.value
 
-    val quickStart: Boolean
+    val quickStart: Bool
         get() = settingsData.quickStart.value
 
-    val alternateStart: Boolean
+    val alternateStart: Bool
         get() = settingsData.alternateStart.value
 
-    val flightModeReminder: Boolean
+    val flightModeReminder: Bool
         get() = settingsData.flightMode.value
 
     fun initSettings(defaultSettings: Array<String>) {
@@ -45,7 +46,7 @@ class SettingsManager(filesDir: File) {
         }
     }
 
-    fun setStartDelay(startDelay: String): Boolean {
+    fun setStartDelay(startDelay: String): Bool {
         try {
             val newSettingsData = settingsData.copy(startDelay = startDelay)
             writeData(newSettingsData)
@@ -57,7 +58,7 @@ class SettingsManager(filesDir: File) {
         return true
     }
 
-    fun setPowerStart(powerStart: Boolean): Boolean {
+    fun setPowerStart(powerStart: Bool): Bool {
         try {
             val newSettingsData = settingsData.copy(powerStart = mutableStateOf(powerStart))
             writeData(newSettingsData)
@@ -69,7 +70,7 @@ class SettingsManager(filesDir: File) {
         return true
     }
 
-    fun setQuickStart(quickStart: Boolean): Boolean {
+    fun setQuickStart(quickStart: Bool): Bool {
         try {
             val newSettingsData = settingsData.copy(quickStart = mutableStateOf(quickStart))
             writeData(newSettingsData)
@@ -81,7 +82,7 @@ class SettingsManager(filesDir: File) {
         return true
     }
 
-    fun setAlternateStart(alternateStart: Boolean): Boolean {
+    fun setAlternateStart(alternateStart: Bool): Bool {
         try {
             val newSettingsData = settingsData.copy(alternateStart = mutableStateOf(alternateStart))
             writeData(newSettingsData)
@@ -93,7 +94,7 @@ class SettingsManager(filesDir: File) {
         return true
     }
 
-    fun setFlightMode(flightMode: Boolean): Boolean {
+    fun setFlightMode(flightMode: Bool): Bool {
         // NB Flight mode reminder is not saved
         /* try {
             val newSettingsData = settingsData.copy(flightMode = mutableStateOf(flightMode))

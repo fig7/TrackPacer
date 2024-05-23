@@ -30,11 +30,13 @@ import com.fig7.trackpacer.databinding.ActivityPaceBinding
 import com.fig7.trackpacer.enums.PacingStatus
 import com.fig7.trackpacer.receiver.PacingReceiver
 import com.fig7.trackpacer.receiver.ScreenReceiver
+import com.fig7.trackpacer.util.Bool
 import com.fig7.trackpacer.util.timeToAlmostFullString
 import com.fig7.trackpacer.util.timeToString
 import com.fig7.trackpacer.waypoint.WaypointService
 import com.fig7.trackpacer.waypoint.distanceFor
 import com.fig7.trackpacer.waypoint.timeFor
+import java.util.Locale
 
 class PacingActivity: AppCompatActivity() {
     private val pacingModel: PacingModel by viewModels()
@@ -100,7 +102,7 @@ class PacingActivity: AppCompatActivity() {
                     registerReceiver(screenReceiver, screenAction, receiverFlags)
                 }
 
-                if(waypointService.resumePacing(runDist, runTime, runLane, alternateStart, pacingModel.elapsedTimeL)) {
+                if(waypointService.resumePacing(runDist, runLane, runTime, alternateStart, pacingModel.elapsedTimeL)) {
                     handler.postDelayed(pacingRunnable, 100)
                 } else {
                     stopPacing(true)
@@ -127,12 +129,12 @@ class PacingActivity: AppCompatActivity() {
         startService()
     }
 
-    private fun isPacing(pacingStatus: PacingStatus? = statusModel.pacingStatus.value): Boolean {
+    private fun isPacing(pacingStatus: PacingStatus? = statusModel.pacingStatus.value): Bool {
         return ((pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume) ||
                 (pacingStatus == PacingStatus.PacingWait)  || (pacingStatus == PacingStatus.Pacing))
     }
 
-    private fun isWaiting(pacingStatus: PacingStatus? = statusModel.pacingStatus.value): Boolean {
+    private fun isWaiting(pacingStatus: PacingStatus? = statusModel.pacingStatus.value): Bool {
         return (pacingStatus == PacingStatus.PacingWait)
     }
 
@@ -164,9 +166,9 @@ class PacingActivity: AppCompatActivity() {
         pacingModel.totalDist = distanceFor(pacingModel.runDist, pacingModel.runLane)
         pacingModel.totalDistStr =
             if(pacingModel.runDist == "1 mile") {
-                if(pacingModel.runLane == 1) pacingModel.runDist else String.format("%.2f miles", pacingModel.totalDist/1609.34)
+                if(pacingModel.runLane == 1) pacingModel.runDist else String.format(Locale.ROOT, "%.2f miles", pacingModel.totalDist/1609.34)
             } else {
-                if (pacingModel.runLane == 1) String.format("%dm", pacingModel.totalDist.toInt()) else String.format("%.2fm", pacingModel.totalDist)
+                if (pacingModel.runLane == 1) String.format(Locale.ROOT, "%dm", pacingModel.totalDist.toInt()) else String.format(Locale.ROOT, "%.2fm", pacingModel.totalDist)
             }
 
         val totalTime = timeFor(pacingModel.runDist, pacingModel.runLane, pacingModel.runTime)
@@ -306,7 +308,7 @@ class PacingActivity: AppCompatActivity() {
         stopService(serviceIntent)
     }
 
-    private fun pausePacing(silent: Boolean) {
+    private fun pausePacing(silent: Bool) {
         // Record the pacing progress
         val elapsedTime = waypointService.elapsedTime()
         pacingModel.setElapsedTime(elapsedTime)
@@ -331,7 +333,7 @@ class PacingActivity: AppCompatActivity() {
         }
     }
 
-    private fun stopPacing(silent: Boolean) {
+    private fun stopPacing(silent: Bool) {
         val pacingStatus = statusModel.pacingStatus.value
         if(isPacing(pacingStatus)) {
             stopService()
@@ -416,7 +418,7 @@ class PacingActivity: AppCompatActivity() {
         handler.postDelayed(pacingRunnable, 100)
     }
 
-    fun handleIncomingIntent(begin: Boolean, silent: Boolean) {
+    fun handleIncomingIntent(begin: Bool, silent: Bool) {
         val pacingStatus = statusModel.pacingStatus.value
         if(begin) {
             if(pacingStatus != PacingStatus.PacingWait) { return }

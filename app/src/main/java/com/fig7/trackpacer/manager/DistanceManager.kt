@@ -1,5 +1,6 @@
 package com.fig7.trackpacer.manager
 
+import com.fig7.trackpacer.util.Bool
 import java.io.File
 import java.io.IOException
 
@@ -153,7 +154,7 @@ class DistanceManager(filesDir: File) {
         writeVersion()
     }
 
-    private fun timeGreaterThan(time1: String, time2: String): Boolean {
+    private fun timeGreaterThan(time1: String, time2: String): Bool {
         val time1Split = time1.split(":")
         val time1Dbl = 1000.0*(time1Split[0].trim().toLong()*60.0 + time1Split[1].toDouble())
 

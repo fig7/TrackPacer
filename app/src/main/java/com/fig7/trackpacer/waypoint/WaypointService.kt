@@ -13,6 +13,8 @@ import android.os.*
 import android.os.PowerManager.WakeLock
 import com.fig7.trackpacer.MainActivity
 import com.fig7.trackpacer.R
+import com.fig7.trackpacer.util.Bool
+import com.fig7.trackpacer.util.Int64
 import kotlin.math.min
 
 private val clipList = arrayOf(
@@ -108,12 +110,10 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
     }
 
     private val startRunnable = Runnable {
-        beginRun()
         mpStart.start()
     }
 
     private val resumeRunnable = Runnable {
-        beginRun()
         mpResume.start()
     }
 
@@ -130,7 +130,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         fun getService(): WaypointService = this@WaypointService
     }
 
-    private fun clipKeyFromArgs(runDist: String, alternateStart: Boolean): String {
+    private fun clipKeyFromArgs(runDist: String, alternateStart: Bool): String {
         var clipKey = runDist
         if(alternateStart && (runDist in listOf("1000m", "3000m", "5000m"))) {
             clipKey += "_a"
@@ -139,7 +139,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         return clipKey
     }
 
-    fun beginPacing(runDist: String, runLane: Int, runTime: Double, alternateStart: Boolean) {
+    fun beginPacing(runDist: String, runLane: Int, runTime: Double, alternateStart: Bool) {
         val clipKey   = clipKeyFromArgs(runDist, alternateStart)
         clipIndexList = clipMap[clipKey]!!
         prevTime      = 0.0
@@ -147,8 +147,9 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         waypointCalculator.initRun(runDist, runTime, runLane)
     }
 
-    fun delayStart(startDelay: Long, quickStart: Boolean): Boolean {
-        mpStart = if(quickStart) mpStart2 else mpStart1
+    fun delayStart(startDelay: Int64, quickStart: Bool): Bool {
+        mpStart = if(quickStart) { mpStart2 } else { mpStart1 }
+
         val res = audioManager.requestAudioFocus(focusRequest)
         if(res == AUDIOFOCUS_REQUEST_GRANTED) {
             if(quickStart) {
@@ -165,8 +166,8 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         return false
     }
 
-    fun powerStart(quickStart: Boolean): Boolean {
-        mpStart = if(quickStart) mpStart2 else mpStart1
+    fun powerStart(quickStart: Bool): Bool {
+        mpStart = if(quickStart) { mpStart2 } else { mpStart1 }
 
         val res = audioManager.requestAudioFocus(focusRequest)
         if(res == AUDIOFOCUS_REQUEST_GRANTED) {
@@ -184,7 +185,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         return false
     }
 
-    fun resumePacing(runDist: String, runTime: Double, runLane: Int, alternateStart: Boolean, resumeTime: Long): Boolean {
+    fun resumePacing(runDist: String, runLane: Int, runTime: Double, alternateStart: Bool, resumeTime: Int64): Bool {
         val clipKey   = clipKeyFromArgs(runDist, alternateStart)
         clipIndexList = clipMap[clipKey]!!
         prevTime      = waypointCalculator.initResume(runDist, runTime, runLane, resumeTime.toDouble())
@@ -192,7 +193,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         val res = audioManager.requestAudioFocus(focusRequest)
         if(res == AUDIOFOCUS_REQUEST_GRANTED) {
             startRealtime = SystemClock.elapsedRealtime() - resumeTime
-            resumeRunnable.run()
+            handler.post(resumeRunnable)
             return true
         }
 
@@ -202,19 +203,19 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
     private fun beginRun() {
         val nextTime   = waypointCalculator.waypointTime()
         val updateTime = (nextTime - elapsedTime().toDouble()).toLong()
-        if (updateTime >= 0L)  handler.postDelayed(waypointRunnable, updateTime)
+        if (updateTime >= 0L) handler.postDelayed(waypointRunnable, updateTime)
     }
 
-    fun elapsedTime(): Long {
+    fun elapsedTime(): Int64 {
         return SystemClock.elapsedRealtime() - startRealtime
     }
 
-    fun timeRemaining(elapsedTime: Long): Long {
+    fun timeRemaining(elapsedTime: Int64): Int64 {
         return waypointCalculator.runTime() - elapsedTime
     }
 
-    fun distOnPace(elapsedTime: Long): Double {
-        return waypointCalculator.distOnPace(elapsedTime)
+    fun distOnPace(elapsedTime: Int64): Double {
+        return waypointCalculator.distOnPace(elapsedTime.toDouble())
     }
 
     fun waypointName(): String {
@@ -222,9 +223,9 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
         return clipNames[clipIndexList[waypointNum]]
     }
 
-    fun waypointProgress(elapsedTime: Long): Double {
+    fun waypointProgress(elapsedTime: Int64): Double {
         val waypointTime = waypointCalculator.waypointTime()
-        return min(1.0, (elapsedTime - prevTime) / (waypointTime - prevTime))
+        return min(1.0, (elapsedTime.toDouble() - prevTime) / (waypointTime - prevTime))
     }
 
     @SuppressLint("WakelockTimeout")
@@ -254,7 +255,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
 
         mpStart1   = MediaPlayer.create(this, R.raw.threetwoone)
         mpStart2   = MediaPlayer.create(this, R.raw.go)
-        mpResume  = MediaPlayer.create(this, R.raw.resumed)
+        mpResume   = MediaPlayer.create(this, R.raw.resumed)
         mpWaypoint = Array(clipList.size) { i -> MediaPlayer.create(this, clipList[i]) }
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -271,14 +272,17 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
 
         mpStart1.setOnCompletionListener {
             audioManager.abandonAudioFocusRequest(focusRequest)
+            beginRun()
         }
 
         mpStart2.setOnCompletionListener {
             audioManager.abandonAudioFocusRequest(focusRequest)
+            beginRun()
         }
 
         mpResume.setOnCompletionListener {
             audioManager.abandonAudioFocusRequest(focusRequest)
+            beginRun()
         }
 
         for( i in 0..<fL ) mpWaypoint[i].setOnCompletionListener { audioManager.abandonAudioFocusRequest(focusRequest) }
@@ -327,6 +331,7 @@ class WaypointService : Service(), OnAudioFocusChangeListener {
 
         if (waypointCalculator.waypointsRemaining()) {
             prevTime = waypointCalculator.waypointTime()
+            
             val waypointTime = waypointCalculator.nextWaypoint()
             handler.postDelayed(waypointRunnable, waypointTime.toLong()-elapsedTime())
         }

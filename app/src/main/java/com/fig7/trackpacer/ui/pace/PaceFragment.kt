@@ -22,6 +22,7 @@ import com.fig7.trackpacer.R
 import com.fig7.trackpacer.data.PacingModel
 import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.FragmentPaceBinding
+import com.fig7.trackpacer.util.Int64
 import com.fig7.trackpacer.util.timeToFullString
 import com.fig7.trackpacer.util.timeToString
 import java.lang.Integer.min
@@ -54,7 +55,7 @@ class PaceFragment: Fragment() {
 
         val timerView = paceView.timeView
         timerView.text = timeToFullString(resources, 0L)
-        pacingModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime: Long ->
+        pacingModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime: Int64 ->
             timerView.text = timeToFullString(resources, elapsedTime)
         }
 
@@ -93,7 +94,7 @@ class PaceFragment: Fragment() {
         timeToProgress = paceView.timetoProgress
         timeToProgress.progress = 0
 
-        pacingModel.timeRemaining.observe(viewLifecycleOwner) { remainingTime: Long? ->
+        pacingModel.timeRemaining.observe(viewLifecycleOwner) { remainingTime: Int64? ->
             if(remainingTime == null) {
                 distRun.text = ""
 
@@ -275,7 +276,7 @@ class PaceFragment: Fragment() {
                     stopButton.isEnabled = true; stopButton.isClickable = true
                 }
 
-                PacingStatus.PacingCancel -> {
+                PacingStatus.PacingComplete -> {
                     setButton.visibility = View.VISIBLE
                     setButton.isEnabled = false; setButton.isClickable = false
 
@@ -286,7 +287,7 @@ class PaceFragment: Fragment() {
                     stopButton.isEnabled = false; stopButton.isClickable = false
                 }
 
-                PacingStatus.PacingComplete -> {
+                PacingStatus.PacingCancel -> {
                     setButton.visibility = View.VISIBLE
                     setButton.isEnabled = false; setButton.isClickable = false
 

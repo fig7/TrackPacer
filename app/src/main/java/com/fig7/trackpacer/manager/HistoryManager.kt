@@ -2,6 +2,7 @@ package com.fig7.trackpacer.manager
 
 import androidx.compose.runtime.mutableStateListOf
 import com.fig7.trackpacer.data.ResultData
+import com.fig7.trackpacer.util.Bool
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedWriter
@@ -68,7 +69,7 @@ class HistoryManager(filesDir: File) {
         historyModified = lastModified
     }
 
-    fun saveHistory(resultData: ResultData): Boolean {
+    fun saveHistory(resultData: ResultData): Bool {
         val json = JSONObject()
 
         try {
@@ -111,7 +112,7 @@ class HistoryManager(filesDir: File) {
         return true
     }
 
-    fun deleteHistory(resultIndex: Int): Boolean {
+    fun deleteHistory(resultIndex: Int): Bool {
         val resultFile = File(historyDir, historyList[resultIndex].resultUUID)
         if(resultFile.delete()) {
             historyList.removeAt(resultIndex)

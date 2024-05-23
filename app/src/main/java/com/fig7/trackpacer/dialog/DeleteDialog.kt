@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.fig7.trackpacer.R
+import com.fig7.trackpacer.util.Bool
 
 class DeleteDialog: DialogFragment() {
     private lateinit var dialogTitle: String
@@ -25,7 +26,7 @@ class DeleteDialog: DialogFragment() {
         }
     }
 
-    private fun setResult(resultVal: Boolean) {
+    private fun setResult(resultVal: Bool) {
         val dialogResult = Bundle()
         dialogResult.putBoolean("DeleteResult", resultVal)
 

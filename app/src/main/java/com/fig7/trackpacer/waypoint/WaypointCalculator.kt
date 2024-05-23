@@ -1,5 +1,8 @@
 package com.fig7.trackpacer.waypoint
 
+import com.fig7.trackpacer.util.Bool
+import com.fig7.trackpacer.util.Int64
+
 val distanceMap = mapOf(
                         "400m"     to 400.0,
                         "800m"     to 800.0,
@@ -14,28 +17,28 @@ val distanceMap = mapOf(
                         "1 mile"   to 1609.34)
 
 val waypointMap = mapOf(
-                        "400m"    to Array(8)   { i -> 50.0 + 50.0*i },
-                        "800m"    to Array(16)  { i -> 50.0 + 50.0*i },
-                        "1000m"   to Array(20)  { i -> 50.0 + 50.0*i },
-                        "1200m"   to Array(24)  { i -> 50.0 + 50.0*i },
-                        "1500m"   to Array(30)  { i -> 50.0 + 50.0*i },
-                        "2000m"   to Array(40)  { i -> 50.0 + 50.0*i },
-                        "3000m"   to Array(60)  { i -> 50.0 + 50.0*i },
-                        "4000m"   to Array(80)  { i -> 50.0 + 50.0*i },
-                        "5000m"   to Array(100) { i -> 50.0 + 50.0*i },
-                        "10000m"  to Array(200) { i -> 50.0 + 50.0*i },
-                        "1 mile"  to Array(32)  { i -> 59.34 + 50.0*i })
+                        "400m"    to Array(  8) { i ->  50.0 + 50.0*i.toDouble() },
+                        "800m"    to Array( 16) { i ->  50.0 + 50.0*i.toDouble() },
+                        "1000m"   to Array( 20) { i ->  50.0 + 50.0*i.toDouble() },
+                        "1200m"   to Array( 24) { i ->  50.0 + 50.0*i.toDouble() },
+                        "1500m"   to Array( 30) { i ->  50.0 + 50.0*i.toDouble() },
+                        "2000m"   to Array( 40) { i ->  50.0 + 50.0*i.toDouble() },
+                        "3000m"   to Array( 60) { i ->  50.0 + 50.0*i.toDouble() },
+                        "4000m"   to Array( 80) { i ->  50.0 + 50.0*i.toDouble() },
+                        "5000m"   to Array(100) { i ->  50.0 + 50.0*i.toDouble() },
+                        "10000m"  to Array(200) { i ->  50.0 + 50.0*i.toDouble() },
+                        "1 mile"  to Array( 32) { i -> 59.34 + 50.0*i.toDouble() })
 
-val rDiff        = Array(8) {i -> 1.22*i }
+val rDiff        = Array(8) {i -> 1.22*i.toDouble() }
 val arcAngle     = arrayOf(1.358696, 1.358696, 0.424201, 0.0, 1.358696, 1.358696, 0.424201, 0.0)
 val arcAngle1500 = arrayOf(0.424201, 0.0, 1.358696, 1.358696, 0.424201, 0.0, 1.358696, 1.358696)
 
-val runMultiplier    = Array(8) { i ->
+val runMultiplier     = Array(8) { i ->
     val r = 36.8 + rDiff[i]
     (2.0*Math.PI*r + 168.78)/400.0
 }
 
-val runMultiplier1500= Array(8) { i ->
+val runMultiplier1500 = Array(8) { i ->
     val r = 36.8 + rDiff[i]
     ((Math.PI + 0.424201)*r + 168.78 + (6.0*Math.PI*r) + 506.34)/1500.0
 }
@@ -168,7 +171,7 @@ class WaypointCalculator {
         return currentWaypoint
     }
 
-    fun waypointsRemaining(): Boolean {
+    fun waypointsRemaining(): Bool {
         return (currentWaypoint < (waypointList.size - 1))
     }
 
@@ -181,11 +184,11 @@ class WaypointCalculator {
         return waypointTime()
     }
 
-    fun runTime(): Long {
+    fun runTime(): Int64 {
         return totalTime.toLong()
     }
 
-    fun distOnPace(elapsedTime: Long): Double {
-        return if(elapsedTime > totalTime) totalDist else (elapsedTime.toDouble()*totalDist)/totalTime
+    fun distOnPace(elapsedTime: Double): Double {
+        return if(elapsedTime > totalTime) totalDist else (elapsedTime*totalDist)/totalTime
     }
 }

@@ -4,12 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.fig7.trackpacer.util.Bool
 
 class RunViewModel(private val state: SavedStateHandle): ViewModel() {
     var newTimeIndex = 0
 
-    private val mutableLaunchSet = MutableLiveData<Boolean>()
-    val launchSet: LiveData<Boolean> get() = mutableLaunchSet
+    private val mutableLaunchSet = MutableLiveData<Bool>()
+    val launchSet: LiveData<Bool> get() = mutableLaunchSet
 
     private val mutableSelectedDist = MutableLiveData<Int>(state["dist"])
     val selectedDist: LiveData<Int> get() = mutableSelectedDist

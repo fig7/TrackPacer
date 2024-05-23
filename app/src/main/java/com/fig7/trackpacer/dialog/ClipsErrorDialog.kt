@@ -5,12 +5,13 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.fig7.trackpacer.R
+import com.fig7.trackpacer.util.Bool
 import kotlin.system.exitProcess
 
 class ClipsErrorDialog: DialogFragment() {
 
     companion object {
-        fun newDialog(action: String, actionFatal: Boolean): ClipsErrorDialog {
+        fun newDialog(action: String, actionFatal: Bool): ClipsErrorDialog {
             val f = ClipsErrorDialog()
             f.isCancelable = false
 

@@ -3,6 +3,7 @@ package com.fig7.trackpacer.data
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import com.fig7.trackpacer.R
+import com.fig7.trackpacer.util.Int64
 import com.fig7.trackpacer.waypoint.timeFor
 import com.fig7.trackpacer.util.timeToAlmostFullString
 import com.fig7.trackpacer.util.timeToMinuteString
@@ -11,7 +12,7 @@ import com.fig7.trackpacer.util.timeToString
 class ResultModel: ViewModel() {
     var resultData = ResultData()
 
-    fun initPacingResult(startTime: Long, pacingModel: PacingModel) {
+    fun initPacingResult(startTime: Int64, pacingModel: PacingModel) {
         resultData.runDate = startTime
 
         resultData.runDist   = pacingModel.runDist

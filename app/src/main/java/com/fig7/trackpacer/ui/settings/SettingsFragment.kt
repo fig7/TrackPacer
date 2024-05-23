@@ -57,6 +57,7 @@ import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.databinding.FragmentSettingsBinding
 import com.fig7.trackpacer.dialog.InfoDialog
 import com.fig7.trackpacer.ui.theme.TPTheme
+import com.fig7.trackpacer.util.Bool
 
 private enum class Validity {
     // Definitely valid
@@ -113,7 +114,7 @@ class SettingsFragment: Fragment() {
             return TransformedText(redText, OffsetMapping.Identity) }
         }
 
-    private fun setStartDelay(newStartDelay: String): Boolean {
+    private fun setStartDelay(newStartDelay: String): Bool {
         var startDelay = newStartDelay
         val startSplit = startDelay.split(".")
         val splitCount = startSplit.count()
@@ -143,7 +144,7 @@ class SettingsFragment: Fragment() {
         return true
     }
 
-    private fun setPowerStart(newPowerStart: Boolean): Boolean {
+    private fun setPowerStart(newPowerStart: Bool): Bool {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setPowerStart(newPowerStart)) {
             handleSettingsError()
@@ -168,7 +169,7 @@ class SettingsFragment: Fragment() {
         return true
     }
 
-    private fun setQuickStart(newQuickStart: Boolean): Boolean {
+    private fun setQuickStart(newQuickStart: Bool): Bool {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setQuickStart(newQuickStart)) {
             handleSettingsError()
@@ -188,7 +189,7 @@ class SettingsFragment: Fragment() {
         return true
     }
 
-    private fun setAlternateStart(newAlternateStart: Boolean): Boolean {
+    private fun setAlternateStart(newAlternateStart: Bool): Bool {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setAlternateStart(newAlternateStart)) {
             handleSettingsError()
@@ -198,7 +199,7 @@ class SettingsFragment: Fragment() {
         return true
     }
 
-    private fun setFlightMode(newFlightMode: Boolean): Boolean {
+    private fun setFlightMode(newFlightMode: Bool): Bool {
         val settingsManager = settingsModel.settingsManager
         if(!settingsManager.setFlightMode(newFlightMode)) {
             handleSettingsError()

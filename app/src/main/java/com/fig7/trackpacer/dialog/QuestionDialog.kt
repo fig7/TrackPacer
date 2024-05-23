@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import com.fig7.trackpacer.util.Bool
 
 class QuestionDialog: DialogFragment() {
     private lateinit var dialogTitle: String
@@ -28,7 +29,7 @@ class QuestionDialog: DialogFragment() {
         }
     }
 
-    private fun setResult(resultVal: Boolean) {
+    private fun setResult(resultVal: Bool) {
         val dialogResult = Bundle()
         dialogResult.putBoolean("QuestionResult", resultVal)
 

@@ -26,6 +26,8 @@ import com.fig7.trackpacer.data.SettingsModel
 import com.fig7.trackpacer.data.StatusModel
 import com.fig7.trackpacer.data.DistanceModel
 import com.fig7.trackpacer.databinding.FragmentRunBinding
+import com.fig7.trackpacer.util.Bool
+import com.fig7.trackpacer.util.Int64
 import com.fig7.trackpacer.waypoint.distanceFor
 
 val rtMap = mapOf(
@@ -155,7 +157,7 @@ val rtMap = mapOf(
     "rt_1 mile_l7" to arrayOf(R.string.laps_mile, R.string.fl_mile, R.string.ll_4, R.drawable.rt_mile_l7),
     "rt_1 mile_l8" to arrayOf(R.string.laps_mile, R.string.fl_mile, R.string.ll_4, R.drawable.rt_mile_l8))
 
-private fun rtKeyFromArgs(runDist: String, runLane: Int, alternateStart: Boolean = false): String {
+private fun rtKeyFromArgs(runDist: String, runLane: Int, alternateStart: Bool = false): String {
     var rtKey = "rt_" + runDist + "_l" + runLane.toString()
     if(alternateStart && (runDist in listOf("1000m", "3000m", "5000m"))) {
         rtKey += "_a"
@@ -170,19 +172,19 @@ private fun rtLaps(runDist: String, runLane: Int): Int {
     return rtArray[0]
 }
 
-private fun rtDesc1(runDist: String, runLane: Int, alternateStart: Boolean): Int {
+private fun rtDesc1(runDist: String, runLane: Int, alternateStart: Bool): Int {
     val rtKey = rtKeyFromArgs(runDist, runLane, alternateStart)
     val rtArray = rtMap[rtKey]!!
     return rtArray[1]
 }
 
-private fun rtDesc2(runDist: String, runLane: Int, alternateStart: Boolean): Int {
+private fun rtDesc2(runDist: String, runLane: Int, alternateStart: Bool): Int {
     val rtKey = rtKeyFromArgs(runDist, runLane, alternateStart)
     val rtArray = rtMap[rtKey]!!
     return rtArray[2]
 }
 
-private fun rtOverlay(runDist: String, runLane: Int, alternateStart: Boolean): Int {
+private fun rtOverlay(runDist: String, runLane: Int, alternateStart: Bool): Int {
     val rtKey = rtKeyFromArgs(runDist, runLane, alternateStart)
     val rtArray = rtMap[rtKey]!!
     return rtArray[3]
@@ -417,7 +419,7 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         binding = null
     }
 
-    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Int64) {
         if(p0 == spinnerDist) {
             runViewModel.selectDist(p2)
         }

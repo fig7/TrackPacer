@@ -19,7 +19,7 @@ class PacingModel: ViewModel() {
     var totalTimeStr = ""
     var totalPaceStr = ""
 
-    private val mutableElapsedTime = MutableLiveData<Long>()
+    private val mutableElapsedTime = MutableLiveData<Int64>()
     val elapsedTime: LiveData<Int64> get() = mutableElapsedTime
     val elapsedTimeL: Int64 get() = mutableElapsedTime.value!!
 
@@ -29,13 +29,13 @@ class PacingModel: ViewModel() {
     private val mutableWaypointProgress = MutableLiveData<Double>()
     val waypointProgress: LiveData<Double> get() = mutableWaypointProgress
 
-    private val mutableTimeRemaining = MutableLiveData<Long?>()
-    val timeRemaining: LiveData<Long?> get() = mutableTimeRemaining
+    private val mutableTimeRemaining = MutableLiveData<Int64?>()
+    val timeRemaining: LiveData<Int64?> get() = mutableTimeRemaining
 
     private val mutableDistRun = MutableLiveData<Double>()
     val distRun: LiveData<Double> get() = mutableDistRun
 
-    fun setElapsedTime(elapsedTime: Long) {
+    fun setElapsedTime(elapsedTime: Int64) {
         mutableElapsedTime.value = elapsedTime
     }
 
@@ -43,7 +43,7 @@ class PacingModel: ViewModel() {
         mutableDistRun.value = distRun
     }
 
-    fun setWaypointProgress(waypointName: String, waypointProgress: Double, timeRemaining: Long) {
+    fun setWaypointProgress(waypointName: String, waypointProgress: Double, timeRemaining: Int64) {
         mutableWaypointName.value      = waypointName
         mutableWaypointProgress.value  = waypointProgress
         mutableTimeRemaining.value     = timeRemaining
