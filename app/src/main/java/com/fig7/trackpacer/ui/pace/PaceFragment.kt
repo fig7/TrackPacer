@@ -112,7 +112,12 @@ class PaceFragment: Fragment() {
         setButton.setOnClickListener {
             val resultBundle = Bundle()
             when (statusModel.pacingStatus.value) {
-                PacingStatus.NotPacing -> { pacingModel.setElapsedTime(0L); afm.setFragmentResult("BEGIN_PACING", resultBundle) }
+                PacingStatus.NotPacing -> {
+                    pacingModel.setElapsedTime(0L);
+                    pacingModel.resetWaypointProgress()
+
+                    afm.setFragmentResult("BEGIN_PACING", resultBundle)
+                }
                 else -> throw IllegalStateException()
             }
         }
@@ -172,8 +177,6 @@ class PaceFragment: Fragment() {
 
                     stopButton.setImageDrawable(AppCompatResources.getDrawable(ourContext, R.drawable.stop))
                     stopButton.isEnabled = true; stopButton.isClickable = true
-
-                    pacingModel.resetWaypointProgress()
                 }
 
                 PacingStatus.PacingWait -> {

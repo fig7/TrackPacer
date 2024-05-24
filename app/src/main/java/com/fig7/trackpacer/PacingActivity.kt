@@ -76,11 +76,7 @@ class PacingActivity: AppCompatActivity() {
                     statusModel.setPacingStatus(PacingStatus.PacingWait)
 
                     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    val screenAction = IntentFilter(Intent.ACTION_SCREEN_OFF)
-                    screenAction.addAction(Intent.ACTION_SCREEN_ON)
-
-                    val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
-                    registerReceiver(screenReceiver, screenAction, receiverFlags)
+                    startScreenReceiver()
                 } else {
                     // Delay start
                     statusModel.setPacingStatus(PacingStatus.PacingStart)
@@ -95,11 +91,7 @@ class PacingActivity: AppCompatActivity() {
                 statusModel.setPacingStatus(PacingStatus.PacingResume)
 
                 if(statusModel.powerStart) {
-                    val screenAction = IntentFilter(Intent.ACTION_SCREEN_OFF)
-                    screenAction.addAction(Intent.ACTION_SCREEN_ON)
-
-                    val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
-                    registerReceiver(screenReceiver, screenAction, receiverFlags)
+                    startScreenReceiver()
                 }
 
                 if(waypointService.resumePacing(runDist, runLane, runTime, alternateStart, pacingModel.elapsedTimeL)) {
@@ -127,6 +119,14 @@ class PacingActivity: AppCompatActivity() {
 
     private val requestPhoneLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         startService()
+    }
+
+    private fun startScreenReceiver() {
+        val screenAction = IntentFilter(Intent.ACTION_SCREEN_OFF)
+        screenAction.addAction(Intent.ACTION_SCREEN_ON)
+
+        val receiverFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
+        registerReceiver(screenReceiver, screenAction, receiverFlags)
     }
 
     private fun isPacing(pacingStatus: PacingStatus? = statusModel.pacingStatus.value): Bool {
