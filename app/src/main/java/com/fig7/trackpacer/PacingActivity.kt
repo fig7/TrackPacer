@@ -418,17 +418,20 @@ class PacingActivity: AppCompatActivity() {
         handler.postDelayed(pacingRunnable, 100)
     }
 
+    private fun powerStart() {
+        statusModel.setPacingStatus(PacingStatus.PacingStart)
+        if(waypointService.powerStart(statusModel.quickStart)) {
+            handler.postDelayed(pacingRunnable, 100)
+        } else {
+            stopPacing(true)
+        }
+    }
+
     fun handleIncomingIntent(begin: Bool, silent: Bool) {
         val pacingStatus = statusModel.pacingStatus.value
         if(begin) {
             if(pacingStatus != PacingStatus.PacingWait) { return }
-
-            statusModel.setPacingStatus(PacingStatus.PacingStart)
-            if(waypointService.powerStart(statusModel.quickStart)) {
-                handler.postDelayed(pacingRunnable, 100)
-            } else {
-                stopPacing(true)
-            }
+            powerStart()
         } else {
             when(pacingStatus) {
                 PacingStatus.NotPacing    -> return
