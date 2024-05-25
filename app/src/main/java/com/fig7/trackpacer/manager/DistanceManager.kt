@@ -3,6 +3,7 @@ package com.fig7.trackpacer.manager
 import com.fig7.trackpacer.util.Bool
 import java.io.File
 import java.io.IOException
+import java.util.Locale
 
 private const val distanceVersion = "1.3"
 class DistanceManager(filesDir: File) {
@@ -43,9 +44,10 @@ class DistanceManager(filesDir: File) {
     }
 
     private fun initData(defaultDistances: Array<String>) {
-        if(!distanceDir.mkdir()) throw IOException()
+        val success = distanceDir.mkdir()
+        if(!success) { throw IOException() }
 
-        distanceArray = Array(defaultDistances.size) { defaultDistances[it].split("+")[0] }
+        distanceArray = Array(defaultDistances.size) { i: Int -> defaultDistances[i].split("+")[0] }
         for((i, runDistance) in distanceArray.withIndex()) {
             timeMap[runDistance] = defaultDistances[i].split("+")[1].trim().split(",").toTypedArray()
         }
@@ -75,11 +77,14 @@ class DistanceManager(filesDir: File) {
 
     private fun writeData(distance: String) {
         val i = distanceArray.indexOf(distance)
-        if (i == -1) { throw IllegalArgumentException() }
+        if(i == -1) { throw IllegalArgumentException() }
 
-        val prefix = String.format("Distance_%03d_", i)
+        val prefix = String.format(Locale.ROOT, "Distance_%03d_", i)
         val distanceDir = File(distanceDir, prefix + distance)
-        if (!distanceDir.exists() && !distanceDir.mkdir()) throw IOException()
+        if(!distanceDir.exists()) {
+            val success = distanceDir.mkdir()
+            if(!success) { throw IOException() }
+        }
 
         val timesFile = File(distanceDir, "times.dat")
         val timeStr = timeMap[distance]!!.joinToString(separator = ",")
@@ -87,10 +92,13 @@ class DistanceManager(filesDir: File) {
     }
 
     private fun writeData() {
-        for ((i, distance) in distanceArray.withIndex()) {
-            val prefix = String.format("Distance_%03d_", i)
+        for((i, distance) in distanceArray.withIndex()) {
+            val prefix = String.format(Locale.ROOT, "Distance_%03d_", i)
             val distanceDir = File(distanceDir, prefix + distance)
-            if (!distanceDir.exists() && !distanceDir.mkdir()) throw IOException()
+            if(!distanceDir.exists()) {
+                val success = distanceDir.mkdir()
+                if(!success) { throw IOException() }
+            }
 
             val timesFile = File(distanceDir, "times.dat")
             val timeStr = timeMap[distance]!!.joinToString(separator = ",")
@@ -156,19 +164,22 @@ class DistanceManager(filesDir: File) {
 
     private fun timeGreaterThan(time1: String, time2: String): Bool {
         val time1Split = time1.split(":")
-        val time1Dbl = 1000.0*(time1Split[0].trim().toLong()*60.0 + time1Split[1].toDouble())
+        val time1Split0 = time1Split[0].trim().toLong()
+        val time1Split1 = time1Split[1].toDouble()
+        val time1Dbl = 1000.0*(time1Split0.toDouble()*60.0 + time1Split1)
 
         val time2Split = time2.split(":")
-        val time2Dbl = 1000.0*(time2Split[0].trim().toLong()*60.0 + time2Split[1].toDouble())
-        return time1Dbl > time2Dbl
+        val time2Split0 = time2Split[0].trim().toLong()
+        val time2Split1 = time2Split[1].toDouble()
+        val time2Dbl = 1000.0*(time2Split0.toDouble()*60.0 + time2Split1)
+        return (time1Dbl > time2Dbl)
     }
 
     fun deleteTime(runDistance: String, runTime: String?): Int {
-        if (runTime == null) { throw IllegalArgumentException() }
-        if (!timeMap.containsKey(runDistance)) { throw IllegalArgumentException() }
+        if(runTime == null) { throw IllegalArgumentException() }
 
-        val timeArray = timeMap[runDistance]!!
-        if (!timeArray.contains(runTime)) { throw IllegalArgumentException() }
+        val timeArray = timeMap[runDistance] ?: throw IllegalArgumentException()
+        if(!timeArray.contains(runTime)) { throw IllegalArgumentException() }
 
         var i = 0
         var newIndex = -1
@@ -176,11 +187,13 @@ class DistanceManager(filesDir: File) {
         for (time in timeArray) {
             if (time == runTime) {
                 newIndex = i-1
-                if (newIndex < 0) newIndex = 0
+                if (newIndex < 0) { newIndex = 0 }
+
                 continue
             }
 
-            newTimeArray[i++] = time
+            newTimeArray[i] = time
+            i += 1
         }
 
         timeMap[runDistance] = newTimeArray
@@ -191,28 +204,28 @@ class DistanceManager(filesDir: File) {
 
     fun addTime(runDistance: String, runTime: String?): Int {
         if (runTime == null) { throw IllegalArgumentException() }
-        if (!timeMap.containsKey(runDistance)) { throw IllegalArgumentException() }
+
+        val timeArray = timeMap[runDistance] ?: throw IllegalArgumentException()
+        if(timeArray.contains(runTime)) { throw IllegalArgumentException() }
 
         var i = 0
         var j = 0
-        val timeArray = timeMap[runDistance]!!
         val newTimeArray = Array(timeArray.size+1) { "" }
-        while (i < timeArray.size) {
+        while(i < timeArray.size) {
             val time = timeArray[i]
-            if (timeGreaterThan(time, runTime)) {
-                break
-            }
+            if(timeGreaterThan(time, runTime)) { break }
 
-            i++
-            newTimeArray[j++] = time
+            newTimeArray[j] = time
+            i += 1; j += 1
         }
 
         val newIndex = j
-        newTimeArray[j++] = runTime
+        newTimeArray[j] = runTime
+        j += 1
 
-        while (i < timeArray.size) {
-            val time = timeArray[i++]
-            newTimeArray[j++] = time
+        while(i < timeArray.size) {
+            newTimeArray[j] = timeArray[i]
+            i += 1; j += 1
         }
 
         timeMap[runDistance] = newTimeArray
@@ -223,24 +236,22 @@ class DistanceManager(filesDir: File) {
 
     fun replaceTime(runDistance: String, origTime: String?, newTime: String?): Int {
         if ((origTime == null) || (newTime == null)) { throw IllegalArgumentException() }
-        if (!timeMap.containsKey(runDistance)) { throw IllegalArgumentException() }
+
+        val timeArray = timeMap[runDistance] ?: throw IllegalArgumentException()
+        if(!timeArray.contains(origTime)) { throw IllegalArgumentException() }
 
         var i = 0
         var j = 0
-        val timeArray = timeMap[runDistance]!!
         val newTimeArray = Array(timeArray.size) { "" }
-        while (i < timeArray.size) {
+        while(i < timeArray.size) {
             val time = timeArray[i]
-            if (timeGreaterThan(time, newTime)) {
-                break
-            }
+            if(timeGreaterThan(time, newTime)) { break }
 
-            i++
-            if (time == origTime) {
-                continue
-            }
+            i += 1
+            if(time == origTime) { continue }
 
-            newTimeArray[j++] = time
+            newTimeArray[j] = time
+            j += 1
         }
 
         val newIndex = j
@@ -249,12 +260,11 @@ class DistanceManager(filesDir: File) {
         while (i < timeArray.size) {
             val time = timeArray[i]
 
-            ++i
-            if (time == origTime) {
-                continue
-            }
+            i += 1
+            if(time == origTime) { continue }
 
-            newTimeArray[j++] = time
+            newTimeArray[j] = time
+            j += 1
         }
 
         timeMap[runDistance] = newTimeArray
