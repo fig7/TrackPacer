@@ -110,7 +110,7 @@ class WaypointCalculator {
         return (waypointDistance() * totalTime) / totalDist
     }
 
-    private fun initRunParams(runDist: String, runTime: Double, runLane: Int) {
+    private fun initRunParams(runDist: String, runLane: Int, runTime: Double) {
         runLaneIndex = runLane - 1
         waypointList = waypointMap[runDist]!!
 
@@ -137,8 +137,8 @@ class WaypointCalculator {
         }
     }
 
-    fun initRun(runDist: String, runTime: Double, runLane: Int) {
-        initRunParams(runDist, runTime, runLane)
+    fun initRun(runDist: String, runLane: Int, runTime: Double) {
+        initRunParams(runDist, runLane, runTime)
 
         currentWaypoint = 0
         currentExtra    = arcExtra()
@@ -148,8 +148,8 @@ class WaypointCalculator {
         // Log.d("TP", waypointTime().toString())
     }
 
-    fun initResume(runDist: String, runTime: Double, runLane: Int, resumeTime: Double): Double {
-        initRunParams(runDist, runTime, runLane)
+    fun initResume(runDist: String, runLane: Int, runTime: Double, resumeTime: Double): Double {
+        initRunParams(runDist, runLane, runTime)
 
         var prevTime = 0.0
         for (i in waypointList.indices) {

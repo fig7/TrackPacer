@@ -29,6 +29,7 @@ import com.fig7.trackpacer.databinding.FragmentRunBinding
 import com.fig7.trackpacer.util.Bool
 import com.fig7.trackpacer.util.Int64
 import com.fig7.trackpacer.waypoint.distanceFor
+import java.util.Locale
 
 val rtMap = mapOf(
     "rt_400m_l1"   to arrayOf(R.string.laps_400, R.string.empty, R.string.empty, R.drawable.rt_400_l1),
@@ -236,9 +237,9 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         val totalDist = distanceFor(runDist, runLane)
         val totalDistStr =
             if(runDist == "1 mile") {
-                if (runLane == 1) runDist else String.format("%.2f miles", totalDist/1609.34)
+                if(runLane == 1) runDist else String.format(Locale.ROOT, "%.2f miles", totalDist/1609.34)
             } else {
-                if (runLane == 1) String.format("%dm", totalDist.toInt()) else String.format("%.2fm", totalDist)
+                if(runLane == 1) String.format(Locale.ROOT, "%dm", totalDist.toInt()) else String.format(Locale.ROOT, "%.2fm", totalDist)
             }
 
         val runView = binding!!
@@ -251,8 +252,8 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         val lapDesc1 = runView.labelLapDesc1
         lapDesc1.text = getString(rtDesc1(runDist, runLane, alternateStart))
 
-        val lastDesc2 = runView.labelLapDesc2
-        lastDesc2.text = getString(rtDesc2(runDist, runLane, alternateStart))
+        val lapDesc2 = runView.labelLapDesc2
+        lapDesc2.text = getString(rtDesc2(runDist, runLane, alternateStart))
 
         val trackOverlay = runView.runningTrackOverlay
         trackOverlay.setImageDrawable(ContextCompat.getDrawable(requireContext(), rtOverlay(runDist, runLane, alternateStart)))
@@ -359,9 +360,9 @@ class RunFragment: Fragment(), AdapterView.OnItemSelectedListener {
         if(BuildConfig.FLAVOR == "free") {
             editProfileButton.setOnClickListener {
                 val dialog = InfoDialog.newDialog("Create profiles",
-                    "Profiles are a feature that allow you to incorporate changes to your pace. "
-                            +"Perhaps you want to run at a slower pace, or stop to recover, between fast intervals. Speed up and slow down, you decide when!\n\n"
-                            +"Profiles will only be available in the pro version of TrackPacer, which is coming soon...")
+                    "Profiles are a feature that allow you to incorporate changes to your pace. " +
+                            "Perhaps you want to run at a slower pace, or stop to recover, between fast intervals. Speed up and slow down, you decide when!\n\n" +
+                            "Profiles will only be available in the pro version of TrackPacer, which is coming soon...")
 
                 dialog.show(parentFragmentManager, "PROFILE_PRO_DIALOG")
             }

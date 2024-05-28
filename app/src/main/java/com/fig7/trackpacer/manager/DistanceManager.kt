@@ -239,6 +239,7 @@ class DistanceManager(filesDir: File) {
 
         val timeArray = timeMap[runDistance] ?: throw IllegalArgumentException()
         if(!timeArray.contains(origTime)) { throw IllegalArgumentException() }
+        if(timeArray.contains(newTime))   { throw IllegalArgumentException() }
 
         var i = 0
         var j = 0

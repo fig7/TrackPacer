@@ -145,21 +145,21 @@ class MainActivity: AppCompatActivity() {
 
         supportFragmentManager.setFragmentResultListener("EDIT_TIME", this) { _: String, bundle: Bundle ->
             try {
-                val storageManager = distanceModel.distanceManager
+                val distanceManager = distanceModel.distanceManager
                 val runDist = bundle.getString("EditDist")!!
                 when (EditResult.entries[bundle.getInt("EditResult")]) {
                     EditResult.Delete -> {
-                        val newTimeIndex = storageManager.deleteTime(runDist, bundle.getString("EditTime"))
+                        val newTimeIndex = distanceManager.deleteTime(runDist, bundle.getString("EditTime"))
                         runViewModel.resetDist(newTimeIndex)
                     }
 
                     EditResult.Add -> {
-                        val newTimeIndex = storageManager.addTime(runDist, bundle.getString("EditTime"))
+                        val newTimeIndex = distanceManager.addTime(runDist, bundle.getString("EditTime"))
                         runViewModel.resetDist(newTimeIndex)
                     }
 
                     EditResult.Set -> {
-                        val newTimeIndex = storageManager.replaceTime(runDist, bundle.getString("OrigTime"), bundle.getString("EditTime"))
+                        val newTimeIndex = distanceManager.replaceTime(runDist, bundle.getString("OrigTime"), bundle.getString("EditTime"))
                         runViewModel.resetDist(newTimeIndex)
                     }
 

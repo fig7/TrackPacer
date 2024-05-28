@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.fig7.trackpacer.enums.EditResult
 import com.fig7.trackpacer.R
+import java.util.Locale
 
 class EditTimeDialog: DialogFragment() {
     private lateinit var dialogTime: String
@@ -46,7 +47,7 @@ class EditTimeDialog: DialogFragment() {
     }
 
     private fun stringFromRunTime(mins: Int, secs: Int, hths: Int): String {
-        return getString(R.string.edit_time_all, mins.toString(), String.format("%02d", secs), String.format("%02d", hths))
+        return getString(R.string.edit_time_all, mins.toString(), String.format(Locale.ROOT, "%02d", secs), String.format(Locale.ROOT, "%02d", hths))
     }
 
     private fun updateButtons() {
@@ -145,7 +146,7 @@ class EditTimeDialog: DialogFragment() {
             secs = newVal
             updateButtons()
         }
-        secPicker.setFormatter { String.format("%02d", it); }
+        secPicker.setFormatter { String.format(Locale.ROOT, "%02d", it); }
         secPicker.minValue = 0
         secPicker.maxValue = 59
         secPicker.value = secs
@@ -155,7 +156,7 @@ class EditTimeDialog: DialogFragment() {
             hths = newVal
             updateButtons()
         }
-        hthsPicker.setFormatter { String.format("%02d", it); }
+        hthsPicker.setFormatter { String.format(Locale.ROOT, "%02d", it); }
         hthsPicker.minValue = 0
         hthsPicker.maxValue = 99
         hthsPicker.value = hths

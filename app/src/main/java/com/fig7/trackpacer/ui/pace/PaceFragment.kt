@@ -113,7 +113,7 @@ class PaceFragment: Fragment() {
             val resultBundle = Bundle()
             when (statusModel.pacingStatus.value) {
                 PacingStatus.NotPacing -> {
-                    pacingModel.setElapsedTime(0L);
+                    pacingModel.setElapsedTime(0L)
                     pacingModel.resetWaypointProgress()
 
                     afm.setFragmentResult("BEGIN_PACING", resultBundle)
