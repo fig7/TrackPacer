@@ -3,7 +3,6 @@ package com.fig7.trackpacer.manager
 import androidx.compose.runtime.mutableStateListOf
 import com.fig7.trackpacer.data.ResultData
 import com.fig7.trackpacer.util.Bool
-import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedWriter
 import java.io.File
@@ -20,7 +19,10 @@ class HistoryManager(filesDir: File) {
     val historyList = mutableStateListOf<ResultData>()
 
     fun initHistory() {
-        if (!historyDir.exists() && !historyDir.mkdir()) throw IOException()
+        if(!historyDir.exists()) {
+            val success = historyDir.mkdir()
+            if(!success) { throw IOException () }
+        }
     }
 
     fun loadHistory() {

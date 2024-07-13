@@ -7,7 +7,7 @@ import com.fig7.trackpacer.R
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-
+import java.util.Locale
 
 private const val clipVersion = "1.0"
 private val defaultClipMap = linkedMapOf(
@@ -16,14 +16,13 @@ private val defaultClipMap = linkedMapOf(
 
     "Quick Start" to mutableListOf(Pair("Go",               Pair(R.raw.go, ""))),
 
-    "Distance"    to mutableListOf(Pair("50m",              Pair(R.raw.fifty, "")),
+    "Waypoints"   to mutableListOf(Pair("50m",              Pair(R.raw.fifty, "")),
                                    Pair("100m",             Pair(R.raw.onehundred, "")),
                                    Pair("150m",             Pair(R.raw.onehundredandfifty, "")),
                                    Pair("200m",             Pair(R.raw.twohundred, "")),
                                    Pair("250m",             Pair(R.raw.twohundredandfifty, "")),
                                    Pair("300m",             Pair(R.raw.threehundred, "")),
-                                   Pair("350m",             Pair(R.raw.threehundredandfifty, "")),
-                                   Pair("400m",             Pair(R.raw.fourhundred, ""))),
+                                   Pair("350m",             Pair(R.raw.threehundredandfifty, ""))),
 
     "Laps"        to mutableListOf(Pair("Lap 2",            Pair(R.raw.lap2, "")),
                                    Pair("Lap 3",            Pair(R.raw.lap3, "")),
@@ -50,11 +49,23 @@ private val defaultClipMap = linkedMapOf(
                                    Pair("Lap 24",           Pair(R.raw.lap24, "")),
                                    Pair("Lap 25",           Pair(R.raw.lap25, ""))),
 
-    "Motivation"  to mutableListOf(),
+  "Distance"      to mutableListOf(Pair("50m",              Pair(R.raw.fifty, "")),
+                                   Pair("100m",             Pair(R.raw.onehundred, "")),
+                                   Pair("150m",             Pair(R.raw.onehundredandfifty, "")),
+                                   Pair("200m",             Pair(R.raw.twohundred, "")),
+                                   Pair("250m",             Pair(R.raw.twohundredandfifty, "")),
+                                   Pair("300m",             Pair(R.raw.threehundred, "")),
+                                   Pair("350m",             Pair(R.raw.threehundredandfifty, "")),
+                                   Pair("400m",             Pair(R.raw.fourhundred, ""))),
 
-    "Finish"      to mutableListOf(Pair("Finish line",      Pair(R.raw.finish, ""))),
+  "Profile"       to mutableListOf(Pair("Speed up",         Pair(R.raw.fifty, "")),
+                                   Pair("Slow down",        Pair(R.raw.fifty, ""))),
 
-    "Status"      to mutableListOf(Pair("Pacing paused",    Pair(R.raw.paused, "")),
+  "Motivation"    to mutableListOf(),
+
+  "Finish"        to mutableListOf(Pair("Finish line",      Pair(R.raw.finish, ""))),
+
+  "Status"        to mutableListOf(Pair("Pacing paused",    Pair(R.raw.paused, "")),
                                    Pair("Pacing cancelled", Pair(R.raw.cancelled, "")),
                                    Pair("Pacing complete",  Pair(R.raw.complete, ""))))
 
@@ -103,7 +114,7 @@ class ClipsManager(filesDir: File) {
         var i = 0
         for(entry in defaultClipMap) {
             val clipCat = entry.key
-            val clipFolderName = String.format("Cat_%03d_%s", i++, clipCat)
+            val clipFolderName = String.format(Locale.ROOT, "Cat_%03d_%s", i++, clipCat)
             val clipCatDir     = File(clipDir, clipFolderName)
             if(!clipCatDir.mkdir()) throw IOException()
 

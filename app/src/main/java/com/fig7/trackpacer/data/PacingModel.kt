@@ -14,7 +14,10 @@ class PacingModel: ViewModel() {
     var alternateStart = false
 
     var totalDist = -1.0
+    var totalTime = -1.0
 
+    // TODO: PacingOptions, + PacingProgress structs
+    // TODO: Use setters for these (same as iOS)
     var totalDistStr = ""
     var totalTimeStr = ""
     var totalPaceStr = ""

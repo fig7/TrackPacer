@@ -213,7 +213,7 @@
       android:layout_weight="1"
 
       android:gravity="top|start"
-      android:padding="12dp"
+      android:padding="5dp"
 
       android:textColor="?android:textColorPrimary"
       android:textSize="18sp" />

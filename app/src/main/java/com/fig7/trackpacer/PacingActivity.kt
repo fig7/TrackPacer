@@ -398,11 +398,11 @@ class PacingActivity: AppCompatActivity() {
 
     private fun handleTimeUpdate() {
         val elapsedTime = waypointService.elapsedTime()
-        if (elapsedTime >= 0L) {
+        if(elapsedTime >= 0L) {
             val pacingStatus = statusModel.pacingStatus.value
-            if ((pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume)) {
+            if((pacingStatus == PacingStatus.PacingStart) || (pacingStatus == PacingStatus.PacingResume)) {
                 statusModel.setPacingStatus(PacingStatus.Pacing)
-                resultModel.initPacingResult(System.currentTimeMillis(), pacingModel)
+                if(pacingStatus == PacingStatus.PacingStart) { resultModel.initPacingResult(System.currentTimeMillis(), pacingModel) }
             } else {
                 val distRun = waypointService.distOnPace(elapsedTime)
                 pacingModel.setDistRun(distRun)

@@ -129,7 +129,8 @@ class SettingsManager(filesDir: File) {
     }
 
     private fun initData() {
-        if(!settingsDir.mkdir()) throw IOException()
+        val success = settingsDir.mkdir()
+        if(!success) throw IOException()
 
         writeData()
         writeVersion()

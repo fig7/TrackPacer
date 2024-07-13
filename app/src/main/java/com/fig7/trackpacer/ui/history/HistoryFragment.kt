@@ -70,12 +70,12 @@ class HistoryFragment: Fragment () {
 
                                 Text(text = resultData.runDist, fontSize = 16.sp, color = MaterialTheme.colors.onBackground,
                                     modifier = Modifier
-                                    .weight(0.25F, true)
+                                    .weight(0.24F, true)
                                     .align(Alignment.CenterVertically))
 
                                 Text(text = shortRunDate, fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center,
                                     modifier = Modifier
-                                        .weight(0.28F, true)
+                                        .weight(0.30F, true)
                                         .align(Alignment.CenterVertically))
 
                                 Text(text = resultData.actualTimeStr, fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center,
@@ -85,10 +85,10 @@ class HistoryFragment: Fragment () {
 
                                 Text(text = resultData.actualPaceStr + "/km", fontSize = 14.sp, color = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center,
                                     modifier = Modifier
-                                        .weight(0.23F, true)
+                                        .weight(0.22F, true)
                                         .align(Alignment.CenterVertically))
 
-                                Text(text = " > ", fontSize = 14.sp, color = MaterialTheme.colors.onBackground)
+                                Text(text = "  >", fontSize = 14.sp, color = MaterialTheme.colors.onBackground)
                             }
 
                             Divider(color = MaterialTheme.colors.onBackground)

@@ -66,15 +66,24 @@ class ClipsFragment: Fragment() {
     private val clipsModel:  ClipsModel  by activityViewModels()
     private val statusModel: StatusModel by activityViewModels()
 
-    private val tabList = listOf(TabItem("Waypoint Audio", null) { WaypointScreen(it) }, TabItem("Clip Library", null) { ClipLibScreen(it) })
-    private val catList = listOf("Start", "Quick Start", "Distance", "Laps", "Motivation", "Finish", "Status")
+    private val tabList = listOf(TabItem("Waypoint Mapping", null) { WaypointScreen(it) }, TabItem("Clip Library", null) { ClipLibScreen(it) })
+    private val catList = listOf("Start", "Quick Start", "Waypoints", "Laps", "Distance", "Profile", "Motivation", "Finish", "Status")
 
     private var mpClip = MediaPlayer()
     private lateinit var textToSpeech: TextToSpeech
 
     @Composable
     private fun WaypointScreen(clipsManager: ClipsManager) {
-        Text("Waypointy")
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 24.dp, bottom = 12.dp)) {
+            Text("Distance:", fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
+            Text("")
+            Text("Profile:", fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
+            Text("")
+            Text("")
+            Text("Mapping:", fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onBackground)
+        }
     }
 
     @Composable
