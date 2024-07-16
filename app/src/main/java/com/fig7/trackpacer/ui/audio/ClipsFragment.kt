@@ -67,10 +67,12 @@ class ClipsFragment: Fragment() {
     private val statusModel: StatusModel by activityViewModels()
 
     private val tabList = listOf(TabItem("Waypoint Mapping", null) { WaypointScreen(it) }, TabItem("Clip Library", null) { ClipLibScreen(it) })
-    private val catList = listOf("Start", "Quick Start", "Waypoints", "Laps", "Distance", "Profile", "Motivation", "Finish", "Status")
+
+    // TODO: Read this from disk
+    private val catList = listOf("Get ready", "Start", "Quick start", "Waypoints", "Laps", "Distance", "Profile", "Motivation", "Finish", "Status")
 
     private var mpClip = MediaPlayer()
-    private lateinit var textToSpeech: TextToSpeech
+    private lateinit var tts: TextToSpeech
 
     @Composable
     private fun WaypointScreen(clipsManager: ClipsManager) {
@@ -187,7 +189,7 @@ class ClipsFragment: Fragment() {
 
     private fun playClip(clipFile: File) {
         mpClip.release()
-        textToSpeech.stop()
+        tts.stop()
 
         val fileExt = clipFile.name.substringAfterLast('.', "")
         if(fileExt == "m4a") playAudio(clipFile) else playTTS(clipFile)
@@ -200,6 +202,9 @@ class ClipsFragment: Fragment() {
     }
 
     private fun playTTS(clipFile: File) {
+        mpClip.release()
+        tts.stop()
+
         val ttsContent = clipFile.readText()
         val json       = JSONObject(ttsContent)
 
@@ -224,14 +229,25 @@ class ClipsFragment: Fragment() {
             val ttsVariant  = ttsLocaleSplit[2]
             val ttsLocale = Locale(ttsLanguage, ttsCountry, ttsVariant)
 
-            val voices = textToSpeech.voices.filter { voice: Voice -> ((voice.locale == ttsLocale) && (voice.name == ttsVoice)) }
-            if(voices.isNotEmpty()) textToSpeech.voice = voices[0]
+            val voices = tts.voices.filter { voice: Voice -> ((voice.locale == ttsLocale) && (voice.name == ttsVoice)) }
+            if(voices.isNotEmpty()) tts.voice = voices[0]
         } else {
-            textToSpeech.voice = textToSpeech.defaultVoice
+            tts.voice = tts.defaultVoice
         }
 
-        textToSpeech.setSpeechRate(ttsRate.toFloat())
-        textToSpeech.speak(ttsText, TextToSpeech.QUEUE_FLUSH, null, null)
+        tts.setSpeechRate(ttsRate.toFloat())
+        val ttsWords = ttsText.split(" ")
+        if(ttsWords.size > 1) {
+            for(word in ttsWords) {
+                // TODO: Tweak when you can listen with the countdown timer
+                // Alternatively, synthesise it and adjust the rate. Or, perhaps better, allow users to adjust the delay between words.
+                // Yes, the latter, I think.
+                tts.speak(word, TextToSpeech.QUEUE_ADD, null, null)
+                tts.playSilentUtterance(200, TextToSpeech.QUEUE_ADD, null)
+            }
+        } else {
+            tts.speak(ttsText, TextToSpeech.QUEUE_ADD, null, null)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -275,7 +291,7 @@ class ClipsFragment: Fragment() {
             clipsTabs.visibility = View.VISIBLE
         }
 
-        textToSpeech = TextToSpeech(requireContext()) { }
+        tts = TextToSpeech(requireContext()) { }
         return clipsView.root
     }
 

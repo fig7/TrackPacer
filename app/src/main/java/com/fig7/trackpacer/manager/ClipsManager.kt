@@ -11,10 +11,14 @@ import java.util.Locale
 
 private const val clipVersion = "1.0"
 private val defaultClipMap = linkedMapOf(
-    "Start"       to mutableListOf(Pair("321Go",            Pair(R.raw.threetwoone, "")),
-                                   Pair("321Go (tts)",      Pair(-1, "{ \"locale\":\"Default\", \"voice\":\"\", \"rate\":\"0.4\", \"text\":\"Three, two, one, Go!\" }"))),
+    "Get ready"   to mutableListOf(Pair("On your marks",    Pair(R.raw.threetwoone, "")),
+                                   Pair("Set",              Pair(R.raw.go, ""))),
 
-    "Quick Start" to mutableListOf(Pair("Go",               Pair(R.raw.go, ""))),
+    "Start"       to mutableListOf(Pair("321Go!",           Pair(R.raw.threetwoone, "")),
+                                   Pair("321Go! (tts)",     Pair(-1, "{ \"locale\":\"Default\", \"voice\":\"\", \"rate\":\"1.0\", \"text\":\"3 2 1 Go!\" }"))),
+
+    "Quick start" to mutableListOf(Pair("Go!",         Pair(R.raw.go, "")),
+                                   Pair("Go! (tts)",   Pair(-1, "{ \"locale\":\"Default\", \"voice\":\"\", \"rate\":\"1.0\", \"text\":\"Go!\" }"))),
 
     "Waypoints"   to mutableListOf(Pair("50m",              Pair(R.raw.fifty, "")),
                                    Pair("100m",             Pair(R.raw.onehundred, "")),
@@ -58,7 +62,10 @@ private val defaultClipMap = linkedMapOf(
                                    Pair("350m",             Pair(R.raw.threehundredandfifty, "")),
                                    Pair("400m",             Pair(R.raw.fourhundred, ""))),
 
-  "Profile"       to mutableListOf(Pair("Speed up",         Pair(R.raw.fifty, "")),
+  "Profile"       to mutableListOf(Pair("Stop and wait",    Pair(R.raw.fifty, "")),
+                                   Pair("30 seconds",       Pair(R.raw.fifty, "")),
+                                   Pair("10 seconds",       Pair(R.raw.fifty, "")),
+                                   Pair("Speed up",         Pair(R.raw.fifty, "")),
                                    Pair("Slow down",        Pair(R.raw.fifty, ""))),
 
   "Motivation"    to mutableListOf(),
