@@ -11,8 +11,8 @@ import java.util.Locale
 
 private const val clipVersion = "1.0"
 private val defaultClipMap = linkedMapOf(
-    "Get ready"   to mutableListOf(Pair("On your marks",    Pair(R.raw.threetwoone, "")),
-                                   Pair("Set",              Pair(R.raw.go, ""))),
+    "Get ready"   to mutableListOf(Pair("On your marks",    Pair(R.raw.oym, "")),
+                                   Pair("Set",              Pair(R.raw.set, ""))),
 
     "Start"       to mutableListOf(Pair("321Go!",           Pair(R.raw.threetwoone, "")),
                                    Pair("321Go! (tts)",     Pair(-1, "{ \"locale\":\"Default\", \"voice\":\"\", \"rate\":\"1.0\", \"text\":\"3 2 1 Go!\" }"))),
@@ -54,6 +54,7 @@ private val defaultClipMap = linkedMapOf(
                                    Pair("Lap 25",           Pair(R.raw.lap25, ""))),
 
   "Distance"      to mutableListOf(Pair("50m",              Pair(R.raw.fifty, "")),
+                                   Pair("50m (tts)",        Pair(-1, "{ \"locale\":\"Default\", \"voice\":\"\", \"rate\":\"1.0\", \"text\":\"50 metres\" }")),
                                    Pair("100m",             Pair(R.raw.onehundred, "")),
                                    Pair("150m",             Pair(R.raw.onehundredandfifty, "")),
                                    Pair("200m",             Pair(R.raw.twohundred, "")),
@@ -62,11 +63,11 @@ private val defaultClipMap = linkedMapOf(
                                    Pair("350m",             Pair(R.raw.threehundredandfifty, "")),
                                    Pair("400m",             Pair(R.raw.fourhundred, ""))),
 
-  "Profile"       to mutableListOf(Pair("Stop and wait",    Pair(R.raw.fifty, "")),
-                                   Pair("30 seconds",       Pair(R.raw.fifty, "")),
-                                   Pair("10 seconds",       Pair(R.raw.fifty, "")),
-                                   Pair("Speed up",         Pair(R.raw.fifty, "")),
-                                   Pair("Slow down",        Pair(R.raw.fifty, ""))),
+  "Profile"       to mutableListOf(Pair("Stop and wait",    Pair(R.raw.stop, "")),
+                                   Pair("30 seconds",       Pair(R.raw.thirty, "")),
+                                   Pair("10 seconds",       Pair(R.raw.ten, "")),
+                                   Pair("Speed up (tts)",   Pair(-1, "{ \"locale\":\"Default\", \"voice\":\"\", \"rate\":\"1.0\", \"text\":\"Speed up\" }")),
+                                   Pair("Slow down (tts)",  Pair(-1, "{ \"locale\":\"Default\", \"voice\":\"\", \"rate\":\"1.0\", \"text\":\"Slow down\" }"))),
 
   "Motivation"    to mutableListOf(),
 
@@ -101,7 +102,7 @@ class ClipsManager(filesDir: File) {
 
     private fun readVersion() {
         val versionFile = File(clipDir, "version.dat")
-        if (!versionFile.exists()) { throw IOException() }
+        if(!versionFile.exists()) { throw IOException() }
 
         currentVersion = versionFile.readText()
     }
@@ -116,13 +117,14 @@ class ClipsManager(filesDir: File) {
     }
 
     private fun initData(resources: Resources) {
-        if(!clipDir.mkdir()) throw IOException()
+        val success = clipDir.mkdir()
+        if(!success) throw IOException()
 
         var i = 0
         for(entry in defaultClipMap) {
-            val clipCat = entry.key
-            val clipFolderName = String.format(Locale.ROOT, "Cat_%03d_%s", i++, clipCat)
-            val clipCatDir     = File(clipDir, clipFolderName)
+            val clipCat       = entry.key
+            val clipCatFolder = String.format(Locale.ROOT, "Cat_%03d_%s", i++, clipCat)
+            val clipCatDir    = File(clipDir, clipCatFolder)
             if(!clipCatDir.mkdir()) throw IOException()
 
             var clipList = clipMap[clipCat]
@@ -157,8 +159,8 @@ class ClipsManager(filesDir: File) {
 
     private fun readData() {
         val folderList = clipDir.list() ?: throw IOException()
-        val catFilter = { clipCat: String -> clipCat.startsWith("Cat") }
 
+        val catFilter   = { clipCat: String -> clipCat.startsWith("Cat") }
         val folderArray = folderList.filter(catFilter).toTypedArray()
         folderArray.sort()
 

@@ -237,7 +237,7 @@ class ClipsFragment: Fragment() {
 
         tts.setSpeechRate(ttsRate.toFloat())
         val ttsWords = ttsText.split(" ")
-        if(ttsWords.size > 1) {
+        if(ttsWords.size == 4) {
             for(word in ttsWords) {
                 // TODO: Tweak when you can listen with the countdown timer
                 // Alternatively, synthesise it and adjust the rate. Or, perhaps better, allow users to adjust the delay between words.
